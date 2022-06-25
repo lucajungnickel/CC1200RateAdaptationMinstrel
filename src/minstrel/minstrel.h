@@ -80,6 +80,15 @@ void minstrel_log_package_status(uint8_t id, packet_status_t status);
 uint8_t minstrel_get_fallback_rate(Minstrel* minstrel);
 
 /**
+ * @brief Returns the next rate, which will be written to the next packet
+ * of the sender.
+ * 
+ * @param minstrel 
+ * @return uint8_t Index of next rate, @see MINSTREL_RATES[]
+ */
+uint8_t minstrel_get_next_rate(Minstrel* minstrel);
+
+/**
  * @brief Prepares minstrel state for the next iteration. This includes the decision of whether we send a real packet or probe next (i.e. setting the symbol rate).
  * 
  */

@@ -5,7 +5,7 @@
 #include <SPIv1.h>
 
 #include "cc1200_rate.h"
-
+#include "packet.h"
 
 void cc1200_change_rate(uint32_t rate) {
     float rate_in_ksps = rate / 1000.;
@@ -25,7 +25,13 @@ void cc1200_change_rate(uint32_t rate) {
 }
 
 // TODO: Error handling + fixed length (?)
-void cc1200_send_packet(uint8_t* buffer, uint32_t len) {
+void cc1200_send_packet(packet_t* packet) {
+
+    //To be tested:
+    uint32_t len = packet_get_size(packet);
+    uint8_t* buffer = malloc(len * sizeof(uint8_t));
+    packet_serialize(packet, buffer);
+
     // ---------------- VARIABLE LENGTH ----------------------
     // Write length byte
     cc1200_reg_write(REG_FIFO, len);

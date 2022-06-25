@@ -1,0 +1,54 @@
+#include "receiver.h"
+
+#include <stdlib.h>
+#include <stdint.h>
+
+#include "cc1200_rate.h"
+
+
+receiver_t* receiver_init() {
+    receiver_t* rcv = calloc(1, sizeof(receiver_t));
+    if (rcv == NULL) return NULL;
+
+    uint16_t token_recv = rand() % UINT16_MAX;
+    rcv->token_receiver = token_recv;
+
+    packet_t* pkt = NULL;
+    while (pkt == NULL) { //TODO better error handling
+        pkt = receiver_receive(rcv);
+    }
+    //assume everything went perfect
+
+    //now set ACK, TOKEN_SEND
+    rcv->last_ack_rcv = pkt->id;
+    rcv->token_sender = pkt->token_send;
+    
+    //send ACK packet
+    receiver_ack(rcv);
+
+    return rcv;
+}
+
+packet_t* receiver_receive(receiver_t* receiver) {
+    packet_t* pkt = cc1200_get_packet();
+    receiver->last_ack_rcv = pkt;
+}
+
+void receiver_ack(receiver_t* receiver) {
+    //build ACK packet 
+    packet_t *pkt_send = calloc(1, sizeof(packet_t));
+    pkt_send->ack = receiver->last_ack_rcv;
+    pkt_send->payload_len = 0; //no payload
+    pkt_send->p_payload = 0x0;
+    pkt_send->fallback_rate = 0; //rcv doesnt set this
+    pkt_send->next_symbol_rate = 0; //rcv doesnt set this
+    pkt_send->id = receiver->last_ack_rcv;
+    pkt_send->token_recv = receiver->token_receiver;
+    pkt_send->token_send = receiver->token_sender;
+    pkt_send->type = packet_status_ack;
+    packet_set_checksum(pkt_send);
+
+    cc1200_send_packet(pkt_send);
+    
+    free(pkt_send);
+}

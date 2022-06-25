@@ -7,7 +7,7 @@
 //TODO überarbeiten
 typedef enum packet_status_t {
     packet_status_ok,
-    packet_status_received,
+    packet_status_ack,
     packet_status_lost
 } packet_status_t;
 

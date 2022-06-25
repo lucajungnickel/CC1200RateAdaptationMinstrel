@@ -1,4 +1,4 @@
-add_executable(unit_test "main_test.c" "test_controller_packet.c" "test_controller_communication.c" "../src/controller/packet.c")
+add_executable(unit_test "main_test.c" "test_controller_packet.c" "test_controller_communication.c" "../src/controller/packet.c" "../src/controller/sender.c" "../src/controller/receiver.c" "../src/minstrel/minstrel_mockup.c" "../src/cc1200/cc1200_mockup.c")
 
 add_test(NAME packet.minstrel.build COMMAND unit_test packet.minstrel.build)
 add_test(NAME packet.minstrel.destroy COMMAND unit_test packet.minstrel.destroy)
@@ -9,3 +9,4 @@ add_test(NAME packet.minstrel.serialize.maximum COMMAND unit_test packet.minstre
 add_test(NAME packet.minstrel.deserialize.normal COMMAND unit_test packet.minstrel.deserialize.normal)
 add_test(NAME packet.minstrel.deserialize.maximum COMMAND unit_test packet.minstrel.deserialize.maximum)
 add_test(NAME communication.sendOK.rcvOK.small COMMAND unit_test communication.sendOK.rcvOK.small)
+add_test(NAME communication.init COMMAND unit_test communication.init)

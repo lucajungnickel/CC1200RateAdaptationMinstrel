@@ -54,6 +54,9 @@ int main(int argc, char** argv) {
     } else if (!strcmp(argv[1], "packet.minstrel.deserialize.maximum")) {
         printf("Start minstrel deserialize maximum case\n");
         test_packet_deserialize_maximum();
+    } else if (!strcmp(argv[1], "communication.init")) {
+        printf("Start communication init test\n");
+        test_communication_initialization();
     } else if (!strcmp(argv[1], "communication.sendOK.rcvOK.small")) {
         printf("Start communication small send ok rcv ok test\n");
         test_communication_send_ok_rcv_ok();

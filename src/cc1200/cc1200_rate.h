@@ -13,6 +13,8 @@
 #ifndef CC1200_RATE_H
 #define CC1200_RATE_H
 
+#include "packet.h"
+
 // Regs
 #define SYMBOL_RATE2 0x13 
 #define SYMBOL_RATE1 0x14 
@@ -30,16 +32,17 @@ int IS_DEBUG;
 
 void cc1200_change_rate(uint32_t rate);
 
-void cc1200_send_packet(uint8_t* const buffer, uint32_t len);
+/**
+ * @brief Sends a packet.
+ * 
+ */
+void cc1200_send_packet(packet_t* packet);
 
 /**
- * @brief Returns a packet in packet_minstrel format.
+ * @brief Reads and returns a packet.
  * 
- * @param buffer buffer which will be filled with serialized packet.
- * @return uint32_t len of the packet
+ * @return packet in packet_t format
  */
-uint32_t cc1200_get_packet(uint8_t* buffer);
-
-float log_2(float num);
+packet_t* cc1200_get_packet();
 
 #endif //CC1200_RATE_H
