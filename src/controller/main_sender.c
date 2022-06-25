@@ -1,5 +1,5 @@
 /**
- * @file minstrel_main.c
+ * @file main_sender.c
  * @author Luca Jungnickel
  * @brief 
  * @version 0.1
@@ -28,6 +28,7 @@ static void start() {
     uint32_t pkt_id = 0;
     while (true) {
         unsigned int next_rate = minstrel->rates.current;
+        
         //change rate
         cc1200_change_rate(next_rate);
 
@@ -36,11 +37,11 @@ static void start() {
         
         pkt->ack = 0;
         // TODO: use minstrel->rates.X here
-        pkt->fallback_rate = MINSTREL_RATES[minstrel_get_fallback_rate()];
+        pkt->fallback_rate = MINSTREL_RATES[minstrel_get_fallback_rate(minstrel)];
         
         pkt->id = pkt_id;
 
-        //pkt->next_symbol_rate = next_rate;
+        pkt->next_symbol_rate = next_rate;
 
         pkt->token_recv = 5; //TODO implement handshake
         pkt->token_send = 6; //TODO implement handshake
@@ -71,6 +72,8 @@ static void start() {
         uint32_t recv_size = cc1200_get_packet(&recv_buf);
 
         //process packet..
+        packet_minstrel_t *pkt_rcv = packet_minstrel_deserialize(recv_buf);
+        
         //int res = waitForACK()
         //if (res == CONNECTION_LOST) return 0;
         //logPackageStatus(package->id, res)

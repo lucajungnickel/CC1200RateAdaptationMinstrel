@@ -32,6 +32,6 @@ void cc1200_send_packet(uint8_t* buffer, uint32_t len) {
 }
 
 // TODO: Error handling + fixed length (?)
-uint32_t cc1200_get_packet(uint8_t** buffer) {
+uint32_t cc1200_get_packet(uint8_t* buffer) {
     
 }

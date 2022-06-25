@@ -78,7 +78,7 @@ void minstrel_log_package_status(uint8_t id, package_status_t status);
  * to the next packet.
  * 
  */
-uint8_t minstrel_get_fallback_rate();
+uint8_t minstrel_get_fallback_rate(Minstrel* minstrel);
 
 /**
  * @brief Prepares minstrel state for the next iteration. This includes the decision of whether we send a real packet or probe next (i.e. setting the symbol rate).

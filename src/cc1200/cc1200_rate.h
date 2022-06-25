@@ -32,7 +32,13 @@ void cc1200_change_rate(uint32_t rate);
 
 void cc1200_send_packet(uint8_t* const buffer, uint32_t len);
 
-uint32_t cc1200_get_packet(uint8_t** buffer_back);
+/**
+ * @brief Returns a packet in packet_minstrel format.
+ * 
+ * @param buffer buffer which will be filled with serialized packet.
+ * @return uint32_t len of the packet
+ */
+uint32_t cc1200_get_packet(uint8_t* buffer);
 
 float log_2(float num);
 
