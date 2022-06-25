@@ -9,7 +9,6 @@
  * 
  * Main minstrel algorithm.
  */
-
 #ifndef MINSTREL_H
 #define MINSTREL_H
 
@@ -87,4 +86,3 @@ uint8_t minstrel_get_fallback_rate(Minstrel* minstrel);
 void minstrel_update(Minstrel* minstrel);
 
 #endif //MINSTREL_H
-

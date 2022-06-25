@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 2.8.9)
 project (CC1200)
 
 option (BUILD_TESTS "Build test programs" ON)
+#TODO SET TO OFF
 option (BUILD_LOCAL_ONLY "Build program only local, without CC1200 libs" ON)
-
+#TODO SET TO ON
+option (BUILD_REAL_MINSTREL "Build program with real minstrel algorithm for productive system" OFF)
 set (LOCAL_LIB "/usr/local/lib")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS} -lm")
 
@@ -16,7 +18,6 @@ include_directories(src/cc1200)
 
 
 file(GLOB SRC_CONTROLLER "src/controller/*.c")
-file(GLOB SRC_MINSTREL "src/minstrel/*.c")
 
 if (BUILD_LOCAL_ONLY) 
     set (SPI_LIB "")
@@ -29,7 +30,12 @@ else()
 endif (BUILD_LOCAL_ONLY)
 
 
-# gcc controller/*.c minstrel/*.c cc1200/cc1200_mockup.c
+if (BUILD_REAL_MINSTREL)
+    file(GLOB SRC_MINSTREL "src/minstrel/minstrel_mockup.c")
+else ()
+    file(GLOB SRC_MINSTREL "src/minstrel/minstrel.c")
+endif (BUILD_REAL_MINSTREL)
+
 
 add_executable(MINSTREL ${SRC_CONTROLLER} ${SRC_MINSTREL} ${SRC_CC1200})
 

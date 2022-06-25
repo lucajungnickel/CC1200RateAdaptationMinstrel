@@ -71,11 +71,11 @@ uint32_t cc1200_get_packet(uint8_t* buffer) {
                 
                 // Only read if whole packet is received
                 if (num_rx_bytes >= pkt_len) {
-                    *buffer = (uint8_t*) calloc(pkt_len + PKT_OVERHEAD, sizeof(uint8_t));
+                    buffer = calloc(pkt_len + PKT_OVERHEAD, sizeof(uint8_t));
 
                     // Read whole packet
                     for (int i=0; i < pkt_len + PKT_OVERHEAD; i++)
-                        (*buffer)[i] = cc1200_reg_read(REG_FIFO, NULL);
+                        buffer[i] = cc1200_reg_read(REG_FIFO, NULL);
 
                     if (IS_DEBUG) {
                         printf("DEBUG: Packet received: \n\t");

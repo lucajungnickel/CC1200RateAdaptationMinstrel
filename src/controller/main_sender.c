@@ -69,7 +69,7 @@ static void start() {
 
         //receive
         uint8_t* recv_buf;
-        uint32_t recv_size = cc1200_get_packet(&recv_buf);
+        uint32_t recv_size = cc1200_get_packet(recv_buf);
 
         //process packet..
         packet_t *pkt_rcv = packet_deserialize(recv_buf);
