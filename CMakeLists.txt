@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.9)
 project (CC1200)
 
 option (BUILD_TESTS "Build test programs" ON)
-option (BUILD_LOCAL_ONLY "Build program only local, without CC1200 libs" OFF)
+option (BUILD_LOCAL_ONLY "Build program only local, without CC1200 libs" ON)
 
 set (LOCAL_LIB "/usr/local/lib")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS} -lm")

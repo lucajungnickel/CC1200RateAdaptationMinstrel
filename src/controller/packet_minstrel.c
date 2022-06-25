@@ -17,7 +17,7 @@
 
 packet_minstrel_t* packet_minstrel_create (
     uint32_t const id,
-    uint32_t  const next_symbol_rate,
+    uint8_t  const next_symbol_rate,
     uint16_t  const token_recv,
     uint16_t  const token_send,
     uint8_t  const type,
@@ -106,10 +106,7 @@ uint8_t packet_minstrel_serialize(packet_minstrel_t* const packet, uint8_t* p_bu
     p_buffer[index + 3] = packet->id >> 24;
     index += 4; //size in bytes
     p_buffer[index] = packet->next_symbol_rate;
-    p_buffer[index + 1] = packet->next_symbol_rate >> 8;
-    p_buffer[index + 2] = packet->next_symbol_rate >> 16;
-    p_buffer[index + 3] = packet->next_symbol_rate >> 24;
-    index += 4;
+    index += 1;
     p_buffer[index] = packet->token_recv;
     p_buffer[index + 1] = packet->token_recv >> 8;
     index += 2;
@@ -151,8 +148,8 @@ packet_minstrel_t* packet_minstrel_deserialize(uint8_t* const p_buffer) {
     index += 4;
 
     //next_symbol_rate
-    back->next_symbol_rate = p_buffer[index] | p_buffer[index + 1] << 8 | p_buffer[index + 2] << 16 | p_buffer[index + 3] << 24;
-    index += 4;
+    back->next_symbol_rate = p_buffer[index];
+    index += 1;
 
     //token_recv
     back->token_recv = p_buffer[index] | p_buffer[index + 1] << 8;

@@ -40,7 +40,7 @@ static void start() {
         
         pkt->id = pkt_id;
 
-        pkt->next_symbol_rate = next_rate;
+        //pkt->next_symbol_rate = next_rate;
 
         pkt->token_recv = 5; //TODO implement handshake
         pkt->token_send = 6; //TODO implement handshake

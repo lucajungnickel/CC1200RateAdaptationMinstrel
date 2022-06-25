@@ -14,7 +14,7 @@ typedef enum package_minstrel_status_t {
 
 typedef struct packet_minstrel_t {
     uint32_t id;
-    uint32_t next_symbol_rate;
+    uint8_t next_symbol_rate;
     uint16_t token_recv;
     uint16_t token_send;
     uint8_t type;
@@ -31,7 +31,7 @@ typedef struct packet_minstrel_t {
  */
 packet_minstrel_t* packet_minstrel_create (
     uint32_t const id,
-    uint32_t  const next_symbol_rate,
+    uint8_t  const next_symbol_rate,
     uint16_t  const token_recv,
     uint16_t  const token_send,
     uint8_t  const type,
