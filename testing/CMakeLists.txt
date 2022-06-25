@@ -1,5 +1,5 @@
 
-add_executable(unit_test "testing.c" "../src/controller/packet_minstrel.h" "../src/controller/packet_minstrel.c")
+add_executable(unit_test "testing.c" "../src/controller/packet.h" "../src/controller/packet.c")
 
 add_test(NAME packet.minstrel.build COMMAND unit_test packet.minstrel.build)
 add_test(NAME packet.minstrel.destroy COMMAND unit_test packet.minstrel.destroy)

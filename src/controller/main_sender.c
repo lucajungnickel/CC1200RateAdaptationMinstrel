@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "packet_minstrel.h"
+#include "packet.h"
 #include "../minstrel/minstrel.h"
 #include "../cc1200/cc1200_rate.h"
 
@@ -33,7 +33,7 @@ static void start() {
         cc1200_change_rate(next_rate);
 
         //build next package
-        packet_minstrel_t *pkt = malloc(sizeof(packet_minstrel_t));
+        packet_t *pkt = malloc(sizeof(packet_t));
         
         pkt->ack = 0;
         // TODO: use minstrel->rates.X here
@@ -46,7 +46,7 @@ static void start() {
         pkt->token_recv = 5; //TODO implement handshake
         pkt->token_send = 6; //TODO implement handshake
         
-        pkt->type = package_minstrel_status_ok;
+        pkt->type = packet_status_ok;
 
         //set payload TODO überarbeiten
         pkt->payload_len = 50;
@@ -55,13 +55,13 @@ static void start() {
             pkt->p_payload[i] = i % 256;
         }
         
-        packet_minstrel_set_checksum(pkt);
+        packet_set_checksum(pkt);
         //packet build done
 
         //serialize
-        uint32_t len = packet_minstrel_get_size(pkt);
+        uint32_t len = packet_get_size(pkt);
         uint8_t* send_buf = malloc(len * sizeof(uint8_t));
-        packet_minstrel_serialize(pkt, send_buf);
+        packet_serialize(pkt, send_buf);
 
         //send
         cc1200_send_packet(send_buf, len);
@@ -72,7 +72,7 @@ static void start() {
         uint32_t recv_size = cc1200_get_packet(&recv_buf);
 
         //process packet..
-        packet_minstrel_t *pkt_rcv = packet_minstrel_deserialize(recv_buf);
+        packet_t *pkt_rcv = packet_deserialize(recv_buf);
         
         //int res = waitForACK()
         //if (res == CONNECTION_LOST) return 0;

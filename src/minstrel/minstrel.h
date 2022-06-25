@@ -14,7 +14,7 @@
 #define MINSTREL_H
 
 #include <stdint.h>
-#include "../controller/packet_minstrel.h"
+#include "../controller/packet.h"
 
 /*
  * Possible symbol rates for the algorithm.
@@ -69,9 +69,9 @@ Minstrel* minstrel_init();
  * @brief Reports the package status of the given package to the algorithm
  * 
  * @param id ID of the package
- * @param status Use PACKAGE_LOST, PACKAGE_RECV for reporting
+ * @param status Use PACKET_LOST, PACKET_RECV for reporting
  */
-void minstrel_log_package_status(uint8_t id, package_status_t status);
+void minstrel_log_package_status(uint8_t id, packet_status_t status);
 
 /**
  * @brief Gets index of the next fallback rate, which will be written

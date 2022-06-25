@@ -16,7 +16,7 @@ Minstrel* minstrel_init() {
     return minstrel;
 }
 
-void minstrel_log_package_status(uint8_t id, package_status_t status) {
+void minstrel_log_package_status(uint8_t id, packet_status_t status) {
 
 }
 

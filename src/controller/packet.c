@@ -1,21 +1,17 @@
 /**
- * @file packet_minstrel.c
- * @author your name (you@domain.com)
- * @brief 
- * @version 0.1
- * @date 2022-06-18
+ * @file packet.c
+ * @author Luca Jungnickel
  * 
- * @copyright Copyright (c) 2022
- * 
- * Defines a packet for the minstrel algorithm, with the correct header and a custom payload.
+ * @brief
+ * Defines a packet for the rate adaptation protocol, with the correct header and a custom payload.
  */
 
-#include "packet_minstrel.h"
+#include "packet.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-packet_minstrel_t* packet_minstrel_create (
+packet_t* packet_create (
     uint32_t const id,
     uint8_t  const next_symbol_rate,
     uint16_t  const token_recv,
@@ -26,7 +22,7 @@ packet_minstrel_t* packet_minstrel_create (
     uint32_t const ack,
     uint8_t  const fallback_rate) {
 
-        packet_minstrel_t* back = malloc(sizeof(packet_minstrel_t));
+        packet_t* back = malloc(sizeof(packet_t));
         back->id = id;
         back->next_symbol_rate = next_symbol_rate;
         back->token_recv = token_recv;
@@ -44,7 +40,7 @@ packet_minstrel_t* packet_minstrel_create (
  * @brief Destroys the packet and also frees the allocated memory in payload data.
  * 
  */
-void packet_minstrel_destroy(packet_minstrel_t* const packet) {
+void packet_destroy(packet_t* const packet) {
     if (packet != NULL) {
         free(packet->p_payload);
     }
@@ -52,7 +48,7 @@ void packet_minstrel_destroy(packet_minstrel_t* const packet) {
 }
 
 
-uint8_t packet_minstrel_calc_checksum(packet_minstrel_t* const packet) {
+uint8_t packet_calc_checksum(packet_t* const packet) {
     //Uses Sum of Bytes % 256
     uint32_t checksum = 0;
 
@@ -90,12 +86,12 @@ uint8_t packet_minstrel_calc_checksum(packet_minstrel_t* const packet) {
     return checksum;
 }
 
-void packet_minstrel_set_checksum(packet_minstrel_t* const packet) {
-    uint8_t checksum = packet_minstrel_calc_checksum(packet);
+void packet_set_checksum(packet_t* const packet) {
+    uint8_t checksum = packet_calc_checksum(packet);
     packet->checksum = checksum;
 }
 
-uint8_t packet_minstrel_serialize(packet_minstrel_t* const packet, uint8_t* p_buffer) {
+uint8_t packet_serialize(packet_t* const packet, uint8_t* p_buffer) {
     uint32_t index = 0;
     if (packet == NULL || p_buffer == NULL) return 1;
     
@@ -136,8 +132,8 @@ uint8_t packet_minstrel_serialize(packet_minstrel_t* const packet, uint8_t* p_bu
     return 0;
 }
 
-packet_minstrel_t* packet_minstrel_deserialize(uint8_t* const p_buffer) {
-    packet_minstrel_t* back = malloc(sizeof(packet_minstrel_t));
+packet_t* packet_deserialize(uint8_t* const p_buffer) {
+    packet_t* back = malloc(sizeof(packet_t));
     if (back == NULL) return NULL;
 
     //read header
@@ -181,7 +177,7 @@ packet_minstrel_t* packet_minstrel_deserialize(uint8_t* const p_buffer) {
     return back;
 }
 
-uint32_t packet_minstrel_get_size(packet_minstrel_t* const packet) {
+uint32_t packet_get_size(packet_t* const packet) {
     return getHeaderSize() + packet->payload_len;
 }
 
