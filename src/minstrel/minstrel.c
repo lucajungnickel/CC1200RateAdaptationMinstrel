@@ -37,12 +37,13 @@ uint8_t minstrel_get_fallback_rate(Minstrel* minstrel) {
 void update_rates(Minstrel* minstrel) {
 }
 
-void set_next_rate(Minstrel* minstrel) {
+void set_next_rate(Minstrel* minstrel, int is_probe) {
 }
 
 // TODO: Update to fallback rate if timeout or error etc.
 // TODO: Reset minstrel->pkt_info's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, Packet* pkt) {
+    int is_probe = 0;
     uint8_t rate_index = minstrel->rates.current;
 
     log_package_status(&minstrel->statistics[rate_index], pkt);
@@ -55,15 +56,11 @@ void minstrel_update(Minstrel* minstrel, Packet* pkt) {
 
         update_rates(minstrel);
     }
-    if (minstrel->is_probe) {
-        minstrel->is_probe = 0;
-        set_next_rate(minstrel);
-    }
     // Send probe every X packets TODO: Use time interval instead
-    if ((pkt->id % 100) == 0) {
-        minstrel->is_probe = 1;
-        set_next_rate(minstrel);
-    }
+    if ((pkt->id % 100) == 0)
+        is_probe = 1;
+
+    set_next_rate(minstrel, is_probe);
 }
 
 uint8_t minstrel_get_next_rate(Minstrel* minstrel) {

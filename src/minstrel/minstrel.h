@@ -45,7 +45,7 @@ typedef struct AvailableRates {
 } AvailableRates;
 
 /*
- * TODO
+ * Statistics of the minstrel algorithm.
  */
 typedef struct MinstrelStatistics {
     uint32_t last_pkt_id;
@@ -64,10 +64,11 @@ typedef struct Minstrel {
     AvailableRates rates;
     MinstrelState state;
     MinstrelStatistics statistics[11];
-    uint8_t is_probe;
 } Minstrel;
 
-
+/*
+ * A packet for the minstrel algorithm.
+ */
 typedef struct Packet {
     uint32_t id;
     packet_status_t status;
@@ -84,8 +85,8 @@ Minstrel* minstrel_init();
 /**
  * @brief Reports the package status of the given package to the algorithm
  *
- * @param id ID of the package
- * @param status Use PACKET_LOST, PACKET_RECV for reporting
+ * @param statistics Statistics of a specific rate for the minstrel algorithm that should be updated.
+ * @param pkt The packet for which new information should be incorporated into the algorithm.
  */
 void log_package_status(MinstrelStatistics* statistics, Packet* pkt);
 
@@ -105,18 +106,42 @@ uint8_t minstrel_get_fallback_rate(Minstrel* minstrel);
  */
 uint8_t minstrel_get_next_rate(Minstrel* minstrel);
 
+/**
+ * @brief Update best rate, second best rate and highest throughput rate of the minstrel algorithm.
+ *
+ * @param minstrel
+ */
 void update_rates(Minstrel* minstrel);
 
-void set_next_rate(Minstrel* minstrel);
+/**
+ * @brief Set the next to-be-used rate (minstrel->rates.current) of the minstrel algorithm.
+ *
+ * @param minstrel
+ * @param is_probe Whether the next rate is a probe or not.
+ */
+void set_next_rate(Minstrel* minstrel, int is_probe);
 
 /**
  * @brief Prepares minstrel state for the next iteration. This includes the decision of whether we send a real packet or probe next (i.e. setting the symbol rate).
  *
+ * @param minstrel
+* @param pkt The packet for which new information should be incorporated into the algorithm.
  */
 void minstrel_update(Minstrel* minstrel, Packet* pkt);
 
+/**
+ * @brief Calculate the exponential moving average of the success probability for a given rate.
+ *
+ * @param minstrel
+ * @param succ_prob The newly calculated success probability which should receive the highest weight (#send/#acks).
+ */
 void calc_ewma(MinstrelStatistics* statistics, uint32_t succ_prob);
 
+/**
+ * @brief Calculate the throughput of a given rate.
+ *
+ * @param statistics Statistics of a given rate for which the throughput should be updated.
+ */
 void calc_throughput(MinstrelStatistics* statistics);
 
 #endif //MINSTREL_H
