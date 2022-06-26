@@ -8,7 +8,7 @@ cmake .
 cmake --build ..
 ```
 
-##Settings for testing
+## Settings for testing
 
 ### Build and run on Linux with mockup files for testing, no CC1200 support:
 ```
