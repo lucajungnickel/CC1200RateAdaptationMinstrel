@@ -26,3 +26,21 @@ Add this flag to cmake when configuring:
 ```
 cmake -DBUILD_TESTS=OFF .
 ```
+
+### Minstrel update cycle
+The minstrel algorithm is keeping track of three rate types
+- Best throughput
+- 2nd best throughtput
+- Highest probability
+
+The throughput (T) of a rate is calculated as:
+$T = {succ\textunderscore prob\enspace \cdot \enspace bytes\textunderscore send \over duration}$
+- succ_prob: success probability of the given rate. As a simple heuristic, we take packets_send/acks_received
+- bytes_send: total bytes per packet
+- duration: average time from sending till receiving an acknowledgment of the same packet
+
+To smoothen the success probability over time (while giving more weight to recent events), we apply an exponential moving average:
+$succ\textunderscore prob_t = {\alpha \enspace \cdot \enspace {send \over acks} \enspace + \enspace (1 - \alpha) \enspace \cdot \enspace succ\textunderscore prob_{t-1}}$
+
+(Adapted from [Rate Adaptation for 802.11 Wireless Networks: Minstrel
+](https://blog.cerowrt.org/papers/minstrel-sigcomm-final.pdf))
