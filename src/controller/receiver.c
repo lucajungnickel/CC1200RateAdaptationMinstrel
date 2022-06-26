@@ -12,7 +12,8 @@ receiver_t* receiver_init() {
 
     uint16_t token_recv = rand() % UINT16_MAX;
     rcv->token_receiver = token_recv;
-
+    if (token_recv == 0) token_recv = 1;
+    
     packet_t* pkt = NULL;
     while (pkt == NULL) { //TODO better error handling
         pkt = receiver_receive(rcv);
@@ -29,9 +30,23 @@ receiver_t* receiver_init() {
     return rcv;
 }
 
+/**
+ * @brief More like a local function. You should use receiver_receive_and_ack()
+ * 
+ * @param receiver 
+ * @return packet_t* 
+ */
 packet_t* receiver_receive(receiver_t* receiver) {
     packet_t* pkt = cc1200_get_packet();
-    receiver->last_ack_rcv = pkt;
+    receiver->last_ack_rcv = pkt->id;
+    receiver->lastPacketRcv = pkt;
+    return pkt;
+}
+
+packet_t* receiver_receive_and_ack(receiver_t* receiver) {
+    packet_t* pkt = receiver_receive(receiver);
+    receiver_ack(receiver);
+    return pkt;
 }
 
 void receiver_ack(receiver_t* receiver) {
@@ -49,6 +64,6 @@ void receiver_ack(receiver_t* receiver) {
     packet_set_checksum(pkt_send);
 
     cc1200_send_packet(pkt_send);
+    receiver->lastPacketSend = pkt_send;
     
-    free(pkt_send);
 }

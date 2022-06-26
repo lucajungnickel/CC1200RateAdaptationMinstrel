@@ -15,6 +15,8 @@ typedef struct receiver_t {
     uint32_t last_ack_rcv;
     uint16_t token_receiver;
     uint16_t token_sender; //receiver needs to know how the sender is
+    packet_t* lastPacketSend; //for better debugging
+    packet_t* lastPacketRcv; //for better debugging
 } receiver_t;
 
 
@@ -37,6 +39,15 @@ receiver_t* receiver_init();
  * @return packet_t the received packet or NULL if error
  */
 packet_t* receiver_receive(receiver_t* receiver);
+
+/**
+ * @brief Should be used from outside file.
+ * Receives and acks a packet, and returns it.
+ * 
+ * @param receiver 
+ * @return packet_t* 
+ */
+packet_t* receiver_receive_and_ack(receiver_t* receiver);
 
 /**
  * @brief Acknowleges the last packet and sends this ACK packet.

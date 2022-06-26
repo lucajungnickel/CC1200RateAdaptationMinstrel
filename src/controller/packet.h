@@ -8,6 +8,7 @@
 typedef enum packet_status_t {
     packet_status_ok,
     packet_status_ack,
+    packet_status_wrong_ack,
     packet_status_lost
 } packet_status_t;
 
@@ -15,8 +16,8 @@ typedef enum packet_status_t {
 typedef struct packet_t {
     uint32_t id;
     uint8_t next_symbol_rate;
-    uint16_t token_recv;
-    uint16_t token_send;
+    uint16_t token_recv; //token of receiver unit
+    uint16_t token_send; //token of sender unit
     uint8_t type;
     uint32_t payload_len;
     uint8_t checksum;

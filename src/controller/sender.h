@@ -11,6 +11,8 @@ typedef struct sender_t {
     uint16_t token_sender;
     uint16_t token_receiver;
     Minstrel *minstrel; //minstrel algorithm reference
+    packet_t* lastPacketSend; //for better debugging
+    packet_t* lastPacketRcv; //for better debugging
 } sender_t;
 
 /**
@@ -38,4 +40,14 @@ void sender_send(sender_t *sender, packet_t *packet);
  * @return status of the received packet 
  */
 packet_status_t sender_rcv_ack(sender_t *sender);
+
+/**
+ * @brief Sends and waits for an valid ack. 
+ * 
+ * @param sender Sender
+ * @param buffer Payload
+ * @param len Payload len
+ */
+void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len);
+
 #endif //SENDER_H

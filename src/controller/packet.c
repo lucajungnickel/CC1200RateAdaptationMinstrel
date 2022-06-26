@@ -14,8 +14,8 @@
 packet_t* packet_create (
     uint32_t const id,
     uint8_t  const next_symbol_rate,
-    uint16_t  const token_recv,
-    uint16_t  const token_send,
+    uint16_t  const token_recv, //can't be 0 for valid token
+    uint16_t  const token_send, //can't be 0 for valid token
     uint8_t  const type,
     uint32_t  const payload_len,
     uint8_t  const checksum,
