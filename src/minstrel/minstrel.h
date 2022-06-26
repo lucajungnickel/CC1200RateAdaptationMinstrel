@@ -1,12 +1,12 @@
 /**
  * @file minstrel.h
  * @author your name (you@domain.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2022-06-18
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  * Main minstrel algorithm.
  */
 #ifndef MINSTREL_H
@@ -14,6 +14,9 @@
 
 #include <stdint.h>
 #include "../controller/packet.h"
+
+
+#define WEIGHT 0.75
 
 /*
  * Possible symbol rates for the algorithm.
@@ -45,9 +48,13 @@ typedef struct AvailableRates {
  * TODO
  */
 typedef struct MinstrelStatistics {
-    uint32_t ewma;
-    uint32_t pending_packets;
-    uint32_t received_packets;
+    uint32_t last_pkt_id;
+    uint32_t ewma; // Success probability
+    uint32_t throughput;
+    uint32_t total_send;
+    uint32_t total_recv;
+    uint32_t bytes_send;
+    uint32_t avg_duration;
 } MinstrelStatistics;
 
 /*
@@ -56,8 +63,18 @@ typedef struct MinstrelStatistics {
 typedef struct Minstrel {
     AvailableRates rates;
     MinstrelState state;
-    MinstrelStatistics statistics;
+    MinstrelStatistics statistics[11];
+    uint8_t is_probe;
 } Minstrel;
+
+
+typedef struct Packet {
+    uint32_t id;
+    packet_status_t status;
+    uint32_t bytes_send;
+    uint32_t duration;
+
+} Packet;
 
 /**
  * @brief Inits the algorithm
@@ -66,32 +83,40 @@ Minstrel* minstrel_init();
 
 /**
  * @brief Reports the package status of the given package to the algorithm
- * 
+ *
  * @param id ID of the package
  * @param status Use PACKET_LOST, PACKET_RECV for reporting
  */
-void minstrel_log_package_status(uint8_t id, packet_status_t status);
+void log_package_status(MinstrelStatistics* statistics, Packet* pkt);
 
 /**
  * @brief Gets index of the next fallback rate, which will be written
  * to the next packet.
- * 
+ *
  */
 uint8_t minstrel_get_fallback_rate(Minstrel* minstrel);
 
 /**
  * @brief Returns the next rate, which will be written to the next packet
  * of the sender.
- * 
- * @param minstrel 
+ *
+ * @param minstrel
  * @return uint8_t Index of next rate, @see MINSTREL_RATES[]
  */
 uint8_t minstrel_get_next_rate(Minstrel* minstrel);
 
+void update_rates(Minstrel* minstrel);
+
+void set_next_rate(Minstrel* minstrel);
+
 /**
  * @brief Prepares minstrel state for the next iteration. This includes the decision of whether we send a real packet or probe next (i.e. setting the symbol rate).
- * 
+ *
  */
-void minstrel_update(Minstrel* minstrel);
+void minstrel_update(Minstrel* minstrel, Packet* pkt);
+
+void calc_ewma(MinstrelStatistics* statistics, uint32_t succ_prob);
+
+void calc_throughput(MinstrelStatistics* statistics);
 
 #endif //MINSTREL_H

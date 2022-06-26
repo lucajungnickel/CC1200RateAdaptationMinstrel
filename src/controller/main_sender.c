@@ -79,7 +79,8 @@ static void start() {
         //logPackageStatus(package->id, res)
 
         // Update Minstrel state + statistics (incl. used rate)
-        minstrel_update(minstrel);
+        Packet* pkt_minstrel; // TODO
+        minstrel_update(minstrel, pkt_minstrel);
  
        //increment packet id for next send
         if (pkt_id != UINT32_MAX) pkt_id++;

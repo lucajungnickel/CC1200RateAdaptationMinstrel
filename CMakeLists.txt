@@ -8,6 +8,7 @@ option (BUILD_LOCAL_ONLY "Build program only local, without CC1200 libs" ON)
 option (BUILD_REAL_MINSTREL "Build program with real minstrel algorithm for productive system" OFF)
 set (LOCAL_LIB "/usr/local/lib")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS} -lm")
+set(CMAKE_C_FLAGS -pthread)
 
 add_compile_options("-g")
 
@@ -19,7 +20,7 @@ include_directories(src/cc1200)
 
 file(GLOB SRC_CONTROLLER "src/controller/*.c")
 
-if (BUILD_LOCAL_ONLY) 
+if (BUILD_LOCAL_ONLY)
     set (SPI_LIB "")
     set (PRUSS_LIBS "")
     file(GLOB SRC_CC1200  "src/cc1200/cc1200_mockup.c")

@@ -27,7 +27,7 @@ uint8_t minstrel_get_fallback_rate(Minstrel* minstrel) {
 
 }
 
-void minstrel_update(Minstrel* minstrel) {
+void minstrel_update(Minstrel* minstrel, Packet* pkt) {
 
 }
 
