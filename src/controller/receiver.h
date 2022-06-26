@@ -38,21 +38,23 @@ receiver_t* receiver_init();
  * @param receiver given receiver
  * @return packet_t the received packet or NULL if error
  */
-packet_t* receiver_receive(receiver_t* receiver);
+packet_t* receiver_receive(receiver_t* const receiver);
 
 /**
- * @brief Should be used from outside file.
- * Receives and acks a packet, and returns it.
+ * @brief Receives and acks a packet and returns the payload.
  * 
- * @param receiver 
- * @return packet_t* 
+ * Call like: receiver_receive_and_ack(rcv, &buffer)
+ * 
+ * @param receiver Receiver
+ * @param buffer Pointer to buffer where data will be written to
+ * @return uint8_t 
  */
-packet_t* receiver_receive_and_ack(receiver_t* receiver);
+uint8_t receiver_receive_and_ack(receiver_t* const receiver, uint8_t** buffer);
 
 /**
  * @brief Acknowleges the last packet and sends this ACK packet.
  * @param receiver 
  */
-void receiver_ack(receiver_t* receiver);
+void receiver_ack(receiver_t* const receiver);
 
 #endif //RECEIVER_H

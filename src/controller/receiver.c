@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "cc1200_rate.h"
 
@@ -43,10 +44,11 @@ packet_t* receiver_receive(receiver_t* receiver) {
     return pkt;
 }
 
-packet_t* receiver_receive_and_ack(receiver_t* receiver) {
+uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
     packet_t* pkt = receiver_receive(receiver);
     receiver_ack(receiver);
-    return pkt;
+    *buffer = pkt->p_payload;
+    return pkt->payload_len;
 }
 
 void receiver_ack(receiver_t* receiver) {
