@@ -1,4 +1,6 @@
-## Rate Adaptation MINSTREL algorithm implementation for a Texas Instrument CC1200 HF-Transceiver on a Beaglebone with Debian
+# Rate Adaptation MINSTREL algorithm implementation for a Texas Instrument CC1200 HF-Transceiver on a Beaglebone with Debian
+
+## This project is still in progress. There will be an update as well as an more detailed installation manual.
 
 ## Build and run on Beaglebone with full support:
 ```
