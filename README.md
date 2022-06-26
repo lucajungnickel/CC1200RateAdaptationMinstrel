@@ -16,7 +16,7 @@ cmake --build ..
 ```
 mkdir build
 cd build
-cmake -DBUILD_LOCAL_ONLY=ON .
+cmake -DBUILD_LOCAL_ONLY=ON ..
 cmake --build ..
 ```
 
