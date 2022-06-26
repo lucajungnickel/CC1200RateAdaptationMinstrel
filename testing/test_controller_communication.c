@@ -139,12 +139,10 @@ void test_communication_send_ok_rcv_ok() {
     assert(sender->lastPacketRcv->ack == 2);
     assert(sender->lastPacketRcv->id == 2);
     assert(sender->lastPacketRcv->payload_len == 0);
-    
+
     //Kill Thread
     while (!receive_done) {
         sleep(0.001);
     }
     pthread_join(thread_rcv_id, NULL);
-
-
 }
