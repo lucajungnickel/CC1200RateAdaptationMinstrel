@@ -1,10 +1,5 @@
-## Build and run on Linux with mockup files for testing, no CC1200 support:
-```
-mkdir build
-cd build
-cmake -DBUILD_LOCAL_ONLY=ON .
-cmake --build ..
-```
+#Design and Implementation of a MINSTREL like rate adaptation protocol 
+#Rate Adaptation MINSTREL algorithm implementation for a Texas Instrument CC1200 HF-Transceiver #on a Beaglebone with Debian
 
 ## Build and run on Beaglebone with full support:
 ```
@@ -13,8 +8,19 @@ cd build
 cmake .
 cmake --build ..
 ```
+
+##Settings for testing
+
+### Build and run on Linux with mockup files for testing, no CC1200 support:
+```
+mkdir build
+cd build
+cmake -DBUILD_LOCAL_ONLY=ON .
+cmake --build ..
+```
+
 ### Build without testing flags
-It's now possible to build everything without unit tests.
+It's possible to build everything without unit tests.
 Add this flag to cmake when configuring:
 ```
 cmake -DBUILD_TESTS=OFF .
