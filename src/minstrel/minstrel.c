@@ -20,7 +20,32 @@ Minstrel* minstrel_init() {
     return minstrel;
 }
 
-void log_package_status(MinstrelStatistics* statistics, Packet* pkt) {
+/**
+ * @brief Calculate the exponential moving average of the success probability for a given rate.
+ *
+ * @param minstrel
+ * @param succ_prob The newly calculated success probability which should receive the highest weight (#send/#acks).
+ */
+static void calc_ewma(MinstrelStatistics* statistics, uint32_t succ_prob) {
+    statistics->ewma = (WEIGHT * succ_prob) + ((1 - WEIGHT) * statistics->ewma);
+}
+
+/**
+ * @brief Calculate the throughput of a given rate.
+ *
+ * @param statistics Statistics of a given rate for which the throughput should be updated.
+ */
+static void calc_throughput(MinstrelStatistics* statistics) {
+    statistics->throughput = (statistics->ewma * statistics->bytes_send) / statistics->avg_duration;
+}
+
+/**
+ * @brief Reports the package status of the given package to the algorithm
+ *
+ * @param statistics Statistics of a specific rate for the minstrel algorithm that should be updated.
+ * @param pkt The packet for which new information should be incorporated into the algorithm.
+ */
+static void log_package_status(MinstrelStatistics* statistics, Packet* pkt) {
     statistics->total_send++;
     if (pkt->status == packet_status_ack)
         statistics->total_recv++;
@@ -34,10 +59,21 @@ uint8_t minstrel_get_fallback_rate(Minstrel* minstrel) {
     return 0;
 }
 
-void update_rates(Minstrel* minstrel) {
+/**
+ * @brief Update best rate, second best rate and highest throughput rate of the minstrel algorithm.
+ *
+ * @param minstrel
+ */
+static void update_rates(Minstrel* minstrel) {
 }
 
-void set_next_rate(Minstrel* minstrel, int is_probe) {
+/**
+ * @brief Set the next to-be-used rate (minstrel->rates.current) of the minstrel algorithm.
+ *
+ * @param minstrel
+ * @param is_probe Whether the next rate is a probe or not.
+ */
+static void set_next_rate(Minstrel* minstrel, int is_probe) {
 }
 
 // TODO: Update to fallback rate if timeout or error etc.
@@ -61,15 +97,4 @@ void minstrel_update(Minstrel* minstrel, Packet* pkt) {
         is_probe = 1;
 
     set_next_rate(minstrel, is_probe);
-}
-
-uint8_t minstrel_get_next_rate(Minstrel* minstrel) {
-}
-
-void calc_ewma(MinstrelStatistics* statistics, uint32_t succ_prob) {
-    statistics->ewma = (WEIGHT * succ_prob) + ((1 - WEIGHT) * statistics->ewma);
-}
-
-void calc_throughput(MinstrelStatistics* statistics) {
-    statistics->throughput = (statistics->ewma * statistics->bytes_send) / statistics->avg_duration;
 }

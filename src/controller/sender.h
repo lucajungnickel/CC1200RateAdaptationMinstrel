@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "packet.h"
-#include "minstrel.h"
+#include "../minstrel/minstrel.h"
 
 typedef struct sender_t {
     uint32_t next_ack;

@@ -9,7 +9,7 @@
 
 #include "stdint.h"
 #include "packet.h"
-#include "minstrel.h"
+#include "../minstrel/minstrel.h"
 
 typedef struct receiver_t {
     uint32_t last_ack_rcv;

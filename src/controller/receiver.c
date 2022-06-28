@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "cc1200_rate.h"
+#include "../cc1200/cc1200_rate.h"
 
 
 receiver_t* receiver_init() {
