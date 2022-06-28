@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "minstrel.h"
-#include "cc1200_rate.h"
+#include "../minstrel/minstrel.h"
+#include "../cc1200/cc1200_rate.h"
 
 static clock_t timer_started = 0x0;
 
@@ -27,7 +27,7 @@ sender_t* sender_init(Minstrel* minstrel, int device_id) {
     pkt->ack = 0;
     pkt->id = sender->next_ack;
     pkt->fallback_rate = minstrel_get_fallback_rate(minstrel);
-    pkt->next_symbol_rate = minstrel_get_next_rate(minstrel);
+    pkt->next_symbol_rate = minstrel->rates.current;
     pkt->p_payload = 0;
     pkt->payload_len = 0;
     pkt->token_recv = 0;
@@ -87,7 +87,7 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     pkt->ack = 0;
     pkt->fallback_rate = minstrel_get_fallback_rate(sender->minstrel);
     pkt->id = sender->next_ack;
-    pkt->next_symbol_rate = minstrel_get_next_rate(sender->minstrel);
+    pkt->next_symbol_rate = sender->minstrel->rates.current;
     pkt->token_recv = sender->token_receiver;
     pkt->token_send = sender->token_sender;
     pkt->payload_len = len;

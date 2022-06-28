@@ -1,12 +1,12 @@
 /**
  * @file main_sender.c
  * @author Luca Jungnickel
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2022-06-18
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #include <stdio.h>
@@ -18,34 +18,38 @@
 #include "../cc1200/cc1200_rate.h"
 
 static void start() {
-    // Init Minstrel state
+    // Initialize Minstrel state
     Minstrel* minstrel = minstrel_init();
     if (minstrel->state != READY) {
         puts("ERROR: Couldn't initialize minstrel");
         exit(1);
     }
+
+    // Initialize CC1200 registers and packet mode
+    cc1200_init();
+
     //packet id of the next sending packet
     uint32_t pkt_id = 0;
     while (true) {
         unsigned int next_rate = minstrel->rates.current;
-        
+
         //change rate
         cc1200_change_rate(next_rate);
 
         //build next package
         packet_t *pkt = malloc(sizeof(packet_t));
-        
+
         pkt->ack = 0;
         // TODO: use minstrel->rates.X here
         pkt->fallback_rate = MINSTREL_RATES[minstrel_get_fallback_rate(minstrel)];
-        
+
         pkt->id = pkt_id;
 
         pkt->next_symbol_rate = next_rate;
 
         pkt->token_recv = 5; //TODO implement handshake
         pkt->token_send = 6; //TODO implement handshake
-        
+
         pkt->type = packet_status_ok;
 
         //set payload TODO überarbeiten
@@ -54,7 +58,7 @@ static void start() {
         for (int i=0; i<pkt->payload_len; i++) {
             pkt->p_payload[i] = i % 256;
         }
-        
+
         packet_set_checksum(pkt);
         //packet build done
 
@@ -73,7 +77,7 @@ static void start() {
 
         //process packet..
         packet_t *pkt_rcv = packet_deserialize(recv_buf);
-        
+
         //int res = waitForACK()
         //if (res == CONNECTION_LOST) return 0;
         //logPackageStatus(package->id, res)
@@ -81,14 +85,14 @@ static void start() {
         // Update Minstrel state + statistics (incl. used rate)
         Packet* pkt_minstrel; // TODO
         minstrel_update(minstrel, pkt_minstrel);
- 
+
        //increment packet id for next send
         if (pkt_id != UINT32_MAX) pkt_id++;
         else pkt_id = 0;
     }
 }
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
     if (argc == 2) {
         puts("Using DEBUG mode\n");

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "cc1200_rate.h"
+#include "../cc1200/cc1200_rate.h"
 
 static clock_t timer_started = 0x0;
 
