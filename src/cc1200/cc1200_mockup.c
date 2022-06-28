@@ -27,17 +27,21 @@
 
 
 
+//Currently there are only two different CC1200 supported
+uint32_t shared_buffer_len_1;
+uint8_t* shared_buffer_1;
+pthread_mutex_t shared_mutex_1 = PTHREAD_MUTEX_INITIALIZER;
 
-uint32_t shared_buffer_len;
-uint8_t* shared_buffer;
-pthread_mutex_t shared_mutex = PTHREAD_MUTEX_INITIALIZER;
+uint32_t shared_buffer_len_2;
+uint8_t* shared_buffer_2;
+pthread_mutex_t shared_mutex_2 = PTHREAD_MUTEX_INITIALIZER;
+
 
 const int TIMEOUT = 100;
 
 static int id0 = 0;
 static int id1 = 0;
 static int numIdsSet = 0;
-static int currentId = 0; //which id is currently selected
 /**
  * @brief Only supports two device IDs at this time.
  */
@@ -50,21 +54,15 @@ void cc1200_init(int id) {
         printf("CC1200 Mockup Warning: Too many ids set.\n");
     }
     numIdsSet++;
-}
-
-void cc1200_switch_to_system(int id) {
-    if (id == id0) {
-        currentId = id0;
-    } else if (id == id1) {
-        currentId = id1;
-    } else {
-        printf("CC1200 Mockup Warning: Wrong id in switch to system.\n");
-    }
+    printf("CC1200 Mockup init %i\n", id);
 }
 
 void cc1200_reset() {
-    shared_buffer_len = 0;
-    shared_buffer = NULL;
+    shared_buffer_len_1 = 0;
+    shared_buffer_1 = NULL;
+    shared_buffer_len_2 = 0;
+    shared_buffer_2 = NULL;
+
     //shared_mutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
@@ -73,20 +71,33 @@ void cc1200_change_rate(uint32_t rate) {
 }
 
 
-void cc1200_send_packet(packet_t* packet) {
+void cc1200_send_packet(int device_id, packet_t* packet) {
+    if (packet == NULL) printf("CC1200 Mockup: Warning send packet packet=NULL\n");
     //writes to shared memory for simulation
     uint8_t *buffer = malloc(packet_get_size(packet) * sizeof(uint8_t));
     packet_serialize(packet, buffer);
     
-    pthread_mutex_lock(&shared_mutex);
-    shared_buffer = buffer;
-    shared_buffer_len = packet_get_size(packet);
-    pthread_mutex_unlock(&shared_mutex);
-    printf("CC1200 Mockup: Wrote packet to buffer\n");
-    printf("CC1200 Mockup: Buffer size %i\n", shared_buffer_len);
+    if (device_id == id0) {
+        pthread_mutex_lock(&shared_mutex_1);
+        shared_buffer_1 = buffer;
+        shared_buffer_len_1 = packet_get_size(packet);
+        pthread_mutex_unlock(&shared_mutex_1);
+        printf("CC1200 Mockup: Wrote packet to buffer %i\n", device_id);
+        printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_1);
+    } else if (device_id == id1) {
+        pthread_mutex_lock(&shared_mutex_2);
+        shared_buffer_2 = buffer;
+        shared_buffer_len_2 = packet_get_size(packet);
+        pthread_mutex_unlock(&shared_mutex_2);
+        printf("CC1200 Mockup: Wrote packet to buffer %i\n", device_id);
+        printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_2);
+    } else {
+        printf("CC1200 Mockup Warning, wrong device id\n");
+    }
+    
 }
 
-packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back) {
+packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_status_t *status_back) {
     //polls shared memory and checks if there is data to 'receive'
     
     uint8_t *data = 0;
@@ -96,23 +107,48 @@ packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_bac
         sleep(0.001);
         //check for timeout
         clock_t time_d = clock() - timeout_started;
-        if (time_d >= TIMEOUT) {
+        int msec = time_d * 1000 / CLOCKS_PER_SEC;
+        if (msec >= TIMEOUT) {
+            printf("Timeout, read on %i\n", device_id);
             *status_back = packet_status_timeout;
             return NULL;
         }
 
-        pthread_mutex_lock(&shared_mutex);
-        if (shared_buffer_len != 0) { //there is data
-            data = shared_buffer;
-            shared_buffer = 0;
-            data_len = shared_buffer_len;
-            shared_buffer_len = 0; 
-            break;
+        if (device_id == id0) {
+            pthread_mutex_lock(&shared_mutex_1);
+            if (shared_buffer_len_1 != 0) { //there is data
+                data = shared_buffer_1;
+                shared_buffer_1 = 0;
+                data_len = shared_buffer_len_1;
+                shared_buffer_len_1 = 0; 
+                break;
+            }
+            pthread_mutex_unlock(&shared_mutex_1);       
+
+            } else if (device_id == id1) {
+            pthread_mutex_lock(&shared_mutex_2);
+            if (shared_buffer_len_2 != 0) { //there is data
+                data = shared_buffer_2;
+                shared_buffer_2 = 0;
+                data_len = shared_buffer_len_2;
+                shared_buffer_len_2 = 0; 
+                break;
+            }
+            pthread_mutex_unlock(&shared_mutex_2);       
+
+        } else {
+            printf("CC1200 Mockup Warning, wrong device ID\n");
         }
-        pthread_mutex_unlock(&shared_mutex);       
+
     }
-    pthread_mutex_unlock(&shared_mutex);  
-    printf("CC1200 Mockup: read data, size %i\n", data_len);
+    if (device_id == id0) {
+        pthread_mutex_unlock(&shared_mutex_1);
+    } else if (device_id == id1) {
+        pthread_mutex_unlock(&shared_mutex_2);
+    } else {
+        printf("CC1200 Mockup Warning, wrong device ID\n");
+    }
+    printf("CC1200 Mockup: read data, device id %i, size %i\n", device_id, data_len);
     //now we got data
     *status_back = packet_status_ok;
     packet_t *back = packet_deserialize(data);

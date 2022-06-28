@@ -68,7 +68,7 @@ static void start() {
         packet_serialize(pkt, send_buf);
 
         //send
-        cc1200_send_packet(pkt);
+        //cc1200_send_packet(pkt);
         free(send_buf); //clean up
 
         //receive

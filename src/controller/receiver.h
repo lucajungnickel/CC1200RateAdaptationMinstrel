@@ -17,7 +17,8 @@ typedef struct receiver_t {
     uint16_t token_sender; //receiver needs to know how the sender is
     packet_t* lastPacketSend; //for better debugging
     packet_t* lastPacketRcv; //for better debugging
-    int device_id;
+    int socket_send;
+    int socket_rcv;
 } receiver_t;
 
 
@@ -28,11 +29,9 @@ typedef struct receiver_t {
  * 
  * Blocking function
  * 
- * @param device_id @see CC1200 device ID
- * 
  * @return receiver_t receiver or NULL if error
  */
-receiver_t* receiver_init(int device_id);
+receiver_t* receiver_init(int socket_send, int socket_rcv);
 
 /**
  * @brief Switches to the given device for receiving.

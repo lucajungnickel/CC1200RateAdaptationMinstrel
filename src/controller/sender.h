@@ -13,7 +13,8 @@ typedef struct sender_t {
     Minstrel *minstrel; //minstrel algorithm reference
     packet_t* lastPacketSend; //for better debugging
     packet_t* lastPacketRcv; //for better debugging
-    int device_id;
+    int socket_send;
+    int socket_rcv;
 } sender_t;
 
 /**
@@ -23,7 +24,7 @@ typedef struct sender_t {
  * 
  * @return sender_t sender or NULL if error ocurred
  */
-sender_t* sender_init(Minstrel *minstrel, int device_id);
+sender_t* sender_init(Minstrel *minstrel, int socket_send, int socket_rcv);
 
 /**
  * @brief Switches to the given device, @see CC1200 id.

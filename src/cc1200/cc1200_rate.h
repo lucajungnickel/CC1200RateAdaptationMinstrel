@@ -74,28 +74,21 @@ void cc1200_reset();
  */
 void cc1200_init(int id);
 
-/**
- * @brief Switches to the given system with the id.
- * Could be implemented if you would like to have different CC1200
- * on one system, or ignored.
- * @param id 
- */
-void cc1200_switch_to_system(int id);
-
-
 void cc1200_change_rate(uint32_t rate);
 
 /**
- * @brief Sends a packet.
+ * @brief Sends a packet on the given device_id.
  *
  */
-void cc1200_send_packet(packet_t* packet);
+void cc1200_send_packet(int device_id, packet_t* packet);
 
 /**
  * @brief Reads and returns a packet.
  * 
  * Blocking function
- * 
+ * @param device_id Device id, can be ignored in the implementation.
+ * Only implement if you would like to support multiple CC1200 on one
+ * MCU.
  * @param timeout_started Time the timeout counter started.
  *  If (timeout_started + TIMEOUT) >= current_time
  *      nothing will be returned and a timeout is assumed
@@ -104,6 +97,6 @@ void cc1200_send_packet(packet_t* packet);
  * 
  * @return packet in packet_t format
  */
-packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back);
+packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_status_t *status_back);
 
 #endif //CC1200_RATE_H

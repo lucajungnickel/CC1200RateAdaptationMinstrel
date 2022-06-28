@@ -11,7 +11,7 @@ static clock_t timer_started = 0x0;
 
 int current_device = 0;
 
-receiver_t* receiver_init(int device_id) {
+receiver_t* receiver_init(int socket_send, int socket_rcv) {
     receiver_t* rcv = calloc(1, sizeof(receiver_t));
     if (rcv == NULL) return NULL;
 
@@ -19,7 +19,9 @@ receiver_t* receiver_init(int device_id) {
     rcv->token_receiver = token_recv;
     if (token_recv == 0) token_recv = 1;
     
-    rcv->device_id = device_id;
+    rcv->socket_send = socket_send;
+    rcv->socket_rcv = socket_rcv;
+
 
     packet_t* pkt = NULL;
     while (pkt == NULL) { //TODO better error handling
@@ -27,6 +29,11 @@ receiver_t* receiver_init(int device_id) {
         printf("receiver Timeout\n");
     }
     printf("receiver rcv\n");
+    for (int i=0;i<pkt->payload_len;i++) {
+        printf("%i ", pkt->p_payload[i]);
+    }
+    printf("\n");
+    
     //assume everything went perfect
 
     //now set ACK, TOKEN_SEND
@@ -51,12 +58,10 @@ void receiver_switch_device(int device_id) {
  */
 packet_t* receiver_receive(receiver_t* receiver) {
     packet_status_t status = 0;
-    
-    cc1200_switch_to_system(receiver->device_id);
 
     timer_started = clock(); //start timer
 
-    packet_t* pkt = cc1200_get_packet(timer_started, &status);
+    packet_t* pkt = cc1200_get_packet(receiver->socket_send, timer_started, &status);
     printf("receiver rcv status: %i\n", status);
     if (pkt != NULL) {
         receiver->last_ack_rcv = pkt->id;
@@ -88,8 +93,7 @@ void receiver_ack(receiver_t* receiver) {
     pkt_send->type = packet_status_ack;
     packet_set_checksum(pkt_send);
 
-    cc1200_switch_to_system(receiver->device_id);
-    cc1200_send_packet(pkt_send);
+    cc1200_send_packet(receiver->socket_rcv, pkt_send);
     receiver->lastPacketSend = pkt_send;
     
 }

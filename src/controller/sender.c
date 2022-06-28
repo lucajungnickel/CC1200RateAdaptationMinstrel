@@ -10,7 +10,7 @@ static clock_t timer_started = 0x0;
 
 
 
-sender_t* sender_init(Minstrel* minstrel, int device_id) {
+sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     sender_t *sender = calloc(1, sizeof(sender_t));
     if (sender == NULL) return NULL;
 
@@ -18,8 +18,9 @@ sender_t* sender_init(Minstrel* minstrel, int device_id) {
 
     sender->next_ack = 1;
 
-    sender->device_id = device_id;
-    
+    sender->socket_rcv = socket_rcv;
+    sender->socket_send = socket_send;
+
     uint16_t token_sender = rand() % UINT16_MAX;
     sender->token_sender = token_sender;
     if (token_sender == 0) token_sender = 1;
@@ -55,8 +56,7 @@ void sender_send(sender_t *sender, packet_t *packet) {
     sender->next_ack = packet->id;
     sender->lastPacketSend = packet;
 
-    cc1200_switch_to_system(sender->device_id);
-    cc1200_send_packet(packet);
+    cc1200_send_packet(sender->socket_send, packet);
     printf("Sender packet sent\n");
     //start timer
     timer_started = clock();
@@ -72,12 +72,15 @@ void sender_send(sender_t *sender, packet_t *packet) {
  */
 packet_status_t sender_rcv_ack(sender_t *sender) {
     packet_status_t status;
-    cc1200_switch_to_system(sender->device_id);
-    packet_t* pkt = cc1200_get_packet(timer_started, &status);
+
+    packet_t* pkt = cc1200_get_packet(sender->socket_rcv, timer_started, &status);
 
     sender->lastPacketRcv = pkt;
     if (pkt == NULL) return status;
-
+    if (status == packet_status_timeout) { //if there is a timeout, start clock again!
+        timer_started = clock();
+    }
+    
     //check for correct ACK
     if (pkt->ack == sender->next_ack) {
         sender->next_ack++;
