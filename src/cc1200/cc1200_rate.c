@@ -6,6 +6,7 @@
 #include <time.h>
 
 #include "cc1200_rate.h"
+#include "register_config.h"
 #include "../controller/packet.h"
 
 
@@ -96,7 +97,6 @@ void cc1200_reset() {
 
 }
 
-
 void cc1200_init(int id) {
     //id can be ignored here
 
@@ -110,72 +110,31 @@ void cc1200_init(int id) {
     cc1200_cmd(SRES);
     cc1200_cmd(SNOP);
 
-    int i, adr, val;
+    int i, addr, val;
     // Set standard register
     for (i=0; i<MAX_REG; i++) {
-        adr = RegSettings[i].adr;
+        addr = RegSettings[i].adr;
         val = RegSettings[i].val;
-        cc1200_reg_write(adr, val);
+        cc1200_reg_write(addr, val);
     }
     // Set extended register
     for (i=0; i<MAX_EXT_REG; i++) {
-        adr = ExtRegSettings[i].adr;
+        addr = ExtRegSettings[i].adr;
         val = ExtRegSettings[i].val;
-        cc1200_reg_write(adr, val);
+        cc1200_reg_write(addr, val);
     }
 
     // Configure variable packet mode
-    cc1200_reg_write(PKT_CFG0, build_pkt_cfg0_std(PKT_MODE));
-    cc1200_reg_write(PKT_CFG2, build_pkt_cfg2_std(PKT_FORMAT));
+    cc1200_reg_write(PKT_CFG0, build_pkg_cfg0_std(PKT_MODE));
+    cc1200_reg_write(PKT_CFG2, build_pkg_cfg2_std(PKT_FORMAT));
     cc1200_reg_write(PKT_LEN, PKT_MAX_LEN);
 
     if (IS_DEBUG)
         puts("DEBUG: Initialized CC1200 registers.");
 }
 
-/**
- * @brief Calls build_pkg_cfg0 with default reg settings for UART
- * Default settings are from RegSettings
- *
- * @param length_config
- * @return uint8_t
- */
-static uint8_t build_pkg_cfg0_std(uint8_t length_config) {
-    uint8_t pkt_bit_len =   (RegSettings[PKT_CFG0].val & 0b00011100) >> 2;
-    uint8_t uart_mode_en =  (RegSettings[PKT_CFG0].val & 0b00000010) >> 1;
-    uint8_t uart_swap_en =  (RegSettings[PKT_CFG0].val & 0b00000001) /* >> 0 */;
-    return build_pkg_cfg0(length_config, pkt_bit_len, uart_mode_en, uart_swap_en);
-}
-
-/**
- * Calls build_pkg_cfg2 with default reg settings (from imported reg file)
- * Default settings are from RegSettings
- *
- * @param pkt_format
- * @return uint8_t
- */
-static uint8_t build_pkt_cfg2_std(uint8_t pkt_format) {
-    uint8_t byte_swap_en = (RegSettings[PKT_CFG2].val & 0b01000000) >> 6;
-    uint8_t fg_mode_en   = (RegSettings[PKT_CFG2].val & 0b00100000) >> 5;
-    uint8_t cca_mode     = (RegSettings[PKT_CFG2].val & 0b00011100) >> 2;
-    return build_pkg_cfg2(byte_swap_en, fg_mode_en, cca_mode, pkt_format);
-}
-
-void cc1200_change_rate(uint32_t rate) {
-    float rate_in_ksps = rate / 1000.;
-    uint32_t srate_e = log_2((rate_in_ksps * pow(2, 39)) / F_XOSC) - 20;
-    uint32_t srate_m = ((rate_in_ksps * pow(2, 39)) / (F_XOSC * (1 << srate_e))) - (1 << 20);
-
-    uint8_t symbol_rate_2 = ((srate_e & 0xF) << 4) | (0xF & (srate_m >> 16));
-    uint8_t symbol_rate_1 = 0xFF & (srate_m >> 8);
-    uint8_t symbol_rate_0 = 0xFF & srate_m;
-
-    // Write exponent and mantissa [19:16]
-    cc1200_reg_write(SYMBOL_RATE2, symbol_rate_2);
-    // Write mantissa [15:8]
-    cc1200_reg_write(SYMBOL_RATE1, symbol_rate_1);
-    // Write mantissa [7:0]
-    cc1200_reg_write(SYMBOL_RATE0, symbol_rate_0);
+static float log_2(float num) {
+    return log(num) / log(2.);
 }
 
 // TODO: Error handling
@@ -216,13 +175,14 @@ packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_bac
 }
 
 // TODO: Error handling
-uint32_t cc1200_get_packet(uint8_t* buffer) {
+packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back) {
     // Switch to RX mode
     cc1200_cmd(SRX);
     while (get_status_cc1200() != RX)
         cc1200_cmd(SNOP);
 
     unsigned int num_rx_bytes, pkt_len;
+    uint8_t* buffer;
     while(1) {
         cc1200_reg_read(NUM_RXBYTES, &num_rx_bytes);
 
@@ -242,18 +202,15 @@ uint32_t cc1200_get_packet(uint8_t* buffer) {
 
                     if (IS_DEBUG) {
                         printf("DEBUG: Packet received: \n\t");
-                        for (int i=0; i < pkt_len; i++) {
+                        for (int i=0; i < pkt_len; i++)
                             printf("%c",buffer[i]);
-                        }
                         printf("\n");
                     }
-                    return pkt_len;
+                    return packet_deserialize(buffer);
                 }
             }
         }
     }
 }
 
-float log_2(float num) {
-    return log(num) / log(2.);
-}
+void cc1200_switch_to_system(int id) {}
