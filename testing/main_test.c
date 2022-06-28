@@ -60,10 +60,13 @@ int main(int argc, char** argv) {
     } else if (!strcmp(argv[1], "communication.sendOK.rcvOK.small")) {
         printf("Start communication small send ok rcv ok test\n");
         test_communication_send_ok_rcv_ok();
-    } else if (!strcmp(argv[1], "communication.sendFAIL.small")) {
-        printf("Start communication small send fail and retry test\n");
-        test_communication_send_error();
-    } else {
+    } else if (!strcmp(argv[1], "communication.handshake.sendFAIL")) {
+        printf("Start communication handshake send fail and retry test\n");
+        test_communication_send_error_handshake();
+    } else if (!strcmp(argv[1], "communication.handshake.ackFAIL")) {
+        printf("Start communication handshake ACK fail and retry test\n");
+        test_communication_handshake_ack_error();
+    }  else {
         printf("No valid test command.\n");
         return 1;
     }

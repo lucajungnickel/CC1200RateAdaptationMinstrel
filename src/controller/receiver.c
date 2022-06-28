@@ -25,7 +25,8 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
 
     packet_t* pkt = NULL;
     while (pkt == NULL) { //TODO better error handling
-        pkt = receiver_receive(rcv);
+        packet_status_t status = 0;
+        pkt = receiver_receive(rcv, &status);
         printf("receiver Timeout\n");
     }
     printf("receiver rcv\n");
@@ -33,7 +34,7 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
         printf("%i ", pkt->p_payload[i]);
     }
     printf("\n");
-    
+
     //assume everything went perfect
 
     //now set ACK, TOKEN_SEND
@@ -46,24 +47,32 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     return rcv;
 }
 
-void receiver_switch_device(int device_id) {
-    
-}
-
 /**
- * @brief More like a local function. You should use receiver_receive_and_ack()
+ * @brief Receives and checks a packet for correct ACK and checksum.
+ * 
+ * More like a local function. You should use receiver_receive_and_ack()
  * 
  * @param receiver 
- * @return packet_t* 
+ * @param status pointer to status, will be set with content and acts as a second return argument
+ * @return packet_t* valid packet, or NULL if an error occured
  */
-packet_t* receiver_receive(receiver_t* receiver) {
+packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
     packet_status_t status = 0;
 
     timer_started = clock(); //start timer
 
     packet_t* pkt = cc1200_get_packet(receiver->socket_send, timer_started, &status);
+    *status_back = status;
     printf("receiver rcv status: %i\n", status);
+    if (status == packet_status_err_timeout) return NULL;
     if (pkt != NULL) {
+        //TODO check for correct recv token
+        //TODO check for correct checksum
+        //check for valid ACK:
+        if (pkt->ack != receiver->last_ack_rcv) {
+            //if there is a wrong ACK, ignore that and assume we got the correct packet            
+            status = packet_status_warn_wrong_ack; //just a hint for the next layer, but not an error
+        }
         receiver->last_ack_rcv = pkt->id;
         receiver->lastPacketRcv = pkt;
         return pkt;
@@ -73,8 +82,13 @@ packet_t* receiver_receive(receiver_t* receiver) {
 }
 
 uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
-    packet_t* pkt = receiver_receive(receiver);
+    packet_status_t status = packet_status_none;
+    packet_t* pkt=NULL;
+    while (status != packet_status_ok || status != packet_status_warn_wrong_ack) {
+        pkt = receiver_receive(receiver, &status);
+    }
     receiver_ack(receiver);
+    printf("status: %i\n", status);
     *buffer = pkt->p_payload;
     return pkt->payload_len;
 }
@@ -90,7 +104,7 @@ void receiver_ack(receiver_t* receiver) {
     pkt_send->id = receiver->last_ack_rcv;
     pkt_send->token_recv = receiver->token_receiver;
     pkt_send->token_send = receiver->token_sender;
-    pkt_send->type = packet_status_ack;
+    pkt_send->type = packet_status_ok_ack;
     packet_set_checksum(pkt_send);
 
     cc1200_send_packet(receiver->socket_rcv, pkt_send);

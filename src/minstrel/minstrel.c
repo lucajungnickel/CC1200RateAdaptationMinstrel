@@ -47,7 +47,7 @@ static void calc_throughput(MinstrelStatistics* statistics) {
  */
 static void log_package_status(MinstrelStatistics* statistics, Packet* pkt) {
     statistics->total_send++;
-    if (pkt->status == packet_status_ack)
+    if (pkt->status == packet_status_ok_ack)
         statistics->total_recv++;
     statistics->avg_duration = (statistics->avg_duration + pkt->duration) / statistics->total_send;
     statistics->last_pkt_id = pkt->id;

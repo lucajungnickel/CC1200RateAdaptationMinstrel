@@ -26,13 +26,6 @@ typedef struct sender_t {
  */
 sender_t* sender_init(Minstrel *minstrel, int socket_send, int socket_rcv);
 
-/**
- * @brief Switches to the given device, @see CC1200 id.
- * Could be ignored in the implementation.
- * 
- * @param device_id 
- */
-void sender_switch_device(int device_id);
 
 /**
  * @brief Sends one packet with the given sender.

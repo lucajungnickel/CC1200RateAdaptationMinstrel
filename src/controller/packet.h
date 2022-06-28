@@ -6,11 +6,11 @@
 //See TYPE in 8bit protocol header field
 //TODO überarbeiten
 typedef enum packet_status_t {
+    packet_status_none, //for initialization only
     packet_status_ok,
-    packet_status_ack,
-    packet_status_wrong_ack,
-    packet_status_timeout,
-    packet_status_lost
+    packet_status_ok_ack,
+    packet_status_warn_wrong_ack,
+    packet_status_err_timeout
 } packet_status_t;
 
 

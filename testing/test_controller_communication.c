@@ -37,6 +37,8 @@ static void *thread_receive_init() {
     assert(receiver->lastPacketRcv->token_recv == 0);
     assert(receiver->lastPacketSend->token_send == 
         receiver->lastPacketRcv->token_send);
+    assert(receiver->lastPacketRcv->ack == 0);
+    
 
     rcv = receiver;
     receive_done = true;
@@ -159,11 +161,108 @@ void test_communication_send_ok_rcv_ok() {
 
 //---------------------------------------------------------------
 
+static void *thread_send_error_handshake() {
+    printf("rcv thread started\n");
+    receiver_t* receiver = receiver_init(id_sender, id_rcv);
+    printf("rcv thread finished\n");
+
+    assert(receiver->token_receiver != 0);
+    assert(receiver->token_sender != 0);
+    assert(receiver->lastPacketRcv->id == 1);
+    assert(receiver->lastPacketRcv->token_send != 0);
+    assert(receiver->lastPacketRcv->token_recv == 0);
+    assert(receiver->lastPacketSend->token_send == 
+        receiver->lastPacketRcv->token_send);
+    assert(receiver->lastPacketRcv->ack == 0);
+
+    rcv = receiver;
+    receive_done = true;
+}
+
 /**
  * @brief Test for sending a packet which will be lost.
  * 
  * The sender should get an ACK Timeout and send the packet again.
  */
-void test_communication_send_error() {
-    assert(true == false); //TODO remove 
+void test_communication_send_error_handshake() {
+    //Setup a sender and receiver
+    resetTests();  
+    cc1200_init(id_sender);
+    cc1200_init(id_rcv);
+
+    //receiver thread:
+    pthread_t thread_rcv_id;
+    pthread_create(&thread_rcv_id, NULL, thread_send_error_handshake, NULL);
+    
+    Minstrel* minstrel = calloc(1, sizeof(Minstrel));
+    assert(minstrel != NULL);
+    cc1200_debug_block_next_write(id_sender);
+    sender_t* sender = sender_init(minstrel, id_sender, id_rcv);
+    
+    //check for correct sender
+    assert(sender->lastPacketSend->id == 1);
+    assert(rcv->lastPacketSend->ack == 1);
+    assert(rcv->lastPacketSend->id == 1);
+    assert(rcv->lastPacketSend->payload_len == 0);
+    assert(rcv->lastPacketRcv->payload_len == 0);
+    assert(sender->next_ack == 2);
+
+    //Kill Thread
+    while (!receive_done) {
+        sleep(0.001);
+    }
+    pthread_join(thread_rcv_id, NULL);
+}
+
+//------------------------------------------------------------------
+static void *thread_handshake_ack_error() {
+    receiver_t* receiver = receiver_init(id_sender, id_rcv);
+
+    assert(receiver->token_receiver != 0);
+    assert(receiver->token_sender != 0);
+    assert(receiver->lastPacketRcv->id == 1);
+    assert(receiver->lastPacketRcv->token_send != 0);
+    assert(receiver->lastPacketRcv->token_recv == 0);
+    assert(receiver->lastPacketSend->token_send == 
+        receiver->lastPacketRcv->token_send);
+
+    rcv = receiver;
+
+    uint8_t* buffer;
+    
+    cc1200_debug_block_next_write(id_rcv); //block next ACK
+    uint8_t len = receiver_receive_and_ack(rcv, &buffer);
+
+    //Check payload
+    receive_done = true;
+}
+
+void test_communication_handshake_ack_error() {
+    //Setup a sender and receiver
+    resetTests();  
+    cc1200_init(id_sender);
+    cc1200_init(id_rcv);
+
+    //receiver thread:
+    pthread_t thread_rcv_id;
+    pthread_create(&thread_rcv_id, NULL, thread_handshake_ack_error, NULL);
+    
+    sleep(0.001);
+
+    Minstrel* minstrel = calloc(1, sizeof(Minstrel));
+    assert(minstrel != NULL);
+    sender_t* sender = sender_init(minstrel, id_sender, id_rcv);
+    //check for correct sender
+    assert(sender->lastPacketSend->id == 1);
+    assert(rcv->lastPacketSend->ack == 1);
+    assert(rcv->lastPacketSend->id == 1);
+    assert(rcv->lastPacketSend->payload_len == 0);
+    assert(rcv->lastPacketRcv->payload_len == 0);
+    assert(sender->next_ack == 2);
+
+    //Kill Thread
+    while (!receive_done) {
+        sleep(0.001);
+    }
+    pthread_join(thread_rcv_id, NULL);
 }

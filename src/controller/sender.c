@@ -41,15 +41,14 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     sender_send(sender, pkt);
 
     //wait for ack
-    packet_status_t status = packet_status_lost;
+    packet_status_t status = packet_status_none;
     while (status != packet_status_ok) {
         status = sender_rcv_ack(sender);
+        if (status == packet_status_err_timeout) { //timeout, try to send packet again
+            sender_send(sender, pkt);
+        }
     }
     return sender;
-}
-
-void sender_switch_device(int device_id) {
-
 }
 
 void sender_send(sender_t *sender, packet_t *packet) {
@@ -77,15 +76,16 @@ packet_status_t sender_rcv_ack(sender_t *sender) {
 
     sender->lastPacketRcv = pkt;
     if (pkt == NULL) return status;
-    if (status == packet_status_timeout) { //if there is a timeout, start clock again!
-        timer_started = clock();
+    if (status == packet_status_err_timeout) { //if there is a timeout, start clock again!
+        //timer_started = clock();
+        return packet_status_err_timeout;
     }
-    
+
     //check for correct ACK
     if (pkt->ack == sender->next_ack) {
         sender->next_ack++;
         return packet_status_ok;
-    } else return packet_status_wrong_ack;
+    } else return packet_status_warn_wrong_ack;
     
 }
 

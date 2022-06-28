@@ -34,21 +34,14 @@ typedef struct receiver_t {
 receiver_t* receiver_init(int socket_send, int socket_rcv);
 
 /**
- * @brief Switches to the given device for receiving.
- * Could be ignored in the implementation.
- * 
- * @param device_id 
- */
-void receiver_switch_device(int device_id);
-
-/**
  * @brief Receives a packet.
  * Checks the checksum and filter for correct rcv and sender tokens.
  * 
  * @param receiver given receiver
+ * @param status pointer to status, will be returned like a second return value
  * @return packet_t the received packet or NULL if error
  */
-packet_t* receiver_receive(receiver_t* const receiver);
+packet_t* receiver_receive(receiver_t* const receiver, packet_status_t* status);
 
 /**
  * @brief Receives and acks a packet and returns the payload.

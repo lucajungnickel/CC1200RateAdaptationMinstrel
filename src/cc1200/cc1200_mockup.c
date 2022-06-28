@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdbool.h>
 
 #include "cc1200_rate.h"
 #include "../controller/packet.h"
@@ -28,14 +29,15 @@
 
 
 //Currently there are only two different CC1200 supported
-uint32_t shared_buffer_len_1;
-uint8_t* shared_buffer_1;
-pthread_mutex_t shared_mutex_1 = PTHREAD_MUTEX_INITIALIZER;
+static uint32_t shared_buffer_len_1;
+static uint8_t* shared_buffer_1;
+static pthread_mutex_t shared_mutex_1 = PTHREAD_MUTEX_INITIALIZER;
+static bool ignore_next_write_1 = false;
 
-uint32_t shared_buffer_len_2;
-uint8_t* shared_buffer_2;
-pthread_mutex_t shared_mutex_2 = PTHREAD_MUTEX_INITIALIZER;
-
+static uint32_t shared_buffer_len_2;
+static uint8_t* shared_buffer_2;
+static pthread_mutex_t shared_mutex_2 = PTHREAD_MUTEX_INITIALIZER;
+static bool ignore_next_write_2 = false;
 
 const int TIMEOUT = 100;
 
@@ -78,19 +80,30 @@ void cc1200_send_packet(int device_id, packet_t* packet) {
     packet_serialize(packet, buffer);
     
     if (device_id == id0) {
-        pthread_mutex_lock(&shared_mutex_1);
-        shared_buffer_1 = buffer;
-        shared_buffer_len_1 = packet_get_size(packet);
-        pthread_mutex_unlock(&shared_mutex_1);
-        printf("CC1200 Mockup: Wrote packet to buffer %i\n", device_id);
-        printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_1);
+        if (!ignore_next_write_1) {
+            pthread_mutex_lock(&shared_mutex_1);
+            shared_buffer_1 = buffer;
+            shared_buffer_len_1 = packet_get_size(packet);
+            pthread_mutex_unlock(&shared_mutex_1);
+            printf("CC1200 Mockup: Wrote packet to buffer %i\n", device_id);
+            printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_1);
+        } else {
+            ignore_next_write_1 = false;
+            printf("Ignored next write to buffer %i\n", device_id);
+        }
+
     } else if (device_id == id1) {
-        pthread_mutex_lock(&shared_mutex_2);
-        shared_buffer_2 = buffer;
-        shared_buffer_len_2 = packet_get_size(packet);
-        pthread_mutex_unlock(&shared_mutex_2);
-        printf("CC1200 Mockup: Wrote packet to buffer %i\n", device_id);
-        printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_2);
+        if (!ignore_next_write_2) {
+            pthread_mutex_lock(&shared_mutex_2);
+            shared_buffer_2 = buffer;
+            shared_buffer_len_2 = packet_get_size(packet);
+            pthread_mutex_unlock(&shared_mutex_2);
+            printf("CC1200 Mockup: Wrote packet to buffer %i\n", device_id);
+            printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_2);
+        } else {
+            ignore_next_write_2 = false;
+            printf("Ignored next write to buffer %i\n", device_id);
+        }
     } else {
         printf("CC1200 Mockup Warning, wrong device id\n");
     }
@@ -110,7 +123,7 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
         int msec = time_d * 1000 / CLOCKS_PER_SEC;
         if (msec >= TIMEOUT) {
             printf("Timeout, read on %i\n", device_id);
-            *status_back = packet_status_timeout;
+            *status_back = packet_status_err_timeout;
             return NULL;
         }
 
@@ -155,6 +168,20 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
     return back;
 }
 
+/**
+ * @brief Debugging function, will ignore the next write to the 
+ * given device buffer.
+ * 
+ */
+void cc1200_debug_block_next_write(int device_id) {
+    if (device_id == id0) {
+        ignore_next_write_1 = true;
+    } else if (device_id == id1) {
+        ignore_next_write_2 = true;
+    } else {
+        printf("CC1200 Mockup warning: invalid device number\n");
+    }
+}
 
 
 
