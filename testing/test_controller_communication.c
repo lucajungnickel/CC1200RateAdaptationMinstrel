@@ -85,6 +85,7 @@ void test_communication_initialization() {
 
 
 static void *thread_receive_send_ok_rcv_ok() {
+    printf("started rcv\n");
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
 
     assert(receiver->token_receiver != 0);
@@ -96,7 +97,7 @@ static void *thread_receive_send_ok_rcv_ok() {
         receiver->lastPacketRcv->token_send);
 
     rcv = receiver;
-
+    printf("Start to receive payload\n");
     uint8_t* buffer;
     uint8_t len = receiver_receive_and_ack(rcv, &buffer);
 
@@ -133,6 +134,7 @@ void test_communication_send_ok_rcv_ok() {
     Minstrel* minstrel = calloc(1, sizeof(Minstrel));
     assert(minstrel != NULL);
     sender_t* sender = sender_init(minstrel, id_sender, id_rcv);
+    
     //check for correct sender
     assert(sender->lastPacketSend->id == 1);
     assert(rcv->lastPacketSend->ack == 1);

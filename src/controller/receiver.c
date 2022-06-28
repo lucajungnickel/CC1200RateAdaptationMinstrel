@@ -82,7 +82,9 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
 uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
     packet_status_t status = packet_status_none;
     packet_t* pkt=packet_status_none;
-    while (status != packet_status_ok || status != packet_status_warn_wrong_ack) {
+    while (status != packet_status_ok 
+            && status != packet_status_warn_wrong_ack 
+            && status != packet_status_ok_ack) {
         pkt = receiver_receive(receiver, &status);
     }
     receiver_ack(receiver);

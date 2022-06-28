@@ -109,6 +109,7 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
         packet_status_t status = sender_rcv_ack(sender);
         if (status == packet_status_ok || packet_status_ok_ack) {
             should_send = false;
+            break;
         } else if (status == packet_status_warn_wrong_ack) {
              //Sender shouldn't receive invalid ACK
              //,then send packet again
