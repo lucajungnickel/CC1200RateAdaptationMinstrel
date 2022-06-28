@@ -129,6 +129,7 @@ void set_next_rate(Minstrel* minstrel, int is_probe);
  */
 void minstrel_update(Minstrel* minstrel, Packet* pkt);
 
+
 /**
  * @brief Calculate the exponential moving average of the success probability for a given rate.
  *

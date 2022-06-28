@@ -11,6 +11,10 @@ void cc1200_reset() {
     
 }
 
+void cc1200_init() {
+    
+}
+
 void cc1200_change_rate(uint32_t rate) {
     float rate_in_ksps = rate / 1000.;
     uint32_t srate_e = log_2((rate_in_ksps * pow(2, 39)) / F_XOSC) - 20;

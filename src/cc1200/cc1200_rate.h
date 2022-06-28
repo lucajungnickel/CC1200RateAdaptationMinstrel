@@ -32,6 +32,8 @@ int IS_DEBUG;
 
 void cc1200_reset();
 
+void cc1200_init();
+
 void cc1200_change_rate(uint32_t rate);
 
 /**
