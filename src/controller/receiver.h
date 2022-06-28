@@ -17,6 +17,7 @@ typedef struct receiver_t {
     uint16_t token_sender; //receiver needs to know how the sender is
     packet_t* lastPacketSend; //for better debugging
     packet_t* lastPacketRcv; //for better debugging
+    int device_id;
 } receiver_t;
 
 

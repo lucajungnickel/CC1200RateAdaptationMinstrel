@@ -18,6 +18,8 @@ sender_t* sender_init(Minstrel* minstrel, int device_id) {
 
     sender->next_ack = 1;
 
+    sender->device_id = device_id;
+    
     uint16_t token_sender = rand() % UINT16_MAX;
     sender->token_sender = token_sender;
     if (token_sender == 0) token_sender = 1;
@@ -52,6 +54,8 @@ void sender_switch_device(int device_id) {
 void sender_send(sender_t *sender, packet_t *packet) {
     sender->next_ack = packet->id;
     sender->lastPacketSend = packet;
+
+    cc1200_switch_to_system(sender->device_id);
     cc1200_send_packet(packet);
     printf("Sender packet sent\n");
     //start timer
@@ -68,6 +72,7 @@ void sender_send(sender_t *sender, packet_t *packet) {
  */
 packet_status_t sender_rcv_ack(sender_t *sender) {
     packet_status_t status;
+    cc1200_switch_to_system(sender->device_id);
     packet_t* pkt = cc1200_get_packet(timer_started, &status);
 
     sender->lastPacketRcv = pkt;

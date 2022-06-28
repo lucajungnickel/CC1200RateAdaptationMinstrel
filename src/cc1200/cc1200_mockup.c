@@ -34,23 +34,39 @@ pthread_mutex_t shared_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 const int TIMEOUT = 100;
 
+static int id0 = 0;
+static int id1 = 0;
+static int numIdsSet = 0;
+static int currentId = 0; //which id is currently selected
+/**
+ * @brief Only supports two device IDs at this time.
+ */
 void cc1200_init(int id) {
-
+    if (numIdsSet == 0) {
+        id0 = id;
+    } else if(numIdsSet == 1) {
+        id1 = id;
+    } else {
+        printf("CC1200 Mockup Warning: Too many ids set.\n");
+    }
+    numIdsSet++;
 }
 
 
 void cc1200_switch_to_system(int id) {
-
+    if (id == id0) {
+        currentId = id0;
+    } else if (id == id1) {
+        currentId = id1;
+    } else {
+        printf("CC1200 Mockup Warning: Wrong id in switch to system.\n");
+    }
 }
 
 void cc1200_reset() {
     shared_buffer_len = 0;
     shared_buffer = NULL;
     //shared_mutex = PTHREAD_MUTEX_INITIALIZER;
-}
-
-void cc1200_init() {
-
 }
 
 void cc1200_change_rate(uint32_t rate) {

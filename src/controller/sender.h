@@ -13,6 +13,7 @@ typedef struct sender_t {
     Minstrel *minstrel; //minstrel algorithm reference
     packet_t* lastPacketSend; //for better debugging
     packet_t* lastPacketRcv; //for better debugging
+    int device_id;
 } sender_t;
 
 /**
