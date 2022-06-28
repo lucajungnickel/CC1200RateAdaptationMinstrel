@@ -172,7 +172,6 @@ void test_communication_send_ok_rcv_ok() {
 static void *thread_send_error_handshake() {
     printf("rcv thread started\n");
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
-    printf("rcv thread finished\n");
 
     assert(receiver->token_receiver != 0);
     assert(receiver->token_sender != 0);
@@ -184,6 +183,9 @@ static void *thread_send_error_handshake() {
     assert(receiver->lastPacketRcv->ack == 0);
 
     rcv = receiver;
+    printf("rcv thread init ok\n");
+
+    printf("rcv thread finished\n");
     receive_done = true;
 }
 
@@ -239,9 +241,6 @@ static void *thread_handshake_ack_error() {
 
     rcv = receiver;
 
-    uint8_t* buffer;
-    
-    
     //Check payload
     receive_done = true;
 }

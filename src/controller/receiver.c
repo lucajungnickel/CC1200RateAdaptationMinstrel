@@ -20,14 +20,17 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     rcv->socket_send = socket_send;
     rcv->socket_rcv = socket_rcv;
 
+    uint8_t* buffer = calloc(sizeof(uint8_t), 1000);
 
     packet_t* pkt = NULL;
-    while (pkt == NULL) { //TODO better error handling
-        packet_status_t status = 0;
+    packet_status_t status = packet_status_none;
+    while (status == !packet_status_ok 
+            && status == !packet_status_ok_ack
+            && status == !packet_status_warn_wrong_ack) { //TODO better error handling
         pkt = receiver_receive(rcv, &status);
         printf("receiver Timeout\n");
     }
-    printf("receiver rcv\n");
+    printf("receiver rcv stuff!\n");
     for (int i=0;i<pkt->payload_len;i++) {
         printf("%i ", pkt->p_payload[i]);
     }
@@ -61,7 +64,7 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
 
     packet_t* pkt = cc1200_get_packet(receiver->socket_send, timer_started, &status);
     *status_back = status;
-    printf("receiver rcv status: %i\n", status);
+    printf("receiver rcv status of packet: %i\n", status);
     if (status == packet_status_err_timeout) return NULL;
     if (pkt != NULL) {
         //TODO check for correct recv token
@@ -82,13 +85,14 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
 uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
     packet_status_t status = packet_status_none;
     packet_t* pkt=packet_status_none;
-    while (status != packet_status_ok 
-            && status != packet_status_warn_wrong_ack 
-            && status != packet_status_ok_ack) {
+    while (status == !packet_status_ok 
+            && status == !packet_status_warn_wrong_ack 
+            && status == !packet_status_ok_ack) {
         pkt = receiver_receive(receiver, &status);
+        printf("Receiver rcv status: %i\n", status);
     }
     receiver_ack(receiver);
-    printf("status: %i\n", status);
+    printf("receiver correct status: %i\n", status);
     *buffer = pkt->p_payload;
     return pkt->payload_len;
 }
@@ -109,5 +113,4 @@ void receiver_ack(receiver_t* receiver) {
 
     cc1200_send_packet(receiver->socket_rcv, pkt_send);
     receiver->lastPacketSend = pkt_send;
-    printf("Receiver: set lastPacketSend, rcv_p: 0x%x, 0x%x\n", receiver, pkt_send);
 }
