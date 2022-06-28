@@ -241,6 +241,10 @@ static void *thread_handshake_ack_error() {
 
     rcv = receiver;
 
+    
+    uint8_t* buffer;
+    uint8_t len = receiver_receive_and_ack(rcv, &buffer);
+
     //Check payload
     receive_done = true;
 }
