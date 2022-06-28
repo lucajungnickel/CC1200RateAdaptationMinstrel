@@ -26,7 +26,7 @@ static void start() {
     }
 
     // Initialize CC1200 registers and packet mode
-    cc1200_init();
+    cc1200_init(0);
 
     //packet id of the next sending packet
     uint32_t pkt_id = 0;

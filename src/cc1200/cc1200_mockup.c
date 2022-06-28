@@ -38,7 +38,6 @@ void cc1200_init(int id) {
 
 }
 
-
 void cc1200_switch_to_system(int id) {
 
 }
@@ -47,10 +46,6 @@ void cc1200_reset() {
     shared_buffer_len = 0;
     shared_buffer = NULL;
     //shared_mutex = PTHREAD_MUTEX_INITIALIZER;
-}
-
-void cc1200_init() {
-
 }
 
 void cc1200_change_rate(uint32_t rate) {
