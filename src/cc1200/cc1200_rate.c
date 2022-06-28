@@ -183,7 +183,6 @@ void cc1200_send_packet(packet_t* packet) {
     uint8_t* buffer = malloc(len * sizeof(uint8_t));
     packet_serialize(packet, buffer);
 
-    // ---------------- VARIABLE LENGTH ----------------------
     // Write length byte
     cc1200_reg_write(REG_FIFO, len);
 
@@ -208,17 +207,13 @@ void cc1200_send_packet(packet_t* packet) {
     }
 }
 
-<<<<<<< HEAD
 // TODO: Error handling
-=======
 packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back) {
 
 }
 
-// TODO: Error handling + fixed length (?)
->>>>>>> 98c347982acd7ebf25ae3912f7fd68cd33067139
+// TODO: Error handling
 uint32_t cc1200_get_packet(uint8_t* buffer) {
-    // ---------------- VARIABLE LENGTH ----------------------
     // Switch to RX mode
     cc1200_cmd(SRX);
     while (get_status_cc1200() != RX)
