@@ -9,7 +9,7 @@
 
 static clock_t timer_started = 0x0;
 
-receiver_t* receiver_init() {
+receiver_t* receiver_init(int device_id) {
     receiver_t* rcv = calloc(1, sizeof(receiver_t));
     if (rcv == NULL) return NULL;
 
@@ -20,7 +20,9 @@ receiver_t* receiver_init() {
     packet_t* pkt = NULL;
     while (pkt == NULL) { //TODO better error handling
         pkt = receiver_receive(rcv);
+        printf("receiver Timeout\n");
     }
+    printf("receiver rcv\n");
     //assume everything went perfect
 
     //now set ACK, TOKEN_SEND
@@ -33,6 +35,10 @@ receiver_t* receiver_init() {
     return rcv;
 }
 
+void receiver_switch_device(int device_id) {
+    
+}
+
 /**
  * @brief More like a local function. You should use receiver_receive_and_ack()
  * 
@@ -41,10 +47,18 @@ receiver_t* receiver_init() {
  */
 packet_t* receiver_receive(receiver_t* receiver) {
     packet_status_t status = 0;
+    
+    timer_started = clock(); //start timer
+
     packet_t* pkt = cc1200_get_packet(timer_started, &status);
-    receiver->last_ack_rcv = pkt->id;
-    receiver->lastPacketRcv = pkt;
-    return pkt;
+    printf("receiver rcv status: %i\n", status);
+    if (pkt != NULL) {
+        receiver->last_ack_rcv = pkt->id;
+        receiver->lastPacketRcv = pkt;
+        return pkt;
+    } else {
+        return NULL;
+    }
 }
 
 uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {

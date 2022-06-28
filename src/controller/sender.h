@@ -22,7 +22,15 @@ typedef struct sender_t {
  * 
  * @return sender_t sender or NULL if error ocurred
  */
-sender_t* sender_init(Minstrel *minstrel);
+sender_t* sender_init(Minstrel *minstrel, int device_id);
+
+/**
+ * @brief Switches to the given device, @see CC1200 id.
+ * Could be ignored in the implementation.
+ * 
+ * @param device_id 
+ */
+void sender_switch_device(int device_id);
 
 /**
  * @brief Sends one packet with the given sender.

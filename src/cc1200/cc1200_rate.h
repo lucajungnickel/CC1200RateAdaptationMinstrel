@@ -62,11 +62,25 @@ int IS_DEBUG;
  * 
  * Should be used in cc1200_get_packet
  */
-const int PACKET_TIMEOUT;
+const int TIMEOUT;
 
 void cc1200_reset();
 
-void cc1200_init();
+/**
+ * @brief Initializes a cc1200 unit with a given id.
+ * 
+ * @param id Theoretically a MCU could have multiple CC1200 attached,
+ * with this parameter you could choose which to initialize
+ */
+void cc1200_init(int id);
+
+/**
+ * @brief Switches to the given system with the id.
+ * Could be implemented if you would like to have different CC1200
+ * on one system, or ignored.
+ * @param id 
+ */
+void cc1200_switch_to_system(int id);
 
 
 void cc1200_change_rate(uint32_t rate);
@@ -83,7 +97,7 @@ void cc1200_send_packet(packet_t* packet);
  * Blocking function
  * 
  * @param timeout_started Time the timeout counter started.
- *  If (timeout_started + PACKET_TIMEOUT) > current_time
+ *  If (timeout_started + TIMEOUT) >= current_time
  *      nothing will be returned and a timeout is assumed
  * @param status_back Pointer to packet status of (maybe) received 
  * packet, will be updated by function.

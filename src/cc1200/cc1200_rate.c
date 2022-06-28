@@ -90,13 +90,16 @@ static uint8_t build_pkt_cfg2_std(uint8_t pkt_format) {
     return build_pkg_cfg2(byte_swap_en, fg_mode_en, cca_mode, pkt_format);
 }
 
-const int PACKET_TIMEOUT = 1000;
+const int TIMEOUT = 1000;
 
 void cc1200_reset() {
 
 }
 
-void cc1200_init() {
+
+void cc1200_init(int id) {
+    //id can be ignored here
+
     // Initialize SPI
     if (spi_init()) {
         puts("error spi init");

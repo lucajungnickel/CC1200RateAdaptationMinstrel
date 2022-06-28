@@ -9,6 +9,7 @@ typedef enum packet_status_t {
     packet_status_ok,
     packet_status_ack,
     packet_status_wrong_ack,
+    packet_status_timeout,
     packet_status_lost
 } packet_status_t;
 
@@ -62,7 +63,7 @@ uint8_t packet_calc_checksum(packet_t* const packet);
 void packet_set_checksum(packet_t* const packet);
 
 /**
- * @brief Converts a  packet to a bitstream.
+ * @brief Converts a packet to a bitstream.
  * 
  * @param packet Packet, which will be serialized to the buffer
  * @param p_buffer Pointer to the empty bit stream. Should be the size of getSize(packet)

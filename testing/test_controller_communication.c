@@ -24,7 +24,7 @@ static void resetTests() {
 
 static void *thread_receive_init() {
     printf("rcv thread started\n");
-    receiver_t* receiver = receiver_init();
+    receiver_t* receiver = receiver_init(0);
     printf("rcv thread finished\n");
 
     assert(receiver->token_receiver != 0);
@@ -54,7 +54,7 @@ void test_communication_initialization() {
 
     Minstrel* minstrel = calloc(1, sizeof(Minstrel));
     assert(minstrel != NULL);
-    sender_t* sender = sender_init(minstrel);
+    sender_t* sender = sender_init(minstrel, 0);
     
     //Kill Thread
     while (!receive_done) {
@@ -75,7 +75,7 @@ void test_communication_initialization() {
 
 
 static void *thread_receive_send_ok_rcv_ok() {
-    receiver_t* receiver = receiver_init();
+    receiver_t* receiver = receiver_init(0);
 
     assert(receiver->token_receiver != 0);
     assert(receiver->token_sender != 0);
@@ -122,7 +122,7 @@ void test_communication_send_ok_rcv_ok() {
 
     Minstrel* minstrel = calloc(1, sizeof(Minstrel));
     assert(minstrel != NULL);
-    sender_t* sender = sender_init(minstrel);
+    sender_t* sender = sender_init(minstrel, 0);
     //check for correct sender
     assert(sender->lastPacketSend->id == 1);
     assert(rcv->lastPacketSend->ack == 1);
