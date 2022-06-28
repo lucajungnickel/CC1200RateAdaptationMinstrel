@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <SPIv1.h>
+#include <time.h>
 
 #include "cc1200_rate.h"
 #include "packet.h"
@@ -65,6 +66,10 @@ void cc1200_send_packet(packet_t* packet) {
         puts("DEBUG: Sent packet!");
         printf("DEBUG: Status: %s\n", get_status_cc1200_str());
     }
+}
+
+packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back) {
+
 }
 
 // TODO: Error handling + fixed length (?)

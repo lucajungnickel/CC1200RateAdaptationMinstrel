@@ -19,9 +19,13 @@
 #include <stdint.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "cc1200_rate.h"
 #include "packet.h"
+
+
+
 
 uint32_t shared_buffer_len;
 uint8_t* shared_buffer;
@@ -50,10 +54,10 @@ void cc1200_send_packet(packet_t* packet) {
     shared_buffer_len = packet_get_size(packet);
     pthread_mutex_unlock(&shared_mutex);
 
-
+    //Start timer
 }
 
-packet_t* cc1200_get_packet() {
+packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back) {
     //polls shared memory and checks if there is data to 'receive'
     
     uint8_t *data = 0;

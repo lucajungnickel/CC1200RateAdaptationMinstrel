@@ -157,5 +157,5 @@ void test_communication_send_ok_rcv_ok() {
  * The sender should get an ACK Timeout and send the packet again.
  */
 void test_communication_send_error() {
-    
+    assert(true == false); //TODO remove 
 }

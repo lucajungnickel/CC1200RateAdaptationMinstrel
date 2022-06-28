@@ -13,6 +13,7 @@
 #ifndef CC1200_RATE_H
 #define CC1200_RATE_H
 
+#include <time.h>
 #include "packet.h"
 
 // Regs
@@ -61,8 +62,14 @@ void cc1200_send_packet(packet_t* packet);
  * 
  * Blocking function
  * 
+ * @param timeout_started Time the timeout counter started.
+ *  If (timeout_started + PACKET_TIMEOUT) > current_time
+ *      nothing will be returned and a timeout is assumed
+ * @param status_back Pointer to packet status of (maybe) received 
+ * packet, will be updated by function.
+ * 
  * @return packet in packet_t format
  */
-packet_t* cc1200_get_packet();
+packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back);
 
 #endif //CC1200_RATE_H

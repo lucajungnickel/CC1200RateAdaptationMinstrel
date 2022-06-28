@@ -1,9 +1,12 @@
 #include "sender.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "minstrel.h"
 #include "cc1200_rate.h"
+
+static clock_t timer_started = 0x0;
 
 sender_t* sender_init(Minstrel* minstrel) {
     sender_t *sender = calloc(1, sizeof(sender_t));
@@ -46,7 +49,7 @@ void sender_send(sender_t *sender, packet_t *packet) {
     sender->lastPacketSend = packet;
     cc1200_send_packet(packet);
     //start timer
-
+    timer_started = clock();
 }
 
 /**
@@ -58,7 +61,10 @@ void sender_send(sender_t *sender, packet_t *packet) {
  * @return packet_status_t status of packet which was received
  */
 packet_status_t sender_rcv_ack(sender_t *sender) {
-    packet_t* pkt = cc1200_get_packet();
+    packet_status_t status;
+    packet_t* pkt = cc1200_get_packet(timer_started, &status);
+    printf("TEST: Status %i\n", status);
+
     sender->lastPacketRcv = pkt;
     //check for correct ACK
     if (pkt->ack == sender->next_ack) {
