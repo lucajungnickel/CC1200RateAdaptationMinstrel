@@ -9,8 +9,6 @@
 
 static clock_t timer_started = 0x0;
 
-int current_device = 0;
-
 receiver_t* receiver_init(int socket_send, int socket_rcv) {
     receiver_t* rcv = calloc(1, sizeof(receiver_t));
     if (rcv == NULL) return NULL;
@@ -83,7 +81,7 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
 
 uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
     packet_status_t status = packet_status_none;
-    packet_t* pkt=NULL;
+    packet_t* pkt=packet_status_none;
     while (status != packet_status_ok || status != packet_status_warn_wrong_ack) {
         pkt = receiver_receive(receiver, &status);
     }
@@ -109,5 +107,5 @@ void receiver_ack(receiver_t* receiver) {
 
     cc1200_send_packet(receiver->socket_rcv, pkt_send);
     receiver->lastPacketSend = pkt_send;
-    
+    printf("Receiver: set lastPacketSend, rcv_p: 0x%x, 0x%x\n", receiver, pkt_send);
 }

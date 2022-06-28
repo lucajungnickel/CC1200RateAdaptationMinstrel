@@ -47,6 +47,13 @@ packet_status_t sender_rcv_ack(sender_t *sender);
 /**
  * @brief Sends and waits for an valid ack. 
  * 
+ * Blocking function.
+ * 
+ * Blocks until a valid ACK is received. 
+ * If no ACK / wrong ACK is received, the packet will be send again 
+ * until we got the correct ACK.
+ * 
+ * 
  * @param sender Sender
  * @param buffer Payload
  * @param len Payload len

@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "../minstrel/minstrel.h"
 #include "../cc1200/cc1200_rate.h"
@@ -77,7 +78,6 @@ packet_status_t sender_rcv_ack(sender_t *sender) {
     sender->lastPacketRcv = pkt;
     if (pkt == NULL) return status;
     if (status == packet_status_err_timeout) { //if there is a timeout, start clock again!
-        //timer_started = clock();
         return packet_status_err_timeout;
     }
 
@@ -103,5 +103,19 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     packet_set_checksum(pkt);
 
     sender_send(sender, pkt);
-    sender_rcv_ack(sender);
+    
+    bool should_send = true;
+    while (should_send) {
+        packet_status_t status = sender_rcv_ack(sender);
+        if (status == packet_status_ok || packet_status_ok_ack) {
+            should_send = false;
+        } else if (status == packet_status_warn_wrong_ack) {
+             //Sender shouldn't receive invalid ACK
+             //,then send packet again
+            sender_send(sender, pkt);
+        } else if (status == packet_status_err_timeout) {
+            //then send packet again
+            sender_send(sender, pkt);
+        }
+    }
 }
