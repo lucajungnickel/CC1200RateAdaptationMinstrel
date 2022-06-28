@@ -26,6 +26,7 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     sender->token_sender = token_sender;
     if (token_sender == 0) token_sender = 1;
 
+/*
     //build handshake packet
     packet_t *pkt = calloc(1, sizeof(packet_t));
     pkt->ack = 0;
@@ -38,7 +39,12 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     pkt->token_send = sender->token_sender;
     pkt->type = packet_status_ok;
     packet_set_checksum(pkt);
+    */
+  
     //sends handshake packet
+    sender_send_and_ack(sender, NULL, 0);
+    
+    /**
     sender_send(sender, pkt);
 
     //wait for ack
@@ -48,7 +54,7 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
         if (status == packet_status_err_timeout) { //timeout, try to send packet again
             sender_send(sender, pkt);
         }
-    }
+    }*/
     return sender;
 }
 
@@ -100,6 +106,8 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     pkt->token_send = sender->token_sender;
     pkt->payload_len = len;
     pkt->p_payload = buffer;
+    pkt->type = packet_status_ok;
+
     packet_set_checksum(pkt);
 
     sender_send(sender, pkt);
@@ -107,7 +115,8 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     bool should_send = true;
     while (should_send) {
         packet_status_t status = sender_rcv_ack(sender);
-        if (status == packet_status_ok || packet_status_ok_ack) {
+        printf("Received at sender: %i\n", status);
+        if (status == packet_status_ok || status == packet_status_ok_ack) {
             should_send = false;
             break;
         } else if (status == packet_status_warn_wrong_ack) {
@@ -119,4 +128,5 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
             sender_send(sender, pkt);
         }
     }
+    printf("Sender done sending ack\n");
 }

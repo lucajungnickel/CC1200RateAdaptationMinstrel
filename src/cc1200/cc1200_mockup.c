@@ -89,7 +89,7 @@ void cc1200_send_packet(int device_id, packet_t* packet) {
             printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_1);
         } else {
             ignore_next_write_1 = false;
-            printf("Ignored next write to buffer %i\n", device_id);
+            printf("CC1200 Mockup: Ignored next write to buffer %i\n", device_id);
         }
 
     } else if (device_id == id1) {
@@ -102,11 +102,12 @@ void cc1200_send_packet(int device_id, packet_t* packet) {
             printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_2);
         } else {
             ignore_next_write_2 = false;
-            printf("Ignored next write to buffer %i\n", device_id);
+            printf("CC1200 Mockup: Ignored next write to buffer %i\n", device_id);
         }
     } else {
         printf("CC1200 Mockup Warning, wrong device id\n");
     }
+    printf("CC1200 Mockup: Sending done\n");
     
 }
 

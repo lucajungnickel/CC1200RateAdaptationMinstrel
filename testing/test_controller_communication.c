@@ -226,6 +226,7 @@ void test_communication_send_error_handshake() {
 
 //------------------------------------------------------------------
 static void *thread_handshake_ack_error() {
+    cc1200_debug_block_next_write(id_rcv); //block next ACK
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
 
     assert(receiver->token_receiver != 0);
@@ -240,9 +241,7 @@ static void *thread_handshake_ack_error() {
 
     uint8_t* buffer;
     
-    cc1200_debug_block_next_write(id_rcv); //block next ACK
-    uint8_t len = receiver_receive_and_ack(rcv, &buffer);
-
+    
     //Check payload
     receive_done = true;
 }
@@ -262,6 +261,12 @@ void test_communication_handshake_ack_error() {
     Minstrel* minstrel = calloc(1, sizeof(Minstrel));
     assert(minstrel != NULL);
     sender_t* sender = sender_init(minstrel, id_sender, id_rcv);
+    //Kill Thread
+    while (!receive_done) {
+        sleep(0.001);
+    }
+    pthread_join(thread_rcv_id, NULL);
+
     //check for correct sender
     assert(sender->lastPacketSend->id == 1);
     assert(rcv->lastPacketSend->ack == 1);
@@ -270,9 +275,5 @@ void test_communication_handshake_ack_error() {
     assert(rcv->lastPacketRcv->payload_len == 0);
     assert(sender->next_ack == 2);
 
-    //Kill Thread
-    while (!receive_done) {
-        sleep(0.001);
-    }
-    pthread_join(thread_rcv_id, NULL);
+
 }
