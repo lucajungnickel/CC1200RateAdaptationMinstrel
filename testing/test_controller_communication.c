@@ -83,7 +83,7 @@ void test_communication_initialization() {
 
 
 static void *thread_receive_send_ok_rcv_ok() {
-    receiver_t* receiver = receiver_init(0, 0);
+    receiver_t* receiver = receiver_init(id_sender, id_rcv);
 
     assert(receiver->token_receiver != 0);
     assert(receiver->token_sender != 0);
@@ -119,9 +119,9 @@ static void *thread_receive_send_ok_rcv_ok() {
 void test_communication_send_ok_rcv_ok() {
     //Setup a sender and receiver
     resetTests();  
+    cc1200_init(id_sender);
+    cc1200_init(id_rcv);
 
-    //Setup a sender and receiver
-    
     //receiver thread:
     pthread_t thread_rcv_id;
     pthread_create(&thread_rcv_id, NULL, thread_receive_send_ok_rcv_ok, NULL);
@@ -130,7 +130,7 @@ void test_communication_send_ok_rcv_ok() {
 
     Minstrel* minstrel = calloc(1, sizeof(Minstrel));
     assert(minstrel != NULL);
-    sender_t* sender = sender_init(minstrel, 0, 0);
+    sender_t* sender = sender_init(minstrel, id_sender, id_rcv);
     //check for correct sender
     assert(sender->lastPacketSend->id == 1);
     assert(rcv->lastPacketSend->ack == 1);
