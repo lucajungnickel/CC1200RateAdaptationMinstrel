@@ -88,7 +88,7 @@ Minstrel* minstrel_init();
  * @param statistics Statistics of a specific rate for the minstrel algorithm that should be updated.
  * @param pkt The packet for which new information should be incorporated into the algorithm.
  */
-void log_package_status(MinstrelStatistics* statistics, Packet* pkt);
+static void log_package_status(MinstrelStatistics* statistics, Packet* pkt);
 
 /**
  * @brief Gets index of the next fallback rate, which will be written
@@ -111,7 +111,7 @@ uint8_t minstrel_get_next_rate(Minstrel* minstrel);
  *
  * @param minstrel
  */
-void update_rates(Minstrel* minstrel);
+static void update_rates(Minstrel* minstrel);
 
 /**
  * @brief Set the next to-be-used rate (minstrel->rates.current) of the minstrel algorithm.
@@ -119,7 +119,7 @@ void update_rates(Minstrel* minstrel);
  * @param minstrel
  * @param is_probe Whether the next rate is a probe or not.
  */
-void set_next_rate(Minstrel* minstrel, int is_probe);
+static void set_next_rate(Minstrel* minstrel, int is_probe);
 
 /**
  * @brief Prepares minstrel state for the next iteration. This includes the decision of whether we send a real packet or probe next (i.e. setting the symbol rate).
@@ -136,13 +136,13 @@ void minstrel_update(Minstrel* minstrel, Packet* pkt);
  * @param minstrel
  * @param succ_prob The newly calculated success probability which should receive the highest weight (#send/#acks).
  */
-void calc_ewma(MinstrelStatistics* statistics, uint32_t succ_prob);
+static void calc_ewma(MinstrelStatistics* statistics, uint32_t succ_prob);
 
 /**
  * @brief Calculate the throughput of a given rate.
  *
  * @param statistics Statistics of a given rate for which the throughput should be updated.
  */
-void calc_throughput(MinstrelStatistics* statistics);
+static void calc_throughput(MinstrelStatistics* statistics);
 
 #endif //MINSTREL_H
