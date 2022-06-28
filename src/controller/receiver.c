@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "../cc1200/cc1200_rate.h"
 
+static clock_t timer_started = 0x0;
 
 receiver_t* receiver_init() {
     receiver_t* rcv = calloc(1, sizeof(receiver_t));
@@ -38,7 +40,8 @@ receiver_t* receiver_init() {
  * @return packet_t* 
  */
 packet_t* receiver_receive(receiver_t* receiver) {
-    packet_t* pkt = cc1200_get_packet();
+    packet_status_t status = 0;
+    packet_t* pkt = cc1200_get_packet(timer_started, &status);
     receiver->last_ack_rcv = pkt->id;
     receiver->lastPacketRcv = pkt;
     return pkt;

@@ -5,4 +5,6 @@ void test_communication_send_ok_rcv_ok();
 
 void test_communication_initialization();
 
+void test_communication_send_error();
+
 #endif //TEST_CONTROLLER_COMMUNICATION_H

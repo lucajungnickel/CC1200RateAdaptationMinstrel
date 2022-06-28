@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <SPIv1.h>
+#include <time.h>
 
 #include "cc1200_rate.h"
 #include "../controller/packet.h"
@@ -88,6 +89,8 @@ static uint8_t build_pkt_cfg2_std(uint8_t pkt_format) {
     uint8_t cca_mode     = (RegSettings[PKT_CFG2].val & 0b00011100) >> 2;
     return build_pkg_cfg2(byte_swap_en, fg_mode_en, cca_mode, pkt_format);
 }
+
+const int PACKET_TIMEOUT = 1000;
 
 void cc1200_reset() {
 
@@ -205,7 +208,15 @@ void cc1200_send_packet(packet_t* packet) {
     }
 }
 
+<<<<<<< HEAD
 // TODO: Error handling
+=======
+packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back) {
+
+}
+
+// TODO: Error handling + fixed length (?)
+>>>>>>> 98c347982acd7ebf25ae3912f7fd68cd33067139
 uint32_t cc1200_get_packet(uint8_t* buffer) {
     // ---------------- VARIABLE LENGTH ----------------------
     // Switch to RX mode
