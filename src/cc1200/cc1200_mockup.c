@@ -52,7 +52,6 @@ void cc1200_init(int id) {
     numIdsSet++;
 }
 
-
 void cc1200_switch_to_system(int id) {
     if (id == id0) {
         currentId = id0;
