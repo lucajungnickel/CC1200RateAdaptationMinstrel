@@ -8,7 +8,9 @@
 
 static clock_t timer_started = 0x0;
 
-sender_t* sender_init(Minstrel* minstrel) {
+
+
+sender_t* sender_init(Minstrel* minstrel, int device_id) {
     sender_t *sender = calloc(1, sizeof(sender_t));
     if (sender == NULL) return NULL;
 
@@ -34,8 +36,7 @@ sender_t* sender_init(Minstrel* minstrel) {
     packet_set_checksum(pkt);
     //sends handshake packet
     sender_send(sender, pkt);
-    free(pkt);
-    
+
     //wait for ack
     packet_status_t status = packet_status_lost;
     while (status != packet_status_ok) {
@@ -44,10 +45,15 @@ sender_t* sender_init(Minstrel* minstrel) {
     return sender;
 }
 
+void sender_switch_device(int device_id) {
+
+}
+
 void sender_send(sender_t *sender, packet_t *packet) {
     sender->next_ack = packet->id;
     sender->lastPacketSend = packet;
     cc1200_send_packet(packet);
+    printf("Sender packet sent\n");
     //start timer
     timer_started = clock();
 }
@@ -63,9 +69,10 @@ void sender_send(sender_t *sender, packet_t *packet) {
 packet_status_t sender_rcv_ack(sender_t *sender) {
     packet_status_t status;
     packet_t* pkt = cc1200_get_packet(timer_started, &status);
-    printf("TEST: Status %i\n", status);
 
     sender->lastPacketRcv = pkt;
+    if (pkt == NULL) return status;
+
     //check for correct ACK
     if (pkt->ack == sender->next_ack) {
         sender->next_ack++;

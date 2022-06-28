@@ -8,14 +8,14 @@
 #include "cc1200_rate.h"
 #include "packet.h"
 
-const int PACKET_TIMEOUT = 1000;
+const int TIMEOUT = 1000;
 
 void cc1200_reset() {
     
 }
 
-void cc1200_init() {
-    
+void cc1200_init(int id) {
+    //id can be ignored here
 }
 
 void cc1200_change_rate(uint32_t rate) {

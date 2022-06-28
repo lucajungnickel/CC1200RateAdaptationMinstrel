@@ -27,9 +27,19 @@ typedef struct receiver_t {
  * 
  * Blocking function
  * 
+ * @param device_id @see CC1200 device ID
+ * 
  * @return receiver_t receiver or NULL if error
  */
-receiver_t* receiver_init();
+receiver_t* receiver_init(int device_id);
+
+/**
+ * @brief Switches to the given device for receiving.
+ * Could be ignored in the implementation.
+ * 
+ * @param device_id 
+ */
+void receiver_switch_device(int device_id);
 
 /**
  * @brief Receives a packet.

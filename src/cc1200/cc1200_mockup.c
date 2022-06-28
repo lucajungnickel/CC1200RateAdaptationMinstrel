@@ -16,6 +16,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -31,7 +32,16 @@ uint32_t shared_buffer_len;
 uint8_t* shared_buffer;
 pthread_mutex_t shared_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-const int PACKET_TIMEOUT = 100;
+const int TIMEOUT = 100;
+
+void cc1200_init(int id) {
+
+}
+
+
+void cc1200_switch_to_system(int id) {
+
+}
 
 void cc1200_reset() {
     shared_buffer_len = 0;
@@ -53,8 +63,8 @@ void cc1200_send_packet(packet_t* packet) {
     shared_buffer = buffer;
     shared_buffer_len = packet_get_size(packet);
     pthread_mutex_unlock(&shared_mutex);
-
-    //Start timer
+    printf("CC1200 Mockup: Wrote packet to buffer\n");
+    printf("CC1200 Mockup: Buffer size %i\n", shared_buffer_len);
 }
 
 packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back) {
@@ -65,6 +75,13 @@ packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_bac
 
     while (1) {
         sleep(0.001);
+        //check for timeout
+        clock_t time_d = clock() - timeout_started;
+        if (time_d >= TIMEOUT) {
+            *status_back = packet_status_timeout;
+            return NULL;
+        }
+
         pthread_mutex_lock(&shared_mutex);
         if (shared_buffer_len != 0) { //there is data
             data = shared_buffer;
@@ -76,8 +93,9 @@ packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_bac
         pthread_mutex_unlock(&shared_mutex);       
     }
     pthread_mutex_unlock(&shared_mutex);  
-
+    printf("CC1200 Mockup: read data, size %i\n", data_len);
     //now we got data
+    *status_back = packet_status_ok;
     packet_t *back = packet_deserialize(data);
     return back;
 }
