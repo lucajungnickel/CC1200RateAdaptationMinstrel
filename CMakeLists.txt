@@ -7,7 +7,6 @@ option (BUILD_LOCAL_ONLY "Build program only local, without CC1200 libs" ON)
 #TODO SET TO ON
 option (BUILD_REAL_MINSTREL "Build program with real minstrel algorithm for productive system" OFF)
 set (LOCAL_LIB "/usr/local/lib")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS} -lm")
 set(CMAKE_C_FLAGS -pthread)
 
 add_compile_options("-g")
@@ -38,6 +37,7 @@ else ()
 endif (BUILD_REAL_MINSTREL)
 
 
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS} -lm")
 add_executable(MINSTREL ${SRC_CONTROLLER} ${SRC_MINSTREL} ${SRC_CC1200})
 
 if (BUILD_TESTS)
