@@ -7,6 +7,8 @@
 #include "cc1200_rate.h"
 #include "packet.h"
 
+const int PACKET_TIMEOUT = 1000;
+
 void cc1200_reset() {
     
 }

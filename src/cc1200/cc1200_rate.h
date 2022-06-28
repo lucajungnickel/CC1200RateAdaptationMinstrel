@@ -27,8 +27,22 @@
 // Crystal frequency of the TI boards (40MHz)
 #define F_XOSC 40000
 
+
+
 // Global debug flag
 int IS_DEBUG;
+
+/**
+ * @brief Defines the timeout for the sender after it sends a packet 
+ * and waits for the ACK.
+ * Is the timeout is reached, the receive function assumes that 
+ * something went wrong. 
+ * 
+ * Unit is in MILLISECONDS.
+ * 
+ * Should be used in cc1200_get_packet
+ */
+const int PACKET_TIMEOUT;
 
 void cc1200_reset();
 
@@ -44,6 +58,8 @@ void cc1200_send_packet(packet_t* packet);
 
 /**
  * @brief Reads and returns a packet.
+ * 
+ * Blocking function
  * 
  * @return packet in packet_t format
  */

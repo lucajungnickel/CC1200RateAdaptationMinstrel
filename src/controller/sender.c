@@ -45,8 +45,18 @@ void sender_send(sender_t *sender, packet_t *packet) {
     sender->next_ack = packet->id;
     sender->lastPacketSend = packet;
     cc1200_send_packet(packet);
+    //start timer
+
 }
 
+/**
+ * @brief Receives an ACK for the given sender.
+ * 
+ * Blocking function.
+ * 
+ * @param sender 
+ * @return packet_status_t status of packet which was received
+ */
 packet_status_t sender_rcv_ack(sender_t *sender) {
     packet_t* pkt = cc1200_get_packet();
     sender->lastPacketRcv = pkt;

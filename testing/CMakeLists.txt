@@ -22,3 +22,5 @@ add_test(NAME packet.minstrel.deserialize.normal COMMAND unit_test packet.minstr
 add_test(NAME packet.minstrel.deserialize.maximum COMMAND unit_test packet.minstrel.deserialize.maximum)
 add_test(NAME communication.init COMMAND unit_test communication.init)
 add_test(NAME communication.sendOK.rcvOK.small COMMAND unit_test communication.sendOK.rcvOK.small)
+add_test(NAME communication.sendFAIL.small COMMAND unit_test communication.sendFAIL.small)
+

@@ -92,9 +92,12 @@ static void *thread_receive_send_ok_rcv_ok() {
     uint8_t len = receiver_receive_and_ack(rcv, &buffer);
 
     //Check payload
+    printf("Received payload after handshake\n");
     for (int i=0;i<len;i++) {
         assert(buffer[i] == i);
+        printf("0x%x ", i);
     }
+    printf("\n");
     receive_done = true;
 }
 
@@ -103,8 +106,7 @@ static void *thread_receive_send_ok_rcv_ok() {
 /**
  * @brief Tests one successful and correct send and one 
  * successful and correct receive
- * with correct data.
- * 
+ * with correct data. There will be a handshake before.
  */
 void test_communication_send_ok_rcv_ok() {
     //Setup a sender and receiver
@@ -145,4 +147,15 @@ void test_communication_send_ok_rcv_ok() {
         sleep(0.001);
     }
     pthread_join(thread_rcv_id, NULL);
+}
+
+//---------------------------------------------------------------
+
+/**
+ * @brief Test for sending a packet which will be lost.
+ * 
+ * The sender should get an ACK Timeout and send the packet again.
+ */
+void test_communication_send_error() {
+    
 }

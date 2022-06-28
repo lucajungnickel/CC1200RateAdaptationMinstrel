@@ -27,6 +27,8 @@ uint32_t shared_buffer_len;
 uint8_t* shared_buffer;
 pthread_mutex_t shared_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+const int PACKET_TIMEOUT = 100;
+
 void cc1200_reset() {
     shared_buffer_len = 0;
     shared_buffer = NULL;
