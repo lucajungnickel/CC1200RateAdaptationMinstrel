@@ -70,7 +70,7 @@ void cc1200_reset() {
     //shared_mutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
-void cc1200_change_rate(uint32_t rate) {
+void cc1200_change_rate(uint8_t rate) {
 
 }
 

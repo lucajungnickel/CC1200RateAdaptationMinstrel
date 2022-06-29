@@ -16,13 +16,15 @@
 #include "../controller/packet.h"
 
 
+#define MAX_RATES 11
+// EWMA alpha value
 #define WEIGHT 0.75
 
 /*
  * Possible symbol rates for the algorithm.
  * Unit in sps, NOT ksps.
  */
-uint32_t MINSTREL_RATES[11];
+uint32_t MINSTREL_RATES[MAX_RATES];
 
 /*
  * Possible states of the algorithm.
@@ -42,6 +44,7 @@ typedef struct AvailableRates {
     uint8_t current;
     uint8_t second_best;
     uint8_t highest_prob;
+    uint8_t fallback;
 } AvailableRates;
 
 /*
@@ -64,7 +67,7 @@ typedef struct Minstrel {
     //ATTENTION, no pointers here, because the content are only integers.
     AvailableRates rates;
     MinstrelState state;
-    MinstrelStatistics statistics[11];
+    MinstrelStatistics statistics[MAX_RATES];
 } Minstrel;
 
 /*
@@ -82,13 +85,6 @@ typedef struct Packet {
  * @brief Inits the algorithm
  */
 Minstrel* minstrel_init();
-
-/**
- * @brief Gets index of the next fallback rate, which will be written
- * to the next packet.
- *
- */
-uint8_t minstrel_get_fallback_rate(Minstrel* minstrel);
 
 /**
  * @brief Returns the next rate, which will be written to the next packet

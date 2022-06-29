@@ -9,9 +9,10 @@ uint32_t MINSTREL_RATES[] = {40, 250, 1200, 2400, 4800, 9600, 25000, 50000, 1000
 Minstrel* minstrel_init() {
     Minstrel* minstrel = malloc(sizeof(Minstrel));
     // Init all rates with lowest possible rate
-    minstrel->rates.current = MINSTREL_RATES[0];
-    minstrel->rates.second_best = MINSTREL_RATES[0];
-    minstrel->rates.highest_prob = MINSTREL_RATES[0];
+    minstrel->rates.current = 0;
+    minstrel->rates.second_best = 0;
+    minstrel->rates.highest_prob = 0;
+    minstrel->rates.fallback = 0;
 
     // Init statistics
     memset(minstrel->statistics, 0, sizeof(minstrel->statistics));
@@ -53,12 +54,6 @@ static void log_package_status(MinstrelStatistics* statistics, Packet* pkt) {
     statistics->last_pkt_id = pkt->id;
 }
 
-
-uint8_t minstrel_get_fallback_rate(Minstrel* minstrel) {
-    // TODO: Maybe put this info into the Minstrel struct itself
-    return 0;
-}
-
 /**
  * @brief Update best rate, second best rate and highest throughput rate of the minstrel algorithm.
  *
@@ -77,7 +72,7 @@ static void set_next_rate(Minstrel* minstrel, int is_probe) {
 }
 
 // TODO: Update to fallback rate if timeout or error etc.
-// TODO: Reset minstrel->pkt_info's total_{send, recv} to avoid overflow
+// TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, Packet* pkt) {
     int is_probe = 0;
     uint8_t rate_index = minstrel->rates.current;
