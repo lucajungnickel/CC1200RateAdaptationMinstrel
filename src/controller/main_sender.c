@@ -72,11 +72,8 @@ static void start() {
         free(send_buf); //clean up
 
         //receive
-        uint8_t* recv_buf = 0;
-        //uint32_t recv_size = cc1200_get_packet(recv_buf);
-
-        //process packet..
-        packet_t *pkt_rcv = packet_deserialize(recv_buf);
+        packet_status_t status;
+        packet_t* recv_pkt = cc1200_get_packet(0, clock(), &status);
 
         //int res = waitForACK()
         //if (res == CONNECTION_LOST) return 0;

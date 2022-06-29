@@ -201,7 +201,11 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
 
     unsigned int num_rx_bytes, pkt_len;
     uint8_t* buffer;
-    while(1) {
+    clock_t time_d = clock() - timeout_started;
+    int msec = time_d * 1000 / CLOCKS_PER_SEC;
+    while(msec < TIMEOUT) {
+        time_d = clock() - timeout_started;
+        msec = time_d * 1000 / CLOCKS_PER_SEC;
         cc1200_reg_read(NUM_RXBYTES, &num_rx_bytes);
 
         // Got something in RX FIFO
@@ -224,11 +228,14 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
                             printf("%c",buffer[i]);
                         printf("\n");
                     }
+                    *status_back = packet_status_ok;
                     return packet_deserialize(buffer);
                 }
             }
         }
     }
+    *status_back = packet_status_err_timeout;
+    return NULL;
 }
 
 void cc1200_switch_to_system(int id) {}
