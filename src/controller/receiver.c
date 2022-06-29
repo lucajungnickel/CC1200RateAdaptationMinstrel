@@ -24,13 +24,11 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
 
     packet_t* pkt = NULL;
     packet_status_t status = packet_status_none;
-    while (status == !packet_status_ok 
-            && status == !packet_status_ok_ack
-            && status == !packet_status_warn_wrong_ack) { //TODO better error handling
+    while (status != packet_status_ok 
+            && status != packet_status_ok_ack
+            && status != packet_status_warn_wrong_ack) { //TODO better error handling
         pkt = receiver_receive(rcv, &status);
-        printf("receiver Timeout\n");
     }
-    printf("receiver rcv stuff!\n");
     for (int i=0;i<pkt->payload_len;i++) {
         printf("%i ", pkt->p_payload[i]);
     }
@@ -63,9 +61,8 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
     timer_started = clock(); //start timer
 
     packet_t* pkt = cc1200_get_packet(receiver->socket_send, timer_started, &status);
-    *status_back = status;
+
     printf("receiver rcv status of packet: %i\n", status);
-    if (status == packet_status_err_timeout) return NULL;
     if (pkt != NULL) {
         //TODO check for correct recv token
         //TODO check for correct checksum
@@ -76,8 +73,10 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
         }
         receiver->last_ack_rcv = pkt->id;
         receiver->lastPacketRcv = pkt;
+        *status_back = status;
         return pkt;
     } else {
+        *status_back = status;
         return NULL;
     }
 }
@@ -85,9 +84,9 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
 uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
     packet_status_t status = packet_status_none;
     packet_t* pkt=packet_status_none;
-    while (status == !packet_status_ok 
-            && status == !packet_status_warn_wrong_ack 
-            && status == !packet_status_ok_ack) {
+    while (status != packet_status_ok 
+            && status != packet_status_warn_wrong_ack 
+            && status != packet_status_ok_ack) {
         pkt = receiver_receive(receiver, &status);
         printf("Receiver rcv status: %i\n", status);
     }
