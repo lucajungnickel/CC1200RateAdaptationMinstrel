@@ -277,6 +277,58 @@ void test_communication_handshake_ack_error() {
     assert(rcv->lastPacketSend->payload_len == 0);
     assert(rcv->lastPacketRcv->payload_len == 0);
     assert(sender->next_ack == 2);
+}
+//-------------------------------------------------------------------------------
 
+static void *thread_communication_send_wrong_checksum_error() {
+    printf("rcv thread started\n");
+    receiver_t* receiver = receiver_init(id_sender, id_rcv);
 
+    assert(receiver->debug_number_wrong_checksum == 1);
+    assert(receiver->token_receiver != 0);
+    assert(receiver->token_sender != 0);
+    assert(receiver->lastPacketRcv->id == 1);
+    assert(receiver->lastPacketRcv->token_send != 0);
+    assert(receiver->lastPacketRcv->token_recv == 0);
+    assert(receiver->lastPacketSend->token_send == 
+        receiver->lastPacketRcv->token_send);
+    assert(receiver->lastPacketRcv->ack == 0);
+
+    rcv = receiver;
+    printf("rcv thread init ok\n");
+
+    printf("rcv thread finished\n");
+    receive_done = true;
+}
+
+void test_communication_send_wrong_checksum_error() {
+//Setup a sender and receiver
+    resetTests();  
+    cc1200_init(id_sender);
+    cc1200_init(id_rcv);
+
+    //receiver thread:
+    pthread_t thread_rcv_id;
+    pthread_create(&thread_rcv_id, NULL, thread_communication_send_wrong_checksum_error, NULL);
+    
+    sleep(0.001);
+
+    Minstrel* minstrel = calloc(1, sizeof(Minstrel));
+    assert(minstrel != NULL);
+    
+    cc1200_debug_corrupt_next_checksum(id_sender);
+    sender_t* sender = sender_init(minstrel, id_sender, id_rcv);
+    //Kill Thread
+    while (!receive_done) {
+        sleep(0.001);
+    }
+    pthread_join(thread_rcv_id, NULL);
+
+    //check for correct sender
+    assert(sender->lastPacketSend->id == 1);
+    assert(rcv->lastPacketSend->ack == 1);
+    assert(rcv->lastPacketSend->id == 1);
+    assert(rcv->lastPacketSend->payload_len == 0);
+    assert(rcv->lastPacketRcv->payload_len == 0);
+    assert(sender->next_ack == 2);
 }

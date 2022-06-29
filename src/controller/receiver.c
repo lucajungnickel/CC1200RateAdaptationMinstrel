@@ -19,7 +19,8 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     
     rcv->socket_send = socket_send;
     rcv->socket_rcv = socket_rcv;
-
+    rcv->debug_number_wrong_checksum = 0;
+    
     uint8_t* buffer = calloc(sizeof(uint8_t), 1000);
 
     packet_t* pkt = NULL;
@@ -66,11 +67,18 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
     if (pkt != NULL) {
         //TODO check for correct recv token
         //TODO check for correct checksum
+        printf("Checksum rcv %i, calced %i\n", pkt->checksum, packet_calc_checksum(pkt));
+        if (pkt->checksum != packet_calc_checksum(pkt)) {
+            status = packet_status_err_timeout;
+            receiver->debug_number_wrong_checksum++;
+            printf("Got wrong checksum %i\n", receiver->debug_number_wrong_checksum);
+        }
         //check for valid ACK:
         if (pkt->ack != receiver->last_ack_rcv) {
             //if there is a wrong ACK, ignore that and assume we got the correct packet            
             status = packet_status_warn_wrong_ack; //just a hint for the next layer, but not an error
         }
+        //assume everything went perfect
         receiver->last_ack_rcv = pkt->id;
         receiver->lastPacketRcv = pkt;
         *status_back = status;

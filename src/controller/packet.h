@@ -10,7 +10,8 @@ typedef enum packet_status_t {
     packet_status_ok,
     packet_status_ok_ack,
     packet_status_warn_wrong_ack,
-    packet_status_err_timeout
+    packet_status_err_timeout,
+    packet_status_err_checksum
 } packet_status_t;
 
 

@@ -83,5 +83,5 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
 
 //only for testing simulation. Could be removed later
 void cc1200_debug_block_next_write(int device_id);
-
+void cc1200_debug_corrupt_next_checksum(int device_id);
 #endif //CC1200_RATE_H
