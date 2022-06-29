@@ -31,9 +31,9 @@ endif (BUILD_LOCAL_ONLY)
 
 
 if (BUILD_REAL_MINSTREL)
-    file(GLOB SRC_MINSTREL "src/minstrel/minstrel_mockup.c")
-else ()
     file(GLOB SRC_MINSTREL "src/minstrel/minstrel.c")
+else ()
+    file(GLOB SRC_MINSTREL "src/minstrel/minstrel_mockup.c")
 endif (BUILD_REAL_MINSTREL)
 
 
