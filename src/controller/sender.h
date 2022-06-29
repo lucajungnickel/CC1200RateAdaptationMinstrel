@@ -7,12 +7,13 @@
 #include "../minstrel/minstrel.h"
 
 typedef struct sender_t {
-    uint32_t next_ack;
+    uint32_t next_ack; //next expected ACK to receive
     uint16_t token_sender;
     uint16_t token_receiver;
     Minstrel *minstrel; //minstrel algorithm reference
     packet_t* lastPacketSend; //for better debugging
     packet_t* lastPacketRcv; //for better debugging
+    int debug_number_wrong_checksum; //for debugging, could be removed in future
     int socket_send;
     int socket_rcv;
 } sender_t;
