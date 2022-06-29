@@ -25,3 +25,4 @@ add_test(NAME communication.sendOK.rcvOK.small COMMAND unit_test communication.s
 add_test(NAME communication.handshake.sendFAIL COMMAND unit_test communication.handshake.sendFAIL)
 add_test(NAME communication.handshake.ackFAIL COMMAND unit_test communication.handshake.ackFAIL)
 add_test(NAME communication.handshake.checksum.sendFAIL COMMAND unit_test communication.handshake.checksum.sendFAIL)
+add_test(NAME communication.handshake.checksum.ackFAIL COMMAND unit_test communication.handshake.checksum.ackFAIL)

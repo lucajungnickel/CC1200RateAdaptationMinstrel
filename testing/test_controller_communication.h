@@ -10,4 +10,6 @@ void test_communication_send_error_handshake();
 void test_communication_handshake_ack_error();
 
 void test_communication_send_wrong_checksum_error();
+
+void test_communication_send_wrong_checksum_ack_error();
 #endif //TEST_CONTROLLER_COMMUNICATION_H

@@ -17,6 +17,7 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
 
     sender->minstrel = minstrel;
 
+    sender->debug_number_wrong_checksum = 0;
     sender->next_ack = 1;
 
     sender->socket_rcv = socket_rcv;
@@ -86,7 +87,11 @@ packet_status_t sender_rcv_ack(sender_t *sender) {
     if (status == packet_status_err_timeout) { //if there is a timeout, start clock again!
         return packet_status_err_timeout;
     }
-
+    //check for correct CHECKSUM
+    if (pkt->checksum != packet_calc_checksum(pkt)) {
+        sender->debug_number_wrong_checksum++;
+        return packet_status_err_checksum;
+    }
     //check for correct ACK
     if (pkt->ack == sender->next_ack) {
         sender->next_ack++;
