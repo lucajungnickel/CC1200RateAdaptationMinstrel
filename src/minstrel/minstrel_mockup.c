@@ -10,7 +10,7 @@
 #include "minstrel.h"
 
 
-uint32_t MINSTREL_RATES[11];
+uint32_t MINSTREL_RATES[MAX_RATES];
 
 
 

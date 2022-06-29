@@ -9,7 +9,6 @@ uint32_t MINSTREL_RATES[] = {40, 250, 1200, 2400, 4800, 9600, 25000, 50000, 1000
 Minstrel* minstrel_init() {
     Minstrel* minstrel = malloc(sizeof(Minstrel));
     // Init all rates with lowest possible rate
-    // TODO: Fix cc1200_change_rate for rate=0 => 40
     minstrel->rates.current = 0;
     minstrel->rates.second_best = 0;
     minstrel->rates.highest_prob = 0;
@@ -73,7 +72,7 @@ static void set_next_rate(Minstrel* minstrel, int is_probe) {
 }
 
 // TODO: Update to fallback rate if timeout or error etc.
-// TODO: Reset minstrel->pkt_info's total_{send, recv} to avoid overflow
+// TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, Packet* pkt) {
     int is_probe = 0;
     uint8_t rate_index = minstrel->rates.current;

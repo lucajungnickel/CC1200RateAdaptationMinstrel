@@ -16,13 +16,15 @@
 #include "../controller/packet.h"
 
 
+#define MAX_RATES 11
+// EWMA alpha value
 #define WEIGHT 0.75
 
 /*
  * Possible symbol rates for the algorithm.
  * Unit in sps, NOT ksps.
  */
-uint32_t MINSTREL_RATES[11];
+uint32_t MINSTREL_RATES[MAX_RATES];
 
 /*
  * Possible states of the algorithm.
@@ -64,7 +66,7 @@ typedef struct MinstrelStatistics {
 typedef struct Minstrel {
     AvailableRates rates;
     MinstrelState state;
-    MinstrelStatistics statistics[11];
+    MinstrelStatistics statistics[MAX_RATES];
 } Minstrel;
 
 /*
