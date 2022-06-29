@@ -66,6 +66,9 @@ int main(int argc, char** argv) {
     } else if (!strcmp(argv[1], "communication.handshake.ackFAIL")) {
         printf("Start communication handshake ACK fail and retry test\n");
         test_communication_handshake_ack_error();
+    }  else if (!strcmp(argv[1], "communication.handshake.checksum.sendFAIL")) {
+        printf("Start communication handshake checksum error\n");
+        test_communication_send_wrong_checksum_error();
     }  else {
         printf("No valid test command.\n");
         return 1;

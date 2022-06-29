@@ -33,11 +33,13 @@ static uint32_t shared_buffer_len_1;
 static uint8_t* shared_buffer_1;
 static pthread_mutex_t shared_mutex_1 = PTHREAD_MUTEX_INITIALIZER;
 static bool ignore_next_write_1 = false;
+static bool corrupt_next_checksum_1 = false;
 
 static uint32_t shared_buffer_len_2;
 static uint8_t* shared_buffer_2;
 static pthread_mutex_t shared_mutex_2 = PTHREAD_MUTEX_INITIALIZER;
 static bool ignore_next_write_2 = false;
+static bool corrupt_next_checksum_2 = false;
 
 const int TIMEOUT = 100;
 
@@ -75,12 +77,22 @@ void cc1200_change_rate(uint8_t rate) {
 
 void cc1200_send_packet(int device_id, packet_t* packet) {
     if (packet == NULL) printf("CC1200 Mockup: Warning send packet packet=NULL\n");
+    
     //writes to shared memory for simulation
     uint8_t *buffer = malloc(packet_get_size(packet) * sizeof(uint8_t));
     packet_serialize(packet, buffer);
     
     if (device_id == id0) {
         if (!ignore_next_write_1) {
+            if (corrupt_next_checksum_1) { //for debugging
+                printf("CC1200 Mockup: Corrupt next checksum sending on device %i\n", device_id);
+                uint8_t original_checksum = packet->checksum;
+                packet->checksum = (packet->checksum +1) % 256;
+                printf("CC1200 Mockup: new checksum: %i\n", packet->checksum);
+                packet_serialize(packet, buffer); //write packet again
+                packet->checksum = original_checksum;
+                corrupt_next_checksum_1 = false;
+            }
             pthread_mutex_lock(&shared_mutex_1);
             shared_buffer_1 = buffer;
             shared_buffer_len_1 = packet_get_size(packet);
@@ -94,6 +106,15 @@ void cc1200_send_packet(int device_id, packet_t* packet) {
 
     } else if (device_id == id1) {
         if (!ignore_next_write_2) {
+            if (corrupt_next_checksum_2) { //for debugging
+                printf("CC1200 Mockup: Corrupt next checksum sending on device %i\n", device_id);
+                uint8_t original_checksum = packet->checksum;
+                packet->checksum = (packet->checksum +1) % 256;
+                printf("CC1200 Mockup: new checksum: %i\n", packet->checksum);
+                packet_serialize(packet, buffer); //write packet again
+                packet->checksum = original_checksum;
+                corrupt_next_checksum_2 = false;
+            }
             pthread_mutex_lock(&shared_mutex_2);
             shared_buffer_2 = buffer;
             shared_buffer_len_2 = packet_get_size(packet);
@@ -184,5 +205,17 @@ void cc1200_debug_block_next_write(int device_id) {
     }
 }
 
-
-
+/**
+ * @brief Corrupts next checksum in sending in next packet.
+ * ONLY FOR TESTING PURPOSE
+ * 
+ */
+void cc1200_debug_corrupt_next_checksum(int device_id) {
+if (device_id == id0) {
+        corrupt_next_checksum_1 = true;
+    } else if (device_id == id1) {
+        corrupt_next_checksum_2 = true;
+    } else {
+        printf("CC1200 Mockup warning: invalid device number\n");
+    }    
+}
