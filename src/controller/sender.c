@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "../minstrel/minstrel.h"
 #include "../cc1200/cc1200_rate.h"
@@ -34,7 +35,9 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
 }
 
 void sender_send(sender_t *sender, packet_t *packet) {
+    if (sender == NULL || packet == NULL) return;
     sender->next_ack = packet->id;
+    packet_destroy(sender->lastPacketSend); //destroy old reference
     sender->lastPacketSend = packet;
 
     cc1200_send_packet(sender->socket_send, packet);
@@ -64,6 +67,7 @@ packet_status_t sender_rcv_ack(sender_t *sender) {
 
     packet_t* pkt = cc1200_get_packet(sender->socket_rcv, timer_started, &status);
 
+    packet_destroy(sender->lastPacketRcv);
     sender->lastPacketRcv = pkt;
     if (pkt == NULL) {
         return status;
@@ -84,6 +88,8 @@ packet_status_t sender_rcv_ack(sender_t *sender) {
     }
 }
 
+
+//Deep copies from buffer
 void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     //build send packet
     packet_t *pkt = calloc(1, sizeof(packet_t));
@@ -94,7 +100,8 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     pkt->token_recv = sender->token_receiver;
     pkt->token_send = sender->token_sender;
     pkt->payload_len = len;
-    pkt->p_payload = buffer;
+    pkt->p_payload = malloc(len * sizeof(uint8_t));
+    memcpy(pkt->p_payload, buffer, len);
     pkt->type = packet_status_ok;
 
     packet_set_checksum(pkt);

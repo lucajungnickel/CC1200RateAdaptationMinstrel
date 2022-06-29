@@ -59,7 +59,6 @@ void test_communication_initialization() {
     //receiver thread:
     pthread_t thread_rcv_id;
     pthread_create(&thread_rcv_id, NULL, thread_receive_init, NULL);
-    //sleep(0.1);
 
     Minstrel* minstrel = calloc(1, sizeof(Minstrel));
     assert(minstrel != NULL);
@@ -110,6 +109,9 @@ static void *thread_receive_send_ok_rcv_ok() {
         printf("0x%x ", i);
     }
     printf("\n");
+
+    //free(buffer);
+    
     receive_done = true;
 }
 
@@ -153,6 +155,18 @@ void test_communication_send_ok_rcv_ok() {
         buffer[i] = i % UINT8_MAX;
     }
     sender_send_and_ack(sender, buffer, buffer_len);
+    free(buffer);
+
+
+    //Kill Thread
+    while (!receive_done) {
+        sleep(0.001);
+    }
+    pthread_join(thread_rcv_id, NULL);
+
+    receiver_destroy(rcv);
+    sender_destroy(sender);
+
     //check if ack was received
 
 /*
@@ -161,12 +175,6 @@ void test_communication_send_ok_rcv_ok() {
     assert(sender->lastPacketRcv->id == 2);
     assert(sender->lastPacketRcv->payload_len == 0);
 */
-
-    //Kill Thread
-    while (!receive_done) {
-        sleep(0.001);
-    }
-    pthread_join(thread_rcv_id, NULL);
 }
 
 //---------------------------------------------------------------

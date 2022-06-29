@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 #include "../cc1200/cc1200_rate.h"
 
@@ -85,7 +86,9 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
         }
         //assume everything went perfect
         receiver->last_ack_rcv = pkt->id;
+        packet_destroy(receiver->lastPacketRcv);
         receiver->lastPacketRcv = pkt;
+
         *status_back = status;
         return pkt;
     } else {
@@ -124,5 +127,7 @@ void receiver_ack(receiver_t* receiver) {
     packet_set_checksum(pkt_send);
 
     cc1200_send_packet(receiver->socket_rcv, pkt_send);
+
+    packet_destroy(receiver->lastPacketSend);
     receiver->lastPacketSend = pkt_send;
 }
