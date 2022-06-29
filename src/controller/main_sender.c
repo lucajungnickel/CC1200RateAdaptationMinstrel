@@ -41,7 +41,7 @@ static void start() {
 
         pkt->ack = 0;
         // TODO: use minstrel->rates.X here
-        pkt->fallback_rate = MINSTREL_RATES[minstrel_get_fallback_rate(minstrel)];
+        pkt->fallback_rate = minstrel->rates.fallback;
 
         pkt->id = pkt_id;
 

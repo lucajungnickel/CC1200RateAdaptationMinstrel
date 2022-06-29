@@ -32,7 +32,7 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     packet_t *pkt = calloc(1, sizeof(packet_t));
     pkt->ack = 0;
     pkt->id = sender->next_ack;
-    pkt->fallback_rate = minstrel_get_fallback_rate(minstrel);
+    pkt->fallback_rate = sender->minstrel->rates.fallback;
     pkt->next_symbol_rate = minstrel->rates.current;
     pkt->p_payload = 0;
     pkt->payload_len = 0;
@@ -104,7 +104,7 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     //build send packet
     packet_t *pkt = calloc(1, sizeof(packet_t));
     pkt->ack = 0;
-    pkt->fallback_rate = minstrel_get_fallback_rate(sender->minstrel);
+    pkt->fallback_rate = sender->minstrel->rates.fallback;
     pkt->id = sender->next_ack;
     pkt->next_symbol_rate = sender->minstrel->rates.current;
     pkt->token_recv = sender->token_receiver;

@@ -13,6 +13,7 @@ Minstrel* minstrel_init() {
     minstrel->rates.current = 0;
     minstrel->rates.second_best = 0;
     minstrel->rates.highest_prob = 0;
+    minstrel->rates.fallback = 0;
 
     // Init statistics
     memset(minstrel->statistics, 0, sizeof(minstrel->statistics));
@@ -52,12 +53,6 @@ static void log_package_status(MinstrelStatistics* statistics, Packet* pkt) {
         statistics->total_recv++;
     statistics->avg_duration = (statistics->avg_duration + pkt->duration) / statistics->total_send;
     statistics->last_pkt_id = pkt->id;
-}
-
-
-uint8_t minstrel_get_fallback_rate(Minstrel* minstrel) {
-    // TODO: Maybe put this info into the Minstrel struct itself
-    return 0;
 }
 
 /**

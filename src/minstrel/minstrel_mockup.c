@@ -23,9 +23,6 @@ void minstrel_log_package_status(uint8_t id, packet_status_t status) {
 
 }
 
-uint8_t minstrel_get_fallback_rate(Minstrel* minstrel) {
-
-}
 
 void minstrel_update(Minstrel* minstrel, Packet* pkt) {
 
