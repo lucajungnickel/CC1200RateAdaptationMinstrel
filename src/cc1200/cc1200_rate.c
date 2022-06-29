@@ -8,6 +8,7 @@
 #include "cc1200_rate.h"
 #include "register_config.h"
 #include "../controller/packet.h"
+#include "../minstrel/minstrel.h"
 
 
 /**
@@ -84,7 +85,7 @@ static uint8_t build_pkg_cfg2(uint8_t byte_swap_en, uint8_t fg_mode_en, uint8_t 
  * @param pkt_format
  * @return uint8_t
  */
-static uint8_t build_pkt_cfg2_std(uint8_t pkt_format) {
+static uint8_t build_pkg_cfg2_std(uint8_t pkt_format) {
     uint8_t byte_swap_en = (RegSettings[PKT_CFG2].val & 0b01000000) >> 6;
     uint8_t fg_mode_en   = (RegSettings[PKT_CFG2].val & 0b00100000) >> 5;
     uint8_t cca_mode     = (RegSettings[PKT_CFG2].val & 0b00011100) >> 2;
@@ -124,29 +125,51 @@ void cc1200_init(int id) {
         cc1200_reg_write(addr, val);
     }
 
-    // Configure variable packet mode
-    cc1200_reg_write(PKT_CFG0, build_pkg_cfg0_std(PKT_MODE));
-    cc1200_reg_write(PKT_CFG2, build_pkg_cfg2_std(PKT_FORMAT));
-    cc1200_reg_write(PKT_LEN, PKT_MAX_LEN);
-
-    if (IS_DEBUG)
+    if (IS_DEBUG) {
         puts("DEBUG: Initialized CC1200 registers.");
+        printf("INFO: Status:%s\n", get_status_cc1200_str());
+    }
+
 }
 
 static float log_2(float num) {
     return log(num) / log(2.);
 }
 
-// TODO: Error handling
-void cc1200_send_packet(packet_t* packet) {
+void cc1200_change_rate(uint8_t rate) {
+    float rate_in_ksps = MINSTREL_RATES[rate] / 1000.;
+    int32_t srate_e = log_2((rate_in_ksps * pow(2, 39)) / F_XOSC) - 20;
+    int32_t srate_m = ((rate_in_ksps * pow(2, 39)) / (F_XOSC * (1 << srate_e))) - (1 << 20);
 
+    uint8_t symbol_rate_2 = ((srate_e & 0xF) << 4) | (0xF & (srate_m >> 16));
+    uint8_t symbol_rate_1 = 0xFF & (srate_m >> 8);
+    uint8_t symbol_rate_0 = 0xFF & srate_m;
+
+    if (IS_DEBUG) {
+        printf("DEBUG: symbol_rate_2: 0x%x\n", symbol_rate_2);
+        printf("DEBUG: symbol_rate_1: 0x%x\n", symbol_rate_1);
+        printf("DEBUG: symbol_rate_0: 0x%x\n", symbol_rate_0);
+    }
+
+    // Write exponent and mantissa [19:16]
+    cc1200_reg_write(SYMBOL_RATE2, symbol_rate_2);
+    // Write mantissa [15:8]
+    cc1200_reg_write(SYMBOL_RATE1, symbol_rate_1);
+    // Write mantissa [7:0]
+    cc1200_reg_write(SYMBOL_RATE0, symbol_rate_0);
+}
+
+// TODO: Error handling
+void cc1200_send_packet(int device_id, packet_t* packet) {
     //To be tested:
     uint32_t len = packet_get_size(packet);
     uint8_t* buffer = malloc(len * sizeof(uint8_t));
     packet_serialize(packet, buffer);
 
-    // Write length byte
-    cc1200_reg_write(REG_FIFO, len);
+    // Configure variable packet mode
+    cc1200_reg_write(PKT_CFG0, build_pkg_cfg0_std(PKT_MODE));
+    cc1200_reg_write(PKT_CFG2, build_pkg_cfg2_std(PKT_FORMAT));
+    cc1200_reg_write(PKT_LEN, len);
 
     // Write TX FIFO
     for (int i=0; i<len; i++)
@@ -170,12 +193,7 @@ void cc1200_send_packet(packet_t* packet) {
 }
 
 // TODO: Error handling
-packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back) {
-
-}
-
-// TODO: Error handling
-packet_t* cc1200_get_packet(clock_t timeout_started, packet_status_t *status_back) {
+packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_status_t *status_back) {
     // Switch to RX mode
     cc1200_cmd(SRX);
     while (get_status_cc1200() != RX)

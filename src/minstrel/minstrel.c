@@ -9,9 +9,10 @@ uint32_t MINSTREL_RATES[] = {40, 250, 1200, 2400, 4800, 9600, 25000, 50000, 1000
 Minstrel* minstrel_init() {
     Minstrel* minstrel = malloc(sizeof(Minstrel));
     // Init all rates with lowest possible rate
-    minstrel->rates.current = MINSTREL_RATES[0];
-    minstrel->rates.second_best = MINSTREL_RATES[0];
-    minstrel->rates.highest_prob = MINSTREL_RATES[0];
+    // TODO: Fix cc1200_change_rate for rate=0 => 40
+    minstrel->rates.current = 0;
+    minstrel->rates.second_best = 0;
+    minstrel->rates.highest_prob = 0;
 
     // Init statistics
     memset(minstrel->statistics, 0, sizeof(minstrel->statistics));
