@@ -186,7 +186,15 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
     //now we got data
     *status_back = packet_status_ok;
     packet_t *back = packet_deserialize(data);
+    //FREE and set pointer to NULL
     free(data);
+    if (device_id == id0) {
+        shared_buffer_1 = NULL;
+    } else if (device_id == id1) {
+        shared_buffer_2 = NULL;
+    } else {
+        printf("CC1200 Mockup Warning, wrong device ID\n");
+    }
     return back;
 }
 
