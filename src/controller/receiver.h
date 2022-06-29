@@ -35,6 +35,12 @@ typedef struct receiver_t {
 receiver_t* receiver_init(int socket_send, int socket_rcv);
 
 /**
+ * @brief Destroys the given receiver with all it's data content.
+ * 
+ */
+void receiver_destroy(receiver_t *rcv);
+
+/**
  * @brief Receives a packet.
  * Checks the checksum and filter for correct rcv and sender tokens.
  * 

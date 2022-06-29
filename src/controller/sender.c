@@ -26,36 +26,10 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     uint16_t token_sender = rand() % UINT16_MAX;
     sender->token_sender = token_sender;
     if (token_sender == 0) token_sender = 1;
-
-/*
-    //build handshake packet
-    packet_t *pkt = calloc(1, sizeof(packet_t));
-    pkt->ack = 0;
-    pkt->id = sender->next_ack;
-    pkt->fallback_rate = minstrel_get_fallback_rate(minstrel);
-    pkt->next_symbol_rate = minstrel->rates.current;
-    pkt->p_payload = 0;
-    pkt->payload_len = 0;
-    pkt->token_recv = 0;
-    pkt->token_send = sender->token_sender;
-    pkt->type = packet_status_ok;
-    packet_set_checksum(pkt);
-    */
   
     //sends handshake packet
     sender_send_and_ack(sender, NULL, 0);
     
-    /**
-    sender_send(sender, pkt);
-
-    //wait for ack
-    packet_status_t status = packet_status_none;
-    while (status != packet_status_ok) {
-        status = sender_rcv_ack(sender);
-        if (status == packet_status_err_timeout) { //timeout, try to send packet again
-            sender_send(sender, pkt);
-        }
-    }*/
     return sender;
 }
 
@@ -67,6 +41,14 @@ void sender_send(sender_t *sender, packet_t *packet) {
     printf("Sender packet sent\n");
     //start timer
     timer_started = clock();
+}
+
+void sender_destroy(sender_t *sender) {
+    if (sender == NULL) return;
+    minstrel_destroy(sender->minstrel);
+    packet_destroy(sender->lastPacketRcv);
+    packet_destroy(sender->lastPacketSend);
+    free(sender);
 }
 
 /**
@@ -83,21 +65,23 @@ packet_status_t sender_rcv_ack(sender_t *sender) {
     packet_t* pkt = cc1200_get_packet(sender->socket_rcv, timer_started, &status);
 
     sender->lastPacketRcv = pkt;
-    if (pkt == NULL) return status;
-    if (status == packet_status_err_timeout) { //if there is a timeout, start clock again!
-        return packet_status_err_timeout;
+    if (pkt == NULL) {
+        return status;
+    } else {
+        if (status == packet_status_err_timeout) { //if there is a timeout, start clock again!
+            return packet_status_err_timeout;
+        }
+        //check for correct CHECKSUM
+        if (pkt->checksum != packet_calc_checksum(pkt)) {
+            sender->debug_number_wrong_checksum++;
+            return packet_status_err_checksum;
+        }
+        //check for correct ACK
+        if (pkt->ack == sender->next_ack) {
+            sender->next_ack++;
+            return packet_status_ok;
+        } else return packet_status_warn_wrong_ack;
     }
-    //check for correct CHECKSUM
-    if (pkt->checksum != packet_calc_checksum(pkt)) {
-        sender->debug_number_wrong_checksum++;
-        return packet_status_err_checksum;
-    }
-    //check for correct ACK
-    if (pkt->ack == sender->next_ack) {
-        sender->next_ack++;
-        return packet_status_ok;
-    } else return packet_status_warn_wrong_ack;
-    
 }
 
 void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {

@@ -40,10 +40,10 @@ packet_t* packet_create (
  * @brief Destroys the packet and also frees the allocated memory in payload data.
  * 
  */
-void packet_destroy(packet_t* const packet) {
-    if (packet != NULL) {
-        free(packet->p_payload);
-    }
+void packet_destroy(packet_t* packet) {
+    if (packet == NULL) return;
+
+    free(packet->p_payload);
     free(packet);
 }
 
@@ -133,7 +133,7 @@ uint8_t packet_serialize(packet_t* const packet, uint8_t* p_buffer) {
 }
 
 packet_t* packet_deserialize(uint8_t* const p_buffer) {
-    packet_t* back = malloc(sizeof(packet_t));
+    packet_t* back = calloc(1, sizeof(packet_t));
     if (back == NULL) return NULL;
 
     //read header
@@ -171,9 +171,9 @@ packet_t* packet_deserialize(uint8_t* const p_buffer) {
 
     //BODY
     //payload
-    back->p_payload = malloc(back->payload_len * sizeof(uint8_t));
+    back->p_payload = calloc(back->payload_len, sizeof(uint8_t));
     memcpy(back->p_payload, p_buffer + index, back->payload_len);
-
+    
     return back;
 }
 

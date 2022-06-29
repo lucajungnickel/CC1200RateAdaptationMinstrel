@@ -21,8 +21,6 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     rcv->socket_rcv = socket_rcv;
     rcv->debug_number_wrong_checksum = 0;
     
-    uint8_t* buffer = calloc(sizeof(uint8_t), 1000);
-
     packet_t* pkt = NULL;
     packet_status_t status = packet_status_none;
     while (status != packet_status_ok 
@@ -45,6 +43,13 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     receiver_ack(rcv);
 
     return rcv;
+}
+
+void receiver_destroy(receiver_t *rcv) {
+    if (rcv == NULL) return;
+    packet_destroy(rcv->lastPacketRcv);
+    packet_destroy(rcv->lastPacketSend);
+    free(rcv);
 }
 
 /**

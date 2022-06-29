@@ -11,7 +11,7 @@ typedef struct sender_t {
     uint16_t token_sender;
     uint16_t token_receiver;
     Minstrel *minstrel; //minstrel algorithm reference
-    packet_t* lastPacketSend; //for better debugging
+    packet_t* lastPacketSend; //for DEBUGGING, last packet which was sent. No checking if it really arrived
     packet_t* lastPacketRcv; //for better debugging
     int debug_number_wrong_checksum; //for debugging, could be removed in future
     int socket_send;
@@ -27,6 +27,11 @@ typedef struct sender_t {
  */
 sender_t* sender_init(Minstrel *minstrel, int socket_send, int socket_rcv);
 
+/**
+ * @brief Destroys the given sender with all it's saved content.
+ * 
+ */
+void sender_destroy(sender_t *sender);
 
 /**
  * @brief Sends one packet with the given sender.

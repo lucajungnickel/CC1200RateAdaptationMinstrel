@@ -47,7 +47,7 @@ packet_t* packet_create (
  * @brief Destroys the packet and also frees the allocated memory in payload data.
  * 
  */
-void packet_destroy(packet_t* const packet);
+void packet_destroy(packet_t* packet);
 
 /**
  * @brief Calculates and returns the checksum.

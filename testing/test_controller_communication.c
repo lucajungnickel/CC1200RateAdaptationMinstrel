@@ -40,7 +40,7 @@ static void *thread_receive_init() {
     assert(receiver->lastPacketRcv->ack == 0);
     
 
-    rcv = receiver;
+    rcv = receiver; //for testing in main thread
     receive_done = true;
 }
 
@@ -51,7 +51,6 @@ static void *thread_receive_init() {
  */
 void test_communication_initialization() {
     //Setup a sender and receiver
-    
     cc1200_init(id_sender);
     cc1200_init(id_rcv);
 
@@ -79,6 +78,9 @@ void test_communication_initialization() {
     assert(rcv->lastPacketSend->payload_len == 0);
     assert(rcv->lastPacketRcv->payload_len == 0);
     assert(sender->next_ack == 2);
+
+    sender_destroy(sender);
+    receiver_destroy(rcv);
 }
 
 //----------------------------------------------------------------

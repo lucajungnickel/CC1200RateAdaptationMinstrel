@@ -98,3 +98,8 @@ void minstrel_update(Minstrel* minstrel, Packet* pkt) {
 
     set_next_rate(minstrel, is_probe);
 }
+
+void minstrel_destroy(Minstrel* minstrel) {
+    if (minstrel == NULL) return;
+    free(minstrel); //ATTENTION, ONLY FREE MINSTREL, NOT THE CONTENT
+}
