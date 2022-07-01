@@ -292,6 +292,10 @@ void test_communication_handshake_ack_error() {
     assert(rcv->lastPacketSend->payload_len == 0);
     assert(rcv->lastPacketRcv->payload_len == 0);
     assert(sender->next_ack == 2);
+
+    sender_destroy(sender);
+    receiver_destroy(rcv);
+    cc1200_reset();
 }
 //-------------------------------------------------------------------------------
 
