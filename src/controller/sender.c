@@ -88,9 +88,11 @@ packet_status_t sender_rcv_ack(sender_t *sender) {
     }
 }
 
-
-//Deep copies from buffer
-void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
+/**
+ * @brief Helper function for sender_send_and_ack, builds the packet and returns it
+ * 
+ */
+static packet_t* sender_build_pkt(sender_t *sender, uint8_t* buffer, uint32_t len) {
     //build send packet
     packet_t *pkt = calloc(1, sizeof(packet_t));
     pkt->ack = 0;
@@ -105,7 +107,14 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     pkt->type = packet_status_ok;
 
     packet_set_checksum(pkt);
+    
+    return pkt;
+}
 
+//Deep copies from buffer
+void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
+    
+    packet_t* pkt = sender_build_pkt(sender, buffer, len);
     sender_send(sender, pkt);
     
     bool should_send = true;
@@ -116,11 +125,13 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
             should_send = false;
             break;
         } else if (status == packet_status_warn_wrong_ack) {
-             //Sender shouldn't receive invalid ACK
-             //,then send packet again
+            //Sender shouldn't receive invalid ACK
+            //,then send packet again
+            pkt = sender_build_pkt(sender, buffer, len);
             sender_send(sender, pkt);
         } else if (status == packet_status_err_timeout) {
             //then send packet again
+            pkt = sender_build_pkt(sender, buffer, len);
             sender_send(sender, pkt);
         }
     }
