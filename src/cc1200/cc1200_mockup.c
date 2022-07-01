@@ -62,6 +62,8 @@ void cc1200_init(int id) {
 }
 
 void cc1200_reset() {
+    free(shared_buffer_1);
+    free(shared_buffer_2);
     shared_buffer_len_1 = 0;
     shared_buffer_1 = NULL;
     shared_buffer_len_2 = 0;
@@ -101,6 +103,7 @@ void cc1200_send_packet(int device_id, packet_t* packet) {
             printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_1);
         } else {
             ignore_next_write_1 = false;
+            free(buffer);
             printf("CC1200 Mockup: Ignored next write to buffer %i\n", device_id);
         }
 
@@ -124,6 +127,7 @@ void cc1200_send_packet(int device_id, packet_t* packet) {
             printf("CC1200 Mockup: Buffer %i size %i\n", device_id, shared_buffer_len_2);
         } else {
             ignore_next_write_2 = false;
+            free(buffer);
             printf("CC1200 Mockup: Ignored next write to buffer %i\n", device_id);
         }
     } else {

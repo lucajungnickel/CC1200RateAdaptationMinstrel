@@ -12,7 +12,7 @@
 #include "minstrel.h"
 #include "cc1200_rate.h"
 
-bool receive_done = false;
+volatile bool receive_done = false;
 receiver_t *rcv = NULL;
 
 static int id_sender = 10;
@@ -234,6 +234,10 @@ void test_communication_send_error_handshake() {
     assert(sender->next_ack == 2);
 
     pthread_join(thread_rcv_id, NULL);
+
+    sender_destroy(sender);
+    receiver_destroy(rcv);
+    cc1200_reset();
 }
 
 //------------------------------------------------------------------
