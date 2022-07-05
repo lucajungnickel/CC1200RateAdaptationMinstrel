@@ -34,7 +34,7 @@ static void start() {
         unsigned int next_rate = minstrel->rates.current;
 
         //change rate
-        cc1200_change_rate(next_rate);
+        cc1200_change_rate(0, next_rate);
 
         //build next package
         packet_t *pkt = malloc(sizeof(packet_t));

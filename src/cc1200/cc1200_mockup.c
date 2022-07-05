@@ -49,30 +49,28 @@ static int numIdsSet = 0;
 /**
  * @brief Only supports two device IDs at this time.
  */
-void cc1200_init(int id) {
+void cc1200_init(int device_id) {
     if (numIdsSet == 0) {
-        id0 = id;
+        id0 = device_id;
     } else if(numIdsSet == 1) {
-        id1 = id;
+        id1 = device_id;
     } else {
         printf("CC1200 Mockup Warning: Too many ids set.\n");
     }
     numIdsSet++;
-    printf("CC1200 Mockup init %i\n", id);
+    printf("CC1200 Mockup init %i\n", device_id);
 }
 
-void cc1200_reset() {
+void cc1200_reset(int device_id) {
     free(shared_buffer_1);
     free(shared_buffer_2);
     shared_buffer_len_1 = 0;
     shared_buffer_1 = NULL;
     shared_buffer_len_2 = 0;
     shared_buffer_2 = NULL;
-
-    //shared_mutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
-void cc1200_change_rate(uint8_t rate) {
+void cc1200_change_rate(int device_id, uint8_t rate) {
 
 }
 

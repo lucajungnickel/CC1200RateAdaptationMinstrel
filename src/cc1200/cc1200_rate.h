@@ -1,6 +1,6 @@
 /**
  * @file cc1200_rate.h
- * @author Jannis
+ * @author Jannis, Luca
  * @brief
  * @version 0.1
  * @date 2022-06-19
@@ -49,7 +49,7 @@ int IS_DEBUG;
  */
 const int TIMEOUT;
 
-void cc1200_reset();
+void cc1200_reset(int device_id);
 
 /**
  * @brief Initializes a cc1200 unit with a given id.
@@ -57,7 +57,7 @@ void cc1200_reset();
  * @param id Theoretically a MCU could have multiple CC1200 attached,
  * with this parameter you could choose which to initialize
  */
-void cc1200_init(int id);
+void cc1200_init(int device_id);
 
 /**
  * @brief Switches to the given system with the id.
@@ -65,10 +65,10 @@ void cc1200_init(int id);
  * on one system, or ignored.
  * @param id
  */
-void cc1200_switch_to_system(int id);
+void cc1200_switch_to_system(int device_id);
 
 
-void cc1200_change_rate(uint8_t rate);
+void cc1200_change_rate(int device_id, uint8_t rate);
 
 /**
  * @brief Sends a packet.

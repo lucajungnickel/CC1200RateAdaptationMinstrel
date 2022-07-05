@@ -21,8 +21,8 @@ static int id_rcv = 20;
 static void resetTests() {
     receive_done = false;
     rcv = NULL;
-    cc1200_reset();
-
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }
 
 static void *thread_receive_init() {
@@ -237,7 +237,9 @@ void test_communication_send_error_handshake() {
 
     sender_destroy(sender);
     receiver_destroy(rcv);
-    cc1200_reset();
+
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }
 
 //------------------------------------------------------------------
@@ -295,7 +297,9 @@ void test_communication_handshake_ack_error() {
 
     sender_destroy(sender);
     receiver_destroy(rcv);
-    cc1200_reset();
+
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }
 //-------------------------------------------------------------------------------
 
@@ -353,8 +357,9 @@ void test_communication_send_wrong_checksum_error() {
 
     sender_destroy(sender);
     receiver_destroy(rcv);
-    cc1200_reset();
 
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }
 
 
@@ -416,5 +421,7 @@ void test_communication_send_wrong_checksum_ack_error() {
 
     sender_destroy(sender);
     receiver_destroy(rcv);
-    cc1200_reset();
+    
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }

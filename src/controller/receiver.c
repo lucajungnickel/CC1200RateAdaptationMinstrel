@@ -73,6 +73,7 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
     printf("receiver rcv status of packet: %i\n", status);
     if (pkt != NULL) {
         //TODO check for correct recv token
+
         //TODO check for correct checksum
         printf("Checksum rcv %i, calced %i\n", pkt->checksum, packet_calc_checksum(pkt));
         if (pkt->checksum != packet_calc_checksum(pkt)) {
@@ -90,6 +91,10 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
         receiver->last_ack_rcv = pkt->id;
         packet_destroy(receiver->lastPacketRcv);
         receiver->lastPacketRcv = pkt;
+        
+        //change rate
+        cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
+        
 
         *status_back = status;
         return pkt;
@@ -143,7 +148,7 @@ void receiver_ack(receiver_t* receiver) {
             break;
         }
     }
-    
+
     packet_destroy(receiver->lastPacketSend);
     receiver->lastPacketSend = pkt_send;
 }
