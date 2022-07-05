@@ -44,3 +44,6 @@ $succ\textunderscore prob_t = {\alpha \enspace \cdot \enspace {send \over acks} 
 
 (Adapted from [Rate Adaptation for 802.11 Wireless Networks: Minstrel
 ](https://blog.cerowrt.org/papers/minstrel-sigcomm-final.pdf))
+
+## Thanks to
+This code uses the ``` https://github.com/rxi/log.c ``` code for logging, (last updated on 05/07/2022).
