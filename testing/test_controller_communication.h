@@ -12,4 +12,7 @@ void test_communication_handshake_ack_error();
 void test_communication_send_wrong_checksum_error();
 
 void test_communication_send_wrong_checksum_ack_error();
+
+void test_communication_send_big_data();
+
 #endif //TEST_CONTROLLER_COMMUNICATION_H

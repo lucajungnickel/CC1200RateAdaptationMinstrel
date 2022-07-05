@@ -18,6 +18,9 @@
 #include "../cc1200/cc1200_rate.h"
 
 static void start() {
+
+    
+
     // Initialize Minstrel state
     Minstrel* minstrel = minstrel_init();
     if (minstrel->state != RUNNING) {
