@@ -17,8 +17,10 @@ static int id_sender = 10;
 static int id_rcv = 20;
 
 static void start() {
+    
+    cc1200_init(id_sender);
+    
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
-
 
     uint32_t currentByte = 0;
     int numPacket = receiver->last_ack_rcv;

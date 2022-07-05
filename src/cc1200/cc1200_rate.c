@@ -210,7 +210,10 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
 // TODO: Error handling
 packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_status_t *status_back) {
     // Switch to RX mode
+    log_debug("Try to switch to SRX mode");
     cc1200_cmd(SRX);
+    log_debug("Switched successfully");
+    
     while (get_status_cc1200() != RX)
         cc1200_cmd(SNOP);
 
