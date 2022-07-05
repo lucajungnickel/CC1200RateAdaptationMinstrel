@@ -93,6 +93,8 @@ packet_t* packet_deserialize(uint8_t* const p_buffer);
  */
 uint32_t packet_get_size(packet_t* const packet);
 
+void packet_print(packet_t* const packet);
+
 /**
  * @brief Get the size of the header in bytes. The size is constant.
  */

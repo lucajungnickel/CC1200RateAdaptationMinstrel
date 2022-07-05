@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../log.c/src/log.h"
+
 packet_t* packet_create (
     uint32_t const id,
     uint8_t  const next_symbol_rate,
@@ -179,6 +181,20 @@ packet_t* packet_deserialize(uint8_t* const p_buffer) {
 
 uint32_t packet_get_size(packet_t* const packet) {
     return getHeaderSize() + packet->payload_len;
+}
+
+void packet_print(packet_t* const packet) {
+    log_debug("Pkt Id: %i", packet->id);
+    log_debug("Pkt Nxt Symbol Rate: %i", packet->next_symbol_rate);
+    log_debug("Pkt Token rcv: %i", packet->token_recv);
+    log_debug("Pkt Token send: %i", packet->token_send);
+    log_debug("Pkt type: %i", packet->type);
+    log_debug("Pkt Payload Len: %i", packet->payload_len);
+    log_debug("Pkt Checksum: %i", packet->checksum);
+    log_debug("Pkt Ack: %i ", packet->ack);
+    log_debug("Pkt Fallback Rate: %i", packet->fallback_rate);
+
+    log_debug("        .         ");
 }
 
 

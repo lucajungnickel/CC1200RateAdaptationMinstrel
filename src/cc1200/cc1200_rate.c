@@ -118,13 +118,26 @@ void cc1200_init(int device_id) {
         addr = RegSettings[i].adr;
         val = RegSettings[i].val;
         cc1200_reg_write(addr, val);
+        log_debug("Write reg adr 0%x, val 0%x", addr, val);
     }
     // Set extended register
     for (i=0; i<MAX_EXT_REG; i++) {
         addr = ExtRegSettings[i].adr;
         val = ExtRegSettings[i].val;
         cc1200_reg_write(addr, val);
+        log_debug("Write reg adr 0%x, val 0%x", addr, val);
     }
+
+    uint32_t len = 50;
+    log_debug("Packet len to be send: %i", len);
+
+    // Configure variable packet mode
+    cc1200_reg_write(PKT_CFG0, build_pkg_cfg0_std(PKT_MODE));
+    cc1200_reg_write(PKT_CFG2, build_pkg_cfg2_std(PKT_FORMAT));
+    cc1200_reg_write(PKT_LEN, len);
+    
+    int control_len = cc1200_reg_read(PKT_LEN, NULL);
+    log_info("Control: len is set to %i", control_len);
 
     if (IS_DEBUG) {
         puts("DEBUG: Initialized CC1200 registers.");
@@ -225,29 +238,40 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
         time_d = clock() - timeout_started;
         msec = time_d * 1000 / CLOCKS_PER_SEC;
         cc1200_reg_read(NUM_RXBYTES, &num_rx_bytes);
-
+        log_debug("Read num rx bytes %i", num_rx_bytes);
         // Got something in RX FIFO
         if (num_rx_bytes > 0) {
+            // Read packet len
+            pkt_len = cc1200_reg_read(REG_FIFO, NULL);
+            log_error("RCV pkt_len: %i", pkt_len);
             while(1) {
-                // Read packet len
-                pkt_len = cc1200_reg_read(REG_FIFO, NULL);
+                cc1200_reg_read(NUM_RXBYTES, &num_rx_bytes);
+                log_debug("Read num rx bytes %i", num_rx_bytes); 
 
                 // Only read if whole packet is received
-                if (num_rx_bytes >= pkt_len) {
-                    buffer = calloc(pkt_len + PKT_OVERHEAD, sizeof(uint8_t));
+                if (num_rx_bytes >= pkt_len + PKT_OVERHEAD) {
+                    log_info("Now all data is there");
+                    buffer = calloc(pkt_len, sizeof(uint8_t));
 
                     // Read whole packet
-                    for (int i=0; i < pkt_len + PKT_OVERHEAD; i++)
+                    for (int i=0; i < pkt_len; i++)
                         buffer[i] = cc1200_reg_read(REG_FIFO, NULL);
+                    log_debug("Read num rx bytes %i", num_rx_bytes); 
+                    
+                    //read 2 overhead bytes
+                    int byte1 = cc1200_reg_read(REG_FIFO, NULL);
+                    int byte2 = cc1200_reg_read(REG_FIFO, NULL);
 
                     if (IS_DEBUG) {
                         printf("DEBUG: Packet received: \n\t");
-                        for (int i=0; i < pkt_len; i++)
-                            printf("%c",buffer[i]);
+                        for (int i=0; i < pkt_len + PKT_OVERHEAD; i++)
+                            printf("0x%x ",buffer[i]);
                         printf("\n");
                     }
                     *status_back = packet_status_ok;
-                    return packet_deserialize(buffer);
+                    packet_t* pkt = packet_deserialize(buffer);
+                    packet_print(pkt);
+                    return pkt;
                 }
             }
         }
