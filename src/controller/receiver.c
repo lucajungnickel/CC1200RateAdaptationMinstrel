@@ -88,9 +88,11 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
             return NULL;
         }
         //check for valid ACK:
+        //TODO remove ACK 
         if (pkt->ack != receiver->last_ack_rcv) {
             //if there is a wrong ACK, ignore that and assume we got the correct packet            
             status = packet_status_warn_wrong_ack; //just a hint for the next layer, but not an error
+            //log_warn("Got wrong ack %i, should %i", receiver->last_ack_rcv, pkt->ack);
         }
         //assume everything went perfect
         receiver->last_ack_rcv = pkt->id;
