@@ -23,6 +23,7 @@
 /*
  * Possible symbol rates for the algorithm.
  * Unit in sps, NOT ksps.
+ * MINSTREL_RATES[0] is the lowest possible symbol rate, then it is incrementing.
  */
 uint32_t MINSTREL_RATES[MAX_RATES];
 

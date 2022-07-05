@@ -22,7 +22,8 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     rcv->socket_send = socket_send;
     rcv->socket_rcv = socket_rcv;
     rcv->debug_number_wrong_checksum = 0;
-    
+    rcv->last_symbol_rate = 0; //symbol rate is set to lowest at beginning
+
     packet_t* pkt = NULL;
     packet_status_t status = packet_status_none;
     while (status != packet_status_ok 
@@ -80,6 +81,7 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
             status = packet_status_err_checksum;
             receiver->debug_number_wrong_checksum++;
             printf("Got wrong checksum %i\n", receiver->debug_number_wrong_checksum);
+            packet_destroy(pkt);
             return NULL;
         }
         //check for valid ACK:
@@ -92,9 +94,11 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
         packet_destroy(receiver->lastPacketRcv);
         receiver->lastPacketRcv = pkt;
         
-        //change rate
-        cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
-        
+        //change rate if there is another symbol rate
+        if (pkt->next_symbol_rate != receiver->last_symbol_rate) {
+            cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
+            receiver->last_symbol_rate = pkt->next_symbol_rate;
+        }
 
         *status_back = status;
         return pkt;
