@@ -42,6 +42,7 @@ typedef enum MinstrelState {
  */
 typedef struct AvailableRates {
     uint8_t current;
+    uint8_t best;
     uint8_t second_best;
     uint8_t highest_prob;
     uint8_t fallback;
@@ -52,8 +53,9 @@ typedef struct AvailableRates {
  */
 typedef struct MinstrelStatistics {
     uint32_t last_pkt_id;
-    uint32_t ewma; // Success probability
-    uint32_t throughput;
+    uint32_t pkt_count;
+    float ewma; // Success probability
+    float throughput;
     uint32_t total_send;
     uint32_t total_recv;
     uint32_t bytes_send;
