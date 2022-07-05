@@ -21,7 +21,7 @@ REG_TYPE RegSettings[MAX_REG] =
     {CHAN_BW        , 0x10 }, // Channel Filter Configuration
     {MDMCFG1        , 0x42 }, // General Modem Parameter Configuration Reg. 1
     {MDMCFG0        , 0x05 }, // General Modem Parameter Configuration Reg. 0
-    {SYMBOL_RATE2   , 0x8f }, // Symbol Rate Configuration Exponent and Mantissa [1..
+    {SYMBOL_RATE2   , 0x3f }, // 1.2KHzSymbol Rate Configuration Exponent and Mantissa [1..
     {SYMBOL_RATE1   , 0x75 }, // Symbol Rate Configuration Mantissa [15:8]
     {SYMBOL_RATE0   , 0x10 }, // Symbol Rate Configuration Mantissa [7:0]
     {AGC_REF        , 0x27 }, // AGC Reference Level Configuration
