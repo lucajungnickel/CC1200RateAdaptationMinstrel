@@ -9,16 +9,18 @@ uint32_t MINSTREL_RATES[] = {40, 250, 1200, 2400, 4800, 9600, 25000, 50000, 1000
 Minstrel* minstrel_init() {
     Minstrel* minstrel = malloc(sizeof(Minstrel));
     // Init all rates with lowest possible rate
-    minstrel->rates.current = 0;
-    minstrel->rates.best = 0;
-    minstrel->rates.second_best = 0;
-    minstrel->rates.highest_prob = 0;
     minstrel->rates.fallback = 0;
+    minstrel->rates.highest_prob = 0;
+    minstrel->rates.second_best = 0;
+    minstrel->rates.best = 0;
+    minstrel->rates.current = 0;
+    minstrel->rates.probe = 0;
 
     // Init statistics
     memset(minstrel->statistics, 0, sizeof(MinstrelStatistics));
 
-    minstrel->state = READY;
+    minstrel->state = RUNNING;
+    minstrel->rate_state = BEST_RATE;
     return minstrel;
 }
 
@@ -62,17 +64,18 @@ static void log_package_status(MinstrelStatistics* statistics, Packet* pkt) {
     float succ_prob;
 
     statistics->total_send++;
-    if (pkt->status == packet_status_ok_ack)
+    if (pkt->status == packet_status_ok_ack) {
         statistics->total_recv++;
-    // Has to be called before pkt_count is set
-    calc_avg_duration(statistics, pkt->duration);
-    statistics->bytes_send = pkt->bytes_send;
-    statistics->last_pkt_id = pkt->id;
-    statistics->pkt_count++;
-    // Update statistics
-    succ_prob = (float) statistics->total_recv / statistics->total_send;
-    calc_ewma(statistics, succ_prob);
-    calc_throughput(statistics);
+        // Has to be called before pkt_count is increased
+        calc_avg_duration(statistics, pkt->duration);
+        statistics->bytes_send = pkt->bytes_send;
+        statistics->last_pkt_id = pkt->id;
+        statistics->pkt_count++;
+        // Update statistics
+        succ_prob = (float) statistics->total_recv / statistics->total_send;
+        calc_ewma(statistics, succ_prob);
+        calc_throughput(statistics);
+    }
 }
 
 /**
@@ -85,25 +88,24 @@ static void update_rates(Minstrel* minstrel) {
     float best_rate, second_best_rate, highest_prob;
     best_rate = second_best_rate = highest_prob = 0;
 
-    // Find highest success probability rate
     for (int i=0; i<MAX_RATES; i++) {
+        // Find highest success probability rate
         if (minstrel->statistics[i].ewma > highest_prob) {
             highest_prob = minstrel->statistics[i].ewma;
             highest_prob_index = i;
         }
-    }
-
-    // Find 1st and 2nd best throughput rate
-    for (int i=0; i<MAX_RATES; i++) {
+        // Find best throughput rate
         if (minstrel->statistics[i].throughput > best_rate) {
             best_rate = minstrel->statistics[i].throughput;
             best_rate_index = i;
         }
+        // Find 2nd best throughput rate
         if (minstrel->statistics[i].throughput > second_best_rate && minstrel->statistics[i].throughput < best_rate) {
             second_best_rate = minstrel->statistics[i].throughput;
             second_best_rate_index = i;
         }
     }
+
     // Update rates indices
     minstrel->rates.best = best_rate_index;
     minstrel->rates.second_best = second_best_rate_index;
@@ -123,19 +125,49 @@ static void update_rates(Minstrel* minstrel) {
  * @param minstrel
  * @param is_probe Whether the next rate is a probe or not.
  */
-static void set_next_rate(Minstrel* minstrel, int is_probe) {
-   if (is_probe)
-       // TODO: Make sure random index != current
-       minstrel->rates.current = rand() % 10;
-   else
-       minstrel->rates.current = minstrel->rates.best;
+static void set_probe_rate(Minstrel* minstrel) {
+    uint8_t probe;
+    // Pick a random rate not equal to the current one
+    while ((probe = rand() % MAX_RATE) == minstrel->rates.current);
+    minstrel->rates.probe = probe;
 }
 
-// TODO: Update to fallback rate if timeout or error etc.
+uint8_t minstrel_get_next_rate(Minstrel* minstrel) {
+    return minstrel->rates[minstrel->rate_state];
+}
+
+static RateState minstrel_state_to_rate_state(MinstrelState state) {
+    switch(state) {
+      case PROBE:
+           set_probe_rate(minstrel);
+           return PROBE_RATE;
+       case PACKET_TIMEOUT:
+           // Use the next lower rate according to the specification
+           // i.e. best throughput -> second best throughput -> highest success probability -> fallback
+           if (minstrel->rate_state != FALLBACK_RATE)
+               return minstrel->rate_state - 1;
+           return FALLBACK_RATE;
+       case RESUME:
+           return CURRENT_RATE;
+       case RESET:
+           return FALLBACK_RATE;
+       case RUNNING:
+       default:
+           return BEST_RATE;
+}
+
+/**
+ * @brief Set the next to-be-used rate (minstrel->rates.current) of the minstrel algorithm.
+ *
+ * @param minstrel
+ * @param is_probe Whether the next rate is a probe or not.
+ */
+static void set_next_rate(Minstrel* minstrel) {
+   minstrel->rate_state = minstrel_state_to_rate_state(minstrel->state);
+}
+
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, Packet* pkt) {
-    int is_probe = 0;
-
     // Update statistics for the current rate
     log_package_status(&minstrel->statistics[minstrel->rates.current], pkt);
 
@@ -143,13 +175,17 @@ void minstrel_update(Minstrel* minstrel, Packet* pkt) {
     if ((pkt->id % 5) == 0)
         update_rates(minstrel);
 
-    // Send probe every X packets TODO: Use time interval instead
-    if ((pkt->id % 10) == 0)
-        is_probe = 1;
-    else
-        puts("DEBUG: normal exchange");
+    if (minstrel->state == PROBE)
+        minstrel->state = RESUME;
+    else {
+        // Send probe every X packets TODO: Use time interval instead
+        if ((pkt->id % 10) == 0)
+            minstrel->state = PROBE;
+        else 
+            minstrel->state = RUNNING;
 
-    set_next_rate(minstrel, is_probe);
+    // Set next rate
+    minstrel->rate_state = minstrel_state_to_rate_state(minstrel->state);
 }
 
 void minstrel_destroy(Minstrel* minstrel) {

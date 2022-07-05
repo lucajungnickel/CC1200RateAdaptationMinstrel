@@ -31,22 +31,40 @@ uint32_t MINSTREL_RATES[MAX_RATES];
  * Possible states of the algorithm.
  */
 typedef enum MinstrelState {
-    READY,
+    PROBE,
+    RESUME, // After probe
+    RUNNING,
+    PACKET_TIMEOUT,
     RESET,
-    RUNNNING,
-    STOPPED,
-    DONE,
 } MinstrelState;
+
+/*
+ * States of the current used rate.
+ * Note: We use this enum to index into AvailableRates.r
+ *       The order of these values is important since we use Minstrel.rates_state-- to decrement the used rate.
+ */
+typedef enum RateState {
+    FALLBACK_RATE,
+    HIGHEST_PROB_RATE,
+    SECOND_BEST_RATE,
+    BEST_RATE,
+    CURRENT_RATE,
+    PROBE_RATE,
+} RateState;
 
 /*
  * Available rates for the algorithm, fields are an index into MINSTREL_RATES.
  */
-typedef struct AvailableRates {
-    uint8_t current;
-    uint8_t best;
-    uint8_t second_best;
-    uint8_t highest_prob;
-    uint8_t fallback;
+typedef union AvailableRates {
+    struct {
+        uint8_t fallback;
+        uint8_t highest_prob;
+        uint8_t second_best;
+        uint8_t best;
+        uint8_t current;
+        uint8_t probe;
+    };
+    uint8_t r[6];
 } AvailableRates;
 
 /*
@@ -67,8 +85,9 @@ typedef struct MinstrelStatistics {
  * State of the minstrel algorithm.
  */
 typedef struct Minstrel {
-    //ATTENTION, no pointers here, because the content are only integers.
+    //ATTENTION, no pointers here, because the contents are only integers.
     AvailableRates rates;
+    RateState rate_state;
     MinstrelState state;
     MinstrelStatistics statistics[MAX_RATES];
 } Minstrel;
