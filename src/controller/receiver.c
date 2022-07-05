@@ -78,6 +78,7 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
             status = packet_status_err_checksum;
             receiver->debug_number_wrong_checksum++;
             printf("Got wrong checksum %i\n", receiver->debug_number_wrong_checksum);
+            return NULL;
         }
         //check for valid ACK:
         if (pkt->ack != receiver->last_ack_rcv) {
