@@ -1,7 +1,6 @@
 #include "sender.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -32,7 +31,7 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     sender->token_sender = token_sender;
     if (token_sender == 0) token_sender = 1;
     
-    log_trace("Hello %s", "world");
+    log_debug("Sender reference is built");
 
     //sends handshake packet, no payload
     sender_send_and_ack(sender, NULL, 0);
@@ -55,12 +54,12 @@ void sender_send(sender_t *sender, packet_t *packet) {
                 should_send = false;
             break;
             case cc1200_status_send_error:
-                printf("Warning: CC1200 sending failed\n");
+                log_warn("Warning: CC1200 sending failed");
                 should_send = true;
             break;
         }
     }
-    printf("Sender packet sent\n");
+    log_debug("Sender packet sent");
     
     //start timer
     timer_started = clock(); //start timer for read timeout
@@ -84,7 +83,7 @@ void sender_destroy(sender_t *sender) {
  */
 packet_status_t sender_rcv_ack(sender_t *sender) {
     packet_status_t status;
-
+    
     packet_t* pkt = cc1200_get_packet(sender->socket_rcv, timer_started, &status);
 
     //update last packet received, even if it's NULL
@@ -135,14 +134,14 @@ static packet_t* sender_build_pkt(sender_t *sender, uint8_t* buffer, uint32_t le
 
 //Deep copies from buffer
 void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
-    
+    log_debug("Start send and ack");
     packet_t* pkt = sender_build_pkt(sender, buffer, len);
     sender_send(sender, pkt);
     
     bool should_send = true;
     while (should_send) {
         packet_status_t status = sender_rcv_ack(sender);
-        printf("Received at sender: %i\n", status);
+        log_debug("Received at sender status: %i", status);
         if (status == packet_status_ok || status == packet_status_ok_ack) {
             should_send = false;
             break;
@@ -157,5 +156,5 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
             sender_send(sender, pkt);
         }
     }
-    printf("Sender done sending ack\n");
+    log_debug("Sender done sending ack");
 }

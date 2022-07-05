@@ -2,12 +2,12 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
 
 #include "../cc1200/cc1200_rate.h"
+#include "../log.c/src/log.h"
 
 static clock_t timer_started = 0x0;
 
@@ -31,10 +31,12 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
             && status != packet_status_warn_wrong_ack) { //TODO better error handling
         pkt = receiver_receive(rcv, &status);
     }
+    log_debug("receiver init worked fine, here is the output of the payload");
+
     for (int i=0;i<pkt->payload_len;i++) {
-        printf("%i ", pkt->p_payload[i]);
+        log_debug("%i ", pkt->p_payload[i]);
     }
-    printf("\n");
+    log_debug("");
 
     //assume everything went perfect
 
@@ -71,17 +73,17 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
 
     packet_t* pkt = cc1200_get_packet(receiver->socket_send, timer_started, &status);
 
-    printf("receiver rcv status of packet: %i\n", status);
+    log_debug("receiver rcv status of packet: %i", status);
     if (pkt != NULL) {
         //TODO check for correct recv token
 
         //TODO check for correct checksum
-        printf("Checksum rcv %i, calced %i\n", pkt->checksum, packet_calc_checksum(pkt));
+        log_debug("Checksum rcv %i, calced %i", pkt->checksum, packet_calc_checksum(pkt));
         if (pkt->checksum != packet_calc_checksum(pkt)) {
             status = packet_status_err_checksum;
             
             receiver->debug_number_wrong_checksum++;
-            printf("Got wrong checksum %i\n", receiver->debug_number_wrong_checksum);
+            log_warn("Got wrong checksum %i", receiver->debug_number_wrong_checksum);
             packet_destroy(pkt);
             return NULL;
         }
@@ -116,10 +118,10 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
             && status != packet_status_warn_wrong_ack 
             && status != packet_status_ok_ack) {
         pkt = receiver_receive(receiver, &status);
-        printf("Receiver rcv status: %i\n", status);
+        log_debug("Receiver rcv status: %i", status);
     }
     receiver_ack(receiver);
-    printf("receiver correct status: %i\n", status);
+    log_debug("receiver correct status: %i", status);
     *buffer = pkt->p_payload;
     return pkt->payload_len;
 }
