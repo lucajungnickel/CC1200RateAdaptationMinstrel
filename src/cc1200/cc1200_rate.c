@@ -181,20 +181,23 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     uint8_t* buffer = malloc(len * sizeof(uint8_t));
     packet_serialize(packet, buffer);
 
-    // Configure variable packet mode
-    cc1200_reg_write(PKT_CFG0, build_pkg_cfg0_std(PKT_MODE));
-    cc1200_reg_write(PKT_CFG2, build_pkg_cfg2_std(PKT_FORMAT));
-    cc1200_reg_write(PKT_LEN, len);
-
     int num_bytes_fifo = cc1200_reg_read(NUM_TXBYTES, NULL);
     log_debug("NUM_TXBYTES REG before writing: %i", num_bytes_fifo);
     
+    cc1200_cmd(SIDLE);
+    while (get_status_cc1200() != IDLE)
+        cc1200_cmd(SNOP);
+    log_debug("Send is in IDLE mode");
+
     //Write len of packet, because it is a variable len
     cc1200_reg_write(REG_FIFO, len);
     // Write TX FIFO
     for (int i=0; i<len; i++)
         cc1200_reg_write(REG_FIFO, buffer[i]);
-
+    
+    num_bytes_fifo = cc1200_reg_read(NUM_TXBYTES, NULL);
+    log_debug("NUM_TXBYTES REG after writing: %i", num_bytes_fifo);
+    
     // Switch to TX mode
     cc1200_cmd(STX);
 
@@ -238,15 +241,14 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
         time_d = clock() - timeout_started;
         msec = time_d * 1000 / CLOCKS_PER_SEC;
         cc1200_reg_read(NUM_RXBYTES, &num_rx_bytes);
-        log_debug("Read num rx bytes %i", num_rx_bytes);
+
+
         // Got something in RX FIFO
         if (num_rx_bytes > 0) {
             // Read packet len
             pkt_len = cc1200_reg_read(REG_FIFO, NULL);
-            log_error("RCV pkt_len: %i", pkt_len);
             while(1) {
                 cc1200_reg_read(NUM_RXBYTES, &num_rx_bytes);
-                log_debug("Read num rx bytes %i", num_rx_bytes); 
 
                 // Only read if whole packet is received
                 if (num_rx_bytes >= pkt_len + PKT_OVERHEAD) {
