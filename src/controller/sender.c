@@ -7,6 +7,7 @@
 
 #include "../minstrel/minstrel.h"
 #include "../cc1200/cc1200_rate.h"
+#include "../log.c/src/log.h"
 
 static clock_t timer_started = 0x0;
 
@@ -30,7 +31,9 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     uint16_t token_sender = rand() % UINT16_MAX;
     sender->token_sender = token_sender;
     if (token_sender == 0) token_sender = 1;
-  
+    
+    log_trace("Hello %s", "world");
+
     //sends handshake packet, no payload
     sender_send_and_ack(sender, NULL, 0);
     

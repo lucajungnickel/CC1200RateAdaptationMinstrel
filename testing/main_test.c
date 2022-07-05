@@ -22,11 +22,16 @@
 #include "test_controller_packet.h"
 #include "test_controller_communication.h"
 
+#include "../src/log.c/src/log.h"
+
 int main(int argc, char** argv) {
     if (argc < 2) { //there are no options
         printf("No options which packet should be tested in arguments\n");
         return 1;
     }
+
+    log_info("Unit test is starting");
+    
     bool test_all=false;
     for (int i=0;i<argc;i++) {
         printf("Test run[%i]: %s\n", i, argv[i]);
