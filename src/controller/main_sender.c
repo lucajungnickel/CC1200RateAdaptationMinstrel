@@ -20,7 +20,7 @@
 static void start() {
     // Initialize Minstrel state
     Minstrel* minstrel = minstrel_init();
-    if (minstrel->state != READY) {
+    if (minstrel->state != RUNNING) {
         puts("ERROR: Couldn't initialize minstrel");
         exit(1);
     }
@@ -31,10 +31,10 @@ static void start() {
     //packet id of the next sending packet
     uint32_t pkt_id = 0;
     while (true) {
-        unsigned int next_rate = minstrel->rates.current;
+        uint8_t next_rate = minstrel_get_next_rate(minstrel);
 
         //change rate
-        cc1200_change_rate(0, next_rate);
+        cc1200_change_rate(0, MINSTREL_RATES[next_rate]);
 
         //build next package
         packet_t *pkt = malloc(sizeof(packet_t));
