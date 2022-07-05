@@ -174,8 +174,10 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     cc1200_reg_write(PKT_LEN, len);
 
     int num_bytes_fifo = cc1200_reg_read(NUM_TXBYTES, NULL);
-    log_debug("NUM_TXBYTES REG: %i", num_bytes_fifo);
-
+    log_debug("NUM_TXBYTES REG before writing: %i", num_bytes_fifo);
+    
+    //Write len of packet, because it is a variable len
+    cc1200_reg_write(REG_FIFO, len);
     // Write TX FIFO
     for (int i=0; i<len; i++)
         cc1200_reg_write(REG_FIFO, buffer[i]);
@@ -188,10 +190,11 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     while (get_status_cc1200() != TX)
         cc1200_cmd(SNOP);
 
+    log_debug("CC1200 Status: %i", get_status_cc1200());
     log_debug("CC1200 Module send, between WHILE");
 
     // Wait till TX mode left
-    while (get_status_cc1200() != IDLE)
+    while (get_status_cc1200() == TX)
         cc1200_cmd(SNOP);
 
     log_debug("CC1200 Module send, after WHILE");
