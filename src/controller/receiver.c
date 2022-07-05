@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <time.h>
 #include <string.h>
 
@@ -114,21 +115,35 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
 }
 
 void receiver_ack(receiver_t* receiver) {
-    //build ACK packet 
-    packet_t *pkt_send = calloc(1, sizeof(packet_t));
-    pkt_send->ack = receiver->last_ack_rcv;
-    pkt_send->payload_len = 0; //no payload
-    pkt_send->p_payload = 0x0;
-    pkt_send->fallback_rate = 0; //rcv doesnt set this
-    pkt_send->next_symbol_rate = 0; //rcv doesnt set this
-    pkt_send->id = receiver->last_ack_rcv;
-    pkt_send->token_recv = receiver->token_receiver;
-    pkt_send->token_send = receiver->token_sender;
-    pkt_send->type = packet_status_ok_ack;
-    packet_set_checksum(pkt_send);
+    bool should_send = true;
+    packet_t *pkt_send;
+    while (should_send) {
+        //build ACK packet 
+        pkt_send = calloc(1, sizeof(packet_t));
+        pkt_send->ack = receiver->last_ack_rcv;
+        pkt_send->payload_len = 0; //no payload
+        pkt_send->p_payload = 0x0;
+        pkt_send->fallback_rate = 0; //rcv doesnt set this
+        pkt_send->next_symbol_rate = 0; //rcv doesnt set this
+        pkt_send->id = receiver->last_ack_rcv;
+        pkt_send->token_recv = receiver->token_receiver;
+        pkt_send->token_send = receiver->token_sender;
+        pkt_send->type = packet_status_ok_ack;
+        packet_set_checksum(pkt_send);
 
-    cc1200_send_packet(receiver->socket_rcv, pkt_send);
-
+        cc1200_status_send status = cc1200_send_packet(receiver->socket_rcv, pkt_send);
+        
+        switch (status) {
+            case cc1200_status_send_ok:
+                should_send = false; //ACK is succesfully send, go on and break loop
+            break;
+            case cc1200_status_send_error:
+                packet_destroy(pkt_send);
+                should_send = true; //continue sending
+            break;
+        }
+    }
+    
     packet_destroy(receiver->lastPacketSend);
     receiver->lastPacketSend = pkt_send;
 }

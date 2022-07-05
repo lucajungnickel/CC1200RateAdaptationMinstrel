@@ -76,7 +76,7 @@ void cc1200_change_rate(uint8_t rate) {
 
 }
 
-void cc1200_send_packet(int device_id, packet_t* packet) {
+cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     if (packet == NULL) printf("CC1200 Mockup: Warning send packet packet=NULL\n");
     
     //writes to shared memory for simulation
@@ -134,7 +134,7 @@ void cc1200_send_packet(int device_id, packet_t* packet) {
         printf("CC1200 Mockup Warning, wrong device id\n");
     }
     printf("CC1200 Mockup: Sending done\n");
-    
+    return cc1200_status_send_ok;
 }
 
 packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_status_t *status_back) {

@@ -160,7 +160,7 @@ void cc1200_change_rate(uint8_t rate) {
 }
 
 // TODO: Error handling
-void cc1200_send_packet(int device_id, packet_t* packet) {
+cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     //To be tested:
     uint32_t len = packet_get_size(packet);
     uint8_t* buffer = malloc(len * sizeof(uint8_t));
@@ -190,6 +190,8 @@ void cc1200_send_packet(int device_id, packet_t* packet) {
         puts("DEBUG: Sent packet!");
         printf("DEBUG: Status: %s\n", get_status_cc1200_str());
     }
+
+    return cc1200_status_send_ok; //TODO better error handling
 }
 
 // TODO: Error handling

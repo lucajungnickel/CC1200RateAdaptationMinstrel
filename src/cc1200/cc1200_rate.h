@@ -29,6 +29,11 @@
 #define F_XOSC 40000
 
 
+typedef enum cc1200_status_send {
+    cc1200_status_send_ok,
+    cc1200_status_send_error
+} cc1200_status_send;
+
 // Global debug flag
 int IS_DEBUG;
 
@@ -67,9 +72,12 @@ void cc1200_change_rate(uint8_t rate);
 
 /**
  * @brief Sends a packet.
- *
+ * 
+ * @param device_id socket id for sender. Implementation can use this or ignore it
+ * @param packet packet to be send
+ * @return cc1200_status_send Status after sending
  */
-void cc1200_send_packet(int device_id, packet_t* packet);
+cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet);
 
 /**
  * @brief Reads and returns a packet.
