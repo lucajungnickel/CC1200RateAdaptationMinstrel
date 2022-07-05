@@ -7,12 +7,20 @@
 #ifndef RECEIVER_H
 #define RECEIVER_H
 
-#include "stdint.h"
+#include <stdint.h>
 #include "packet.h"
 #include "../minstrel/minstrel.h"
 
 typedef struct receiver_t {
     uint32_t last_ack_rcv;
+    /**
+     * Last symbol rate, which was received (and is set)
+     * 
+     * Is a index to MINSTREL_RATES, and not the content.
+     * Therefore it is somewhere between 0 and 12 for example 
+     * (if there are 13 possible symbol rates)
+     */
+    uint8_t last_symbol_rate; 
     uint16_t token_receiver;
     uint16_t token_sender; //receiver needs to know how the sender is
     packet_t* lastPacketSend; //for better debugging
@@ -20,6 +28,7 @@ typedef struct receiver_t {
     int debug_number_wrong_checksum; //for debugging, could be removed in future
     int socket_send;
     int socket_rcv;
+
 } receiver_t;
 
 
@@ -33,6 +42,12 @@ typedef struct receiver_t {
  * @return receiver_t receiver or NULL if error
  */
 receiver_t* receiver_init(int socket_send, int socket_rcv);
+
+/**
+ * @brief Destroys the given receiver with all it's data content.
+ * 
+ */
+void receiver_destroy(receiver_t *rcv);
 
 /**
  * @brief Receives a packet.

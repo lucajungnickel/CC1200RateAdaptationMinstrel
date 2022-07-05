@@ -136,6 +136,7 @@ void test_packet_serialize_normal() {
 
     testSerializedPacket(pkt, serialized);
 
+    free(serialized);
     packet_destroy(pkt);
 }
 
@@ -166,6 +167,8 @@ void test_packet_serialize_zero() {
     packet_serialize(pkt, serialized);
 
     testSerializedPacket(pkt, serialized);
+
+    free(serialized);
 
     packet_destroy(pkt);
 }
@@ -198,6 +201,7 @@ void test_packet_serialize_maximum() {
     
     testSerializedPacket(pkt, serialized);
 
+    free(serialized);
     packet_destroy(pkt);
 }
 
@@ -221,6 +225,8 @@ void test_packet_deserialize_normal() {
     for (int i=0;i<pkt->payload_len;i++) {
         assert(pkt->p_payload[i] == input[getHeaderSize() - 1 + i]);
     }
+
+    packet_destroy(pkt);
 }
 
 void test_packet_deserialize_maximum() {
@@ -242,4 +248,5 @@ void test_packet_deserialize_maximum() {
     for (int i=0;i<pkt->payload_len;i++) {
         assert(pkt->p_payload[i] == input[getHeaderSize() - 1 + i]);
     }
+    packet_destroy(pkt);
 }

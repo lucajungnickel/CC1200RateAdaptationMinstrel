@@ -23,6 +23,7 @@
 /*
  * Possible symbol rates for the algorithm.
  * Unit in sps, NOT ksps.
+ * MINSTREL_RATES[0] is the lowest possible symbol rate, then it is incrementing.
  */
 uint32_t MINSTREL_RATES[MAX_RATES];
 
@@ -66,6 +67,7 @@ typedef struct MinstrelStatistics {
  * State of the minstrel algorithm.
  */
 typedef struct Minstrel {
+    //ATTENTION, no pointers here, because the content are only integers.
     AvailableRates rates;
     MinstrelState state;
     MinstrelStatistics statistics[MAX_RATES];
@@ -103,5 +105,12 @@ uint8_t minstrel_get_next_rate(Minstrel* minstrel);
 * @param pkt The packet for which new information should be incorporated into the algorithm.
  */
 void minstrel_update(Minstrel* minstrel, Packet* pkt);
+
+/**
+ * @brief Destroys the minstrel struct and all related data in it.
+ * 
+ * @param minstrel 
+ */
+void minstrel_destroy(Minstrel* minstrel);
 
 #endif //MINSTREL_H

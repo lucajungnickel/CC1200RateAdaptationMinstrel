@@ -7,6 +7,8 @@
  * DO NOT COMPILE FOR PRODUCTIVE SYSTEM! USE minstrel.c INSTEAD
  */
 
+#include <stdlib.h>
+
 #include "minstrel.h"
 
 
@@ -31,4 +33,9 @@ void minstrel_update(Minstrel* minstrel, Packet* pkt) {
 
 uint8_t minstrel_get_next_rate(Minstrel* minstrel) {
     
+}
+
+void minstrel_destroy(Minstrel* minstrel) {
+    if (minstrel == NULL) return;
+    free(minstrel); //ATTENTION, ONLY FREE MINSTREL, NOT THE CONTENT
 }

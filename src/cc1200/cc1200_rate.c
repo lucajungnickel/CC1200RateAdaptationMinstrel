@@ -94,11 +94,11 @@ static uint8_t build_pkg_cfg2_std(uint8_t pkt_format) {
 
 const int TIMEOUT = 1000;
 
-void cc1200_reset() {
+void cc1200_reset(int device_id) {
 
 }
 
-void cc1200_init(int id) {
+void cc1200_init(int device_id) {
     //id can be ignored here
 
     // Initialize SPI
@@ -136,7 +136,7 @@ static float log_2(float num) {
     return log(num) / log(2.);
 }
 
-void cc1200_change_rate(uint8_t rate) {
+void cc1200_change_rate(int device_id, uint8_t rate) {
     float rate_in_ksps = MINSTREL_RATES[rate] / 1000.;
     int32_t srate_e = log_2((rate_in_ksps * pow(2, 39)) / F_XOSC) - 20;
     int32_t srate_m = ((rate_in_ksps * pow(2, 39)) / (F_XOSC * (1 << srate_e))) - (1 << 20);
@@ -160,7 +160,7 @@ void cc1200_change_rate(uint8_t rate) {
 }
 
 // TODO: Error handling
-void cc1200_send_packet(int device_id, packet_t* packet) {
+cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     //To be tested:
     uint32_t len = packet_get_size(packet);
     uint8_t* buffer = malloc(len * sizeof(uint8_t));
@@ -190,6 +190,8 @@ void cc1200_send_packet(int device_id, packet_t* packet) {
         puts("DEBUG: Sent packet!");
         printf("DEBUG: Status: %s\n", get_status_cc1200_str());
     }
+
+    return cc1200_status_send_ok; //TODO better error handling
 }
 
 // TODO: Error handling

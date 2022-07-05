@@ -27,54 +27,69 @@ int main(int argc, char** argv) {
         printf("No options which packet should be tested in arguments\n");
         return 1;
     }
+    bool test_all=false;
     for (int i=0;i<argc;i++) {
         printf("Test run[%i]: %s\n", i, argv[i]);
     }
-    if (!strcmp(argv[1], "packet.minstrel.build")) {
-        printf("Start minstrel build\n");
+    if (!strcmp(argv[1], "--all")) {
+        printf("Test all cases\n");
+        test_all = true;
+    }
+    if (!strcmp(argv[1], "packet.minstrel.build") || test_all) {
+        printf("\nStart minstrel build\n\n");
         test_packet_build();
-    } else if (!strcmp(argv[1], "packet.minstrel.destroy"))  {
-        printf("Start minstrel destroy\n");
+    }
+    if (!strcmp(argv[1], "packet.minstrel.destroy") || test_all)  {
+        printf("\nStart minstrel destroy\n\n");
         test_packet_destroy();
-    } else if (!strcmp(argv[1], "packet.minstrel.checksum")) {
-        printf("Start minstrel checksum\n");
+    }
+    if (!strcmp(argv[1], "packet.minstrel.checksum") || test_all) {
+        printf("\nStart minstrel checksum\n\n");
         test_packet_checksum();
-    } else if (!strcmp(argv[1], "packet.minstrel.serialize.normal")) {
-        printf("Start minstrel serialize normal\n");
+    }
+    if (!strcmp(argv[1], "packet.minstrel.serialize.normal") || test_all) {
+        printf("\nStart minstrel serialize normal\n\n");
         test_packet_serialize_normal();
-    } else if (!strcmp(argv[1], "packet.minstrel.serialize.zero")) {
-        printf("Start minstrel serialize zero case\n");
+    }
+    if (!strcmp(argv[1], "packet.minstrel.serialize.zero") || test_all) {
+        printf("\nStart minstrel serialize zero case\n\n");
         test_packet_serialize_zero();
-    } else if (!strcmp(argv[1], "packet.minstrel.serialize.maximum")) {
-        printf("Start minstrel serialize maximum case\n");
+    }
+    if (!strcmp(argv[1], "packet.minstrel.serialize.maximum") || test_all) {
+        printf("\nStart minstrel serialize maximum case\n\n");
         test_packet_serialize_maximum();
-    } else if (!strcmp(argv[1], "packet.minstrel.deserialize.normal")) {
-        printf("Start minstrel deserialize normal case\n");
+    }
+    if (!strcmp(argv[1], "packet.minstrel.deserialize.normal") || test_all) {
+        printf("\nStart minstrel deserialize normal case\n\n");
         test_packet_deserialize_normal();
-    } else if (!strcmp(argv[1], "packet.minstrel.deserialize.maximum")) {
-        printf("Start minstrel deserialize maximum case\n");
+    } 
+    if (!strcmp(argv[1], "packet.minstrel.deserialize.maximum") || test_all) {
+        printf("\nStart minstrel deserialize maximum case\n\n");
         test_packet_deserialize_maximum();
-    } else if (!strcmp(argv[1], "communication.init")) {
-        printf("Start communication init test\n");
+    }
+    if (!strcmp(argv[1], "communication.init") || test_all) {
+        printf("\nStart communication init test\n\n");
         test_communication_initialization();
-    } else if (!strcmp(argv[1], "communication.sendOK.rcvOK.small")) {
-        printf("Start communication small send ok rcv ok test\n");
+    }
+    if (!strcmp(argv[1], "communication.sendOK.rcvOK.small") || test_all) {
+        printf("\nStart communication small send ok rcv ok test\n\n");
         test_communication_send_ok_rcv_ok();
-    } else if (!strcmp(argv[1], "communication.handshake.sendFAIL")) {
-        printf("Start communication handshake send fail and retry test\n");
+    }
+    if (!strcmp(argv[1], "communication.handshake.sendFAIL") || test_all) {
+        printf("\nStart communication handshake send fail and retry test\n\n");
         test_communication_send_error_handshake();
-    } else if (!strcmp(argv[1], "communication.handshake.ackFAIL")) {
-        printf("Start communication handshake ACK fail and retry test\n");
+    }
+    if (!strcmp(argv[1], "communication.handshake.ackFAIL") || test_all) {
+        printf("\nStart communication handshake ACK fail and retry test\n\n");
         test_communication_handshake_ack_error();
-    } else if (!strcmp(argv[1], "communication.handshake.checksum.sendFAIL")) {
-        printf("Start communication handshake checksum error\n");
+    }
+    if (!strcmp(argv[1], "communication.handshake.checksum.sendFAIL") || test_all) {
+        printf("\nStart communication handshake checksum error\n\n");
         test_communication_send_wrong_checksum_error();
-    } else if (!strcmp(argv[1], "communication.handshake.checksum.ackFAIL")) {
-        printf("Start communication handshake checksum in ack error\n");
+    }
+    if (!strcmp(argv[1], "communication.handshake.checksum.ackFAIL") || test_all) {
+        printf("\nStart communication handshake checksum in ack error\n\n");
         test_communication_send_wrong_checksum_ack_error();
-    } else {
-        printf("No valid test command.\n");
-        return 1;
     }
 
     return 0;

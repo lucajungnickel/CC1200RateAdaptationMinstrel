@@ -12,7 +12,7 @@
 #include "minstrel.h"
 #include "cc1200_rate.h"
 
-bool receive_done = false;
+volatile bool receive_done = false;
 receiver_t *rcv = NULL;
 
 static int id_sender = 10;
@@ -21,8 +21,8 @@ static int id_rcv = 20;
 static void resetTests() {
     receive_done = false;
     rcv = NULL;
-    cc1200_reset();
-
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }
 
 static void *thread_receive_init() {
@@ -40,7 +40,7 @@ static void *thread_receive_init() {
     assert(receiver->lastPacketRcv->ack == 0);
     
 
-    rcv = receiver;
+    rcv = receiver; //for testing in main thread
     receive_done = true;
 }
 
@@ -51,7 +51,6 @@ static void *thread_receive_init() {
  */
 void test_communication_initialization() {
     //Setup a sender and receiver
-    
     cc1200_init(id_sender);
     cc1200_init(id_rcv);
 
@@ -60,7 +59,6 @@ void test_communication_initialization() {
     //receiver thread:
     pthread_t thread_rcv_id;
     pthread_create(&thread_rcv_id, NULL, thread_receive_init, NULL);
-    //sleep(0.1);
 
     Minstrel* minstrel = calloc(1, sizeof(Minstrel));
     assert(minstrel != NULL);
@@ -79,6 +77,9 @@ void test_communication_initialization() {
     assert(rcv->lastPacketSend->payload_len == 0);
     assert(rcv->lastPacketRcv->payload_len == 0);
     assert(sender->next_ack == 2);
+
+    sender_destroy(sender);
+    receiver_destroy(rcv);
 }
 
 //----------------------------------------------------------------
@@ -108,6 +109,9 @@ static void *thread_receive_send_ok_rcv_ok() {
         printf("0x%x ", i);
     }
     printf("\n");
+
+    //free(buffer);
+    
     receive_done = true;
 }
 
@@ -151,6 +155,18 @@ void test_communication_send_ok_rcv_ok() {
         buffer[i] = i % UINT8_MAX;
     }
     sender_send_and_ack(sender, buffer, buffer_len);
+    free(buffer);
+
+
+    //Kill Thread
+    while (!receive_done) {
+        sleep(0.001);
+    }
+    pthread_join(thread_rcv_id, NULL);
+
+    receiver_destroy(rcv);
+    sender_destroy(sender);
+
     //check if ack was received
 
 /*
@@ -159,12 +175,6 @@ void test_communication_send_ok_rcv_ok() {
     assert(sender->lastPacketRcv->id == 2);
     assert(sender->lastPacketRcv->payload_len == 0);
 */
-
-    //Kill Thread
-    while (!receive_done) {
-        sleep(0.001);
-    }
-    pthread_join(thread_rcv_id, NULL);
 }
 
 //---------------------------------------------------------------
@@ -224,6 +234,12 @@ void test_communication_send_error_handshake() {
     assert(sender->next_ack == 2);
 
     pthread_join(thread_rcv_id, NULL);
+
+    sender_destroy(sender);
+    receiver_destroy(rcv);
+
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }
 
 //------------------------------------------------------------------
@@ -278,6 +294,12 @@ void test_communication_handshake_ack_error() {
     assert(rcv->lastPacketSend->payload_len == 0);
     assert(rcv->lastPacketRcv->payload_len == 0);
     assert(sender->next_ack == 2);
+
+    sender_destroy(sender);
+    receiver_destroy(rcv);
+
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }
 //-------------------------------------------------------------------------------
 
@@ -332,6 +354,12 @@ void test_communication_send_wrong_checksum_error() {
     assert(rcv->lastPacketSend->payload_len == 0);
     assert(rcv->lastPacketRcv->payload_len == 0);
     assert(sender->next_ack == 2);
+
+    sender_destroy(sender);
+    receiver_destroy(rcv);
+
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }
 
 
@@ -390,4 +418,10 @@ void test_communication_send_wrong_checksum_ack_error() {
     assert(rcv->lastPacketRcv->payload_len == 0);
     assert(sender->next_ack == 2);
     assert(sender->debug_number_wrong_checksum == 1);
+
+    sender_destroy(sender);
+    receiver_destroy(rcv);
+    
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
 }

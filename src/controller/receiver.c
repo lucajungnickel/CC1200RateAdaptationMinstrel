@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <time.h>
+#include <string.h>
 
 #include "../cc1200/cc1200_rate.h"
 
@@ -20,8 +22,7 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     rcv->socket_send = socket_send;
     rcv->socket_rcv = socket_rcv;
     rcv->debug_number_wrong_checksum = 0;
-    
-    uint8_t* buffer = calloc(sizeof(uint8_t), 1000);
+    rcv->last_symbol_rate = 0; //symbol rate is set to lowest at beginning
 
     packet_t* pkt = NULL;
     packet_status_t status = packet_status_none;
@@ -47,6 +48,13 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     return rcv;
 }
 
+void receiver_destroy(receiver_t *rcv) {
+    if (rcv == NULL) return;
+    packet_destroy(rcv->lastPacketRcv);
+    packet_destroy(rcv->lastPacketSend);
+    free(rcv);
+}
+
 /**
  * @brief Receives and checks a packet for correct ACK and checksum.
  * 
@@ -66,12 +74,15 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
     printf("receiver rcv status of packet: %i\n", status);
     if (pkt != NULL) {
         //TODO check for correct recv token
+
         //TODO check for correct checksum
         printf("Checksum rcv %i, calced %i\n", pkt->checksum, packet_calc_checksum(pkt));
         if (pkt->checksum != packet_calc_checksum(pkt)) {
-            status = packet_status_err_timeout;
+            status = packet_status_err_checksum;
             receiver->debug_number_wrong_checksum++;
             printf("Got wrong checksum %i\n", receiver->debug_number_wrong_checksum);
+            packet_destroy(pkt);
+            return NULL;
         }
         //check for valid ACK:
         if (pkt->ack != receiver->last_ack_rcv) {
@@ -80,7 +91,15 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
         }
         //assume everything went perfect
         receiver->last_ack_rcv = pkt->id;
+        packet_destroy(receiver->lastPacketRcv);
         receiver->lastPacketRcv = pkt;
+        
+        //change rate if there is another symbol rate
+        if (pkt->next_symbol_rate != receiver->last_symbol_rate) {
+            cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
+            receiver->last_symbol_rate = pkt->next_symbol_rate;
+        }
+
         *status_back = status;
         return pkt;
     } else {
@@ -105,19 +124,35 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
 }
 
 void receiver_ack(receiver_t* receiver) {
-    //build ACK packet 
-    packet_t *pkt_send = calloc(1, sizeof(packet_t));
-    pkt_send->ack = receiver->last_ack_rcv;
-    pkt_send->payload_len = 0; //no payload
-    pkt_send->p_payload = 0x0;
-    pkt_send->fallback_rate = 0; //rcv doesnt set this
-    pkt_send->next_symbol_rate = 0; //rcv doesnt set this
-    pkt_send->id = receiver->last_ack_rcv;
-    pkt_send->token_recv = receiver->token_receiver;
-    pkt_send->token_send = receiver->token_sender;
-    pkt_send->type = packet_status_ok_ack;
-    packet_set_checksum(pkt_send);
+    bool should_send = true;
+    packet_t *pkt_send;
+    while (should_send) {
+        //build ACK packet 
+        pkt_send = calloc(1, sizeof(packet_t));
+        pkt_send->ack = receiver->last_ack_rcv;
+        pkt_send->payload_len = 0; //no payload
+        pkt_send->p_payload = 0x0;
+        pkt_send->fallback_rate = 0; //rcv doesnt set this
+        pkt_send->next_symbol_rate = 0; //rcv doesnt set this
+        pkt_send->id = receiver->last_ack_rcv;
+        pkt_send->token_recv = receiver->token_receiver;
+        pkt_send->token_send = receiver->token_sender;
+        pkt_send->type = packet_status_ok_ack;
+        packet_set_checksum(pkt_send);
 
-    cc1200_send_packet(receiver->socket_rcv, pkt_send);
+        cc1200_status_send status = cc1200_send_packet(receiver->socket_rcv, pkt_send);
+        
+        switch (status) {
+            case cc1200_status_send_ok:
+                should_send = false; //ACK is succesfully send, go on and break loop
+            break;
+            case cc1200_status_send_error:
+                packet_destroy(pkt_send);
+                should_send = true; //continue sending
+            break;
+        }
+    }
+
+    packet_destroy(receiver->lastPacketSend);
     receiver->lastPacketSend = pkt_send;
 }
