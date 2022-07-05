@@ -9,6 +9,7 @@
 #include "register_config.h"
 #include "../controller/packet.h"
 #include "../minstrel/minstrel.h"
+#include "../log.c/src/log.h"
 
 
 /**
@@ -163,6 +164,7 @@ void cc1200_change_rate(int device_id, uint8_t rate) {
 cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     //To be tested:
     uint32_t len = packet_get_size(packet);
+    log_debug("Packet len to be send: %i", len);
     uint8_t* buffer = malloc(len * sizeof(uint8_t));
     packet_serialize(packet, buffer);
 
@@ -171,6 +173,9 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     cc1200_reg_write(PKT_CFG2, build_pkg_cfg2_std(PKT_FORMAT));
     cc1200_reg_write(PKT_LEN, len);
 
+    int num_bytes_fifo = cc1200_reg_read(NUM_TXBYTES, NULL);
+    log_debug("NUM_TXBYTES REG: %i", num_bytes_fifo);
+
     // Write TX FIFO
     for (int i=0; i<len; i++)
         cc1200_reg_write(REG_FIFO, buffer[i]);
@@ -178,13 +183,18 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     // Switch to TX mode
     cc1200_cmd(STX);
 
+    log_debug("CC1200 Module send, before WHILE");
     // Wait till TX mode entered
     while (get_status_cc1200() != TX)
         cc1200_cmd(SNOP);
 
+    log_debug("CC1200 Module send, between WHILE");
+
     // Wait till TX mode left
     while (get_status_cc1200() != IDLE)
         cc1200_cmd(SNOP);
+
+    log_debug("CC1200 Module send, after WHILE");
 
     if (IS_DEBUG) {
         puts("DEBUG: Sent packet!");

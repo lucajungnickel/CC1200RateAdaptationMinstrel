@@ -21,7 +21,7 @@
 #include "../log.c/src/log.h"
 
 static int id_sender = 10;
-static int id_rcv = 10;
+static int id_rcv = 20;
 
 static void start() {
     cc1200_init(id_sender);

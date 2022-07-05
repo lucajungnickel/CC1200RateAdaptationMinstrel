@@ -48,7 +48,9 @@ static void sender_send(sender_t *sender, packet_t *packet) {
 
     bool should_send = true;
     while (should_send) {
+        log_debug("Send the packet to cc1200 module");
         cc1200_status_send status = cc1200_send_packet(sender->socket_send, packet);
+        log_debug("Send to module done");
         switch (status) {
             case cc1200_status_send_ok:
                 should_send = false;
@@ -140,20 +142,26 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     
     bool should_send = true;
     while (should_send) {
+        log_debug("Try to receive an ACK");
         packet_status_t status = sender_rcv_ack(sender);
         log_debug("Received at sender status: %i", status);
         if (status == packet_status_ok || status == packet_status_ok_ack) {
             should_send = false;
+            log_info("Got good status, leave loop here");
             break;
         } else if (status == packet_status_warn_wrong_ack) {
             //Sender shouldn't receive invalid ACK
             //,then send packet again
+            log_debug("Wrong ACK, send again");
             pkt = sender_build_pkt(sender, buffer, len);
             sender_send(sender, pkt);
         } else if (status == packet_status_err_timeout) {
             //then send packet again
+            log_debug("Timeout, send again");
             pkt = sender_build_pkt(sender, buffer, len);
+            log_debug("PKT built again");
             sender_send(sender, pkt);
+            log_debug("packet after timeout sent");
         }
     }
     log_info("Sender done sending ack");
