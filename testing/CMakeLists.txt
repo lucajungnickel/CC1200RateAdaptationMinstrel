@@ -28,3 +28,5 @@ add_test(NAME communication.handshake.sendFAIL COMMAND unit_test communication.h
 add_test(NAME communication.handshake.ackFAIL COMMAND unit_test communication.handshake.ackFAIL)
 add_test(NAME communication.handshake.checksum.sendFAIL COMMAND unit_test communication.handshake.checksum.sendFAIL)
 add_test(NAME communication.handshake.checksum.ackFAIL COMMAND unit_test communication.handshake.checksum.ackFAIL)
+add_test(NAME communication.send.bigData COMMAND unit_test communication.send.bigData)
+

@@ -39,7 +39,7 @@ void sender_destroy(sender_t *sender);
  * @param sender given sender
  * @param packet packet which will be send
  */
-void sender_send(sender_t *sender, packet_t *packet);
+//void sender_send(sender_t *sender, packet_t *packet);
 
 /**
  * @brief Receives an ACK from receiver.

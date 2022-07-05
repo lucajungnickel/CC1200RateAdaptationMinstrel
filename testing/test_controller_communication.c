@@ -425,3 +425,69 @@ void test_communication_send_wrong_checksum_ack_error() {
     cc1200_reset(id_sender);
     cc1200_reset(id_rcv);
 }
+
+
+
+//-------------------------------------------------------------------------------------
+
+
+void *thread_send_big_data() {
+    cc1200_debug_corrupt_next_checksum(id_rcv);
+    receiver_t* receiver = receiver_init(id_sender, id_rcv);
+
+    assert(receiver->token_receiver != 0);
+    assert(receiver->token_sender != 0);
+    assert(receiver->lastPacketRcv->id == 1);
+    assert(receiver->lastPacketRcv->token_send != 0);
+    assert(receiver->lastPacketRcv->token_recv == 0);
+    assert(receiver->lastPacketSend->token_send == 
+        receiver->lastPacketRcv->token_send);
+
+    rcv = receiver;
+
+    //it's important to receive the next packet, only at this point we can detect if 
+    //an ack failed
+    uint8_t* buffer;
+    uint8_t len = receiver_receive_and_ack(rcv, &buffer);
+
+    //Check payload
+    receive_done = true;
+}
+
+void test_communication_send_big_data() {
+    return;
+    //Setup a sender and receiver
+    resetTests();  
+    cc1200_init(id_sender);
+    cc1200_init(id_rcv);
+
+    //receiver thread:
+    pthread_t thread_rcv_id;
+    pthread_create(&thread_rcv_id, NULL, thread_send_big_data, NULL);
+    
+    sleep(0.001);
+
+    Minstrel* minstrel = calloc(1, sizeof(Minstrel));
+    assert(minstrel != NULL);
+    sender_t* sender = sender_init(minstrel, id_sender, id_rcv);
+    //Kill Thread
+    while (!receive_done) {
+        sleep(0.001);
+    }
+    pthread_join(thread_rcv_id, NULL);
+
+    //check for correct sender
+    assert(sender->lastPacketSend->id == 1);
+    assert(rcv->lastPacketSend->ack == 1);
+    assert(rcv->lastPacketSend->id == 1);
+    assert(rcv->lastPacketSend->payload_len == 0);
+    assert(rcv->lastPacketRcv->payload_len == 0);
+    assert(sender->next_ack == 2);
+    assert(sender->debug_number_wrong_checksum == 1);
+
+    sender_destroy(sender);
+    receiver_destroy(rcv);
+    
+    cc1200_reset(id_sender);
+    cc1200_reset(id_rcv);
+}

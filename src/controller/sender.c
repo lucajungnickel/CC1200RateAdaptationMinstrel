@@ -40,7 +40,7 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
 }
 
 //use it like a local function
-void sender_send(sender_t *sender, packet_t *packet) {
+static void sender_send(sender_t *sender, packet_t *packet) {
     if (sender == NULL || packet == NULL) return;
     sender->next_ack = packet->id; //send last send and next expected ACK
     packet_destroy(sender->lastPacketSend); //destroy old reference

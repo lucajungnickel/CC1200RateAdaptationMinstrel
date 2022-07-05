@@ -95,6 +95,12 @@ int main(int argc, char** argv) {
         log_info("Start communication handshake checksum in ack error");
         test_communication_send_wrong_checksum_ack_error();
     }
+    if (!strcmp(argv[1], "communication.send.bigData") || test_all) {
+        log_info("Start communication send big data test");
+        test_communication_send_big_data();
+    }
+
+    
 
     return 0;
 }
