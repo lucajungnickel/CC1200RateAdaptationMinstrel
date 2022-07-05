@@ -44,8 +44,21 @@ void sender_send(sender_t *sender, packet_t *packet) {
     packet_destroy(sender->lastPacketSend); //destroy old reference
     sender->lastPacketSend = packet; //update last packet send
 
-    cc1200_send_packet(sender->socket_send, packet);
+    bool should_send = true;
+    while (should_send) {
+        cc1200_status_send status = cc1200_send_packet(sender->socket_send, packet);
+        switch (status) {
+            case cc1200_status_send_ok:
+                should_send = false;
+            break;
+            case cc1200_status_send_error:
+                printf("Warning: CC1200 sending failed\n");
+                should_send = true;
+            break;
+        }
+    }
     printf("Sender packet sent\n");
+    
     //start timer
     timer_started = clock(); //start timer for read timeout
 }

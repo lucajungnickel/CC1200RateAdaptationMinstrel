@@ -79,6 +79,7 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
         printf("Checksum rcv %i, calced %i\n", pkt->checksum, packet_calc_checksum(pkt));
         if (pkt->checksum != packet_calc_checksum(pkt)) {
             status = packet_status_err_checksum;
+            
             receiver->debug_number_wrong_checksum++;
             printf("Got wrong checksum %i\n", receiver->debug_number_wrong_checksum);
             packet_destroy(pkt);
