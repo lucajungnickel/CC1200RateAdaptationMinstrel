@@ -13,37 +13,41 @@ static clock_t timer_started = 0x0;
 
 
 sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
+    if (minstrel == NULL) return NULL;
+
     sender_t *sender = calloc(1, sizeof(sender_t));
     if (sender == NULL) return NULL;
-
+    
+    //builds sender
     sender->minstrel = minstrel;
-
     sender->debug_number_wrong_checksum = 0;
     sender->next_ack = 1;
-
     sender->socket_rcv = socket_rcv;
     sender->socket_send = socket_send;
-
+    sender->lastPacketRcv = NULL;
+    sender->lastPacketSend = NULL;
+    //randomly generating a token for sender:
     uint16_t token_sender = rand() % UINT16_MAX;
     sender->token_sender = token_sender;
     if (token_sender == 0) token_sender = 1;
   
-    //sends handshake packet
+    //sends handshake packet, no payload
     sender_send_and_ack(sender, NULL, 0);
     
     return sender;
 }
 
+//use it like a local function
 void sender_send(sender_t *sender, packet_t *packet) {
     if (sender == NULL || packet == NULL) return;
-    sender->next_ack = packet->id;
+    sender->next_ack = packet->id; //send last send and next expected ACK
     packet_destroy(sender->lastPacketSend); //destroy old reference
-    sender->lastPacketSend = packet;
+    sender->lastPacketSend = packet; //update last packet send
 
     cc1200_send_packet(sender->socket_send, packet);
     printf("Sender packet sent\n");
     //start timer
-    timer_started = clock();
+    timer_started = clock(); //start timer for read timeout
 }
 
 void sender_destroy(sender_t *sender) {
@@ -67,12 +71,14 @@ packet_status_t sender_rcv_ack(sender_t *sender) {
 
     packet_t* pkt = cc1200_get_packet(sender->socket_rcv, timer_started, &status);
 
+    //update last packet received, even if it's NULL
     packet_destroy(sender->lastPacketRcv);
     sender->lastPacketRcv = pkt;
+
     if (pkt == NULL) {
         return status;
     } else {
-        if (status == packet_status_err_timeout) { //if there is a timeout, start clock again!
+        if (status == packet_status_err_timeout) { 
             return packet_status_err_timeout;
         }
         //check for correct CHECKSUM

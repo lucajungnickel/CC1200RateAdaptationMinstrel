@@ -8,8 +8,8 @@
 
 typedef struct sender_t {
     uint32_t next_ack; //next expected ACK to receive
-    uint16_t token_sender;
-    uint16_t token_receiver;
+    uint16_t token_sender; //unique token, can't be 0
+    uint16_t token_receiver; //unique token, can't be 0
     Minstrel *minstrel; //minstrel algorithm reference
     packet_t* lastPacketSend; //for DEBUGGING, last packet which was sent. No checking if it really arrived
     packet_t* lastPacketRcv; //for better debugging

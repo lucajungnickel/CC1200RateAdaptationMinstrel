@@ -7,7 +7,7 @@
 #ifndef RECEIVER_H
 #define RECEIVER_H
 
-#include "stdint.h"
+#include <stdint.h>
 #include "packet.h"
 #include "../minstrel/minstrel.h"
 
