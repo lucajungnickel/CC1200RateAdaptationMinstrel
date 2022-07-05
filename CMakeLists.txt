@@ -26,16 +26,20 @@ list(REMOVE_ITEM SRC_CONTROLLER "${CMAKE_CURRENT_SOURCE_DIR}/src/controller/main
 #remove receiver main
 list(REMOVE_ITEM SRC_CONTROLLER "${CMAKE_CURRENT_SOURCE_DIR}/src/controller/main_receiver.c")
 
+file(GLOB SRC_CC1200 "src/cc1200/*.c")
+
+
+
 file(GLOB SRC_LOG_LIB "src/log.c/src/log.c")
 
 if (BUILD_LOCAL_ONLY)
     set (SPI_LIB "")
     set (PRUSS_LIBS "")
-    file(GLOB SRC_CC1200  "src/cc1200/cc1200_mockup.c")
+    list(REMOVE_ITEM SRC_CC1200 "${CMAKE_CURRENT_SOURCE_DIR}/src/cc1200/cc1200_rate.c")
 else()
     set (PRUSS_LIBS "-Wl,-rpath=$(LOCAL_LIB) -L$(LOCAL_LIB) -lprussdrv")
     set (SPI_LIB "-L${LOCAL_LIB} -lspi")
-    file(GLOB SRC_CC1200  "src/cc1200/cc1200_rate.c")
+    list(REMOVE_ITEM SRC_CC1200 "${CMAKE_CURRENT_SOURCE_DIR}/src/cc1200/cc1200_mockup.c") #REMOVE MOCKUOP
 endif (BUILD_LOCAL_ONLY)
 
 
