@@ -156,5 +156,5 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
             sender_send(sender, pkt);
         }
     }
-    log_debug("Sender done sending ack");
+    log_info("Sender done sending ack");
 }

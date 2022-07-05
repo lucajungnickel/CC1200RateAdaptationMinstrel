@@ -10,6 +10,7 @@
 #include "sender.h"
 #include "minstrel.h"
 #include "cc1200_rate.h"
+#include "sender_interface.h"
 #include "../src/log.c/src/log.h"
 
 volatile bool receive_done = false;
@@ -430,9 +431,9 @@ void test_communication_send_wrong_checksum_ack_error() {
 
 //-------------------------------------------------------------------------------------
 
+static uint32_t data_size = 1024 * 2;
 
 void *thread_send_big_data() {
-    cc1200_debug_corrupt_next_checksum(id_rcv);
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
 
     assert(receiver->token_receiver != 0);
@@ -447,15 +448,30 @@ void *thread_send_big_data() {
 
     //it's important to receive the next packet, only at this point we can detect if 
     //an ack failed
-    uint8_t* buffer;
-    uint8_t len = receiver_receive_and_ack(rcv, &buffer);
+    uint32_t currentByte = 0;
+
+    while (currentByte < data_size) {
+
+        uint8_t* buffer;
+        uint8_t len = receiver_receive_and_ack(rcv, &buffer);
+
+        for (int i=0;i<len;i++) {
+            log_debug("RCV: [%i] %i", currentByte, buffer[i]);
+            assert(buffer[i] == currentByte % 256);
+            currentByte++;
+        }
+
+        //TODO assert here
+
+    }
+
+
 
     //Check payload
     receive_done = true;
 }
 
 void test_communication_send_big_data() {
-    return;
     //Setup a sender and receiver
     resetTests();  
     cc1200_init(id_sender);
@@ -467,25 +483,27 @@ void test_communication_send_big_data() {
     
     sleep(0.001);
 
-    Minstrel* minstrel = calloc(1, sizeof(Minstrel));
-    assert(minstrel != NULL);
-    sender_t* sender = sender_init(minstrel, id_sender, id_rcv);
+    //Test sender_interface
+    log_debug("Start init sender_interface in test function");
+    sender_interface_t* s_interface = sender_interface_init(id_sender, id_rcv);
+    log_debug("Handshake succeeded in sender interface");
+
+    log_debug("Try to send a lot of data");
+    uint8_t *buffer = calloc(data_size, sizeof(uint8_t));
+    for (int i=0;i < data_size;i++) {
+        buffer[i] = i % 256;
+    }
+    sender_interface_send_data(s_interface, buffer, data_size);
+    log_info("All data sent!");
+    free(buffer);
+    
     //Kill Thread
     while (!receive_done) {
         sleep(0.001);
     }
     pthread_join(thread_rcv_id, NULL);
 
-    //check for correct sender
-    assert(sender->lastPacketSend->id == 1);
-    assert(rcv->lastPacketSend->ack == 1);
-    assert(rcv->lastPacketSend->id == 1);
-    assert(rcv->lastPacketSend->payload_len == 0);
-    assert(rcv->lastPacketRcv->payload_len == 0);
-    assert(sender->next_ack == 2);
-    assert(sender->debug_number_wrong_checksum == 1);
-
-    sender_destroy(sender);
+    sender_interface_destroy(s_interface);
     receiver_destroy(rcv);
     
     cc1200_reset(id_sender);
