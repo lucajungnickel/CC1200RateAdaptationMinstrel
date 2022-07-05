@@ -12,84 +12,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #include "packet.h"
+#include "sender_interface.h"
 #include "../minstrel/minstrel.h"
 #include "../cc1200/cc1200_rate.h"
+#include "../log.c/src/log.h"
+
+static int id_sender = 10;
+static int id_rcv = 10;
 
 static void start() {
+    cc1200_init(id_sender);
+    cc1200_init(id_rcv);
 
+    //sender_interface
+    log_debug("Start init sender_interface in test function");
+    sender_interface_t* s_interface = sender_interface_init(id_sender, id_rcv);
+    log_debug("Handshake succeeded in sender interface");
+
+    uint32_t data_size = 1024 * 2;
+    uint8_t *buffer = calloc(data_size, sizeof(uint8_t));
+    for (int i=0;i < data_size;i++) {
+        buffer[i] = i % 256;
+    }    
     
-
-    // Initialize Minstrel state
-    Minstrel* minstrel = minstrel_init();
-    if (minstrel->state != READY) {
-        puts("ERROR: Couldn't initialize minstrel");
-        exit(1);
+    while (true) { //for testing purpose there is a while loop here
+        log_debug("Try to send a lot of data");
+        sender_interface_send_data(s_interface, buffer, data_size);
+        sleep(1);
+        log_info("All data sent!");
     }
-
-    // Initialize CC1200 registers and packet mode
-    cc1200_init(0);
-
-    //packet id of the next sending packet
-    uint32_t pkt_id = 0;
-    while (true) {
-        unsigned int next_rate = minstrel->rates.current;
-
-        //change rate
-        cc1200_change_rate(0, next_rate);
-
-        //build next package
-        packet_t *pkt = malloc(sizeof(packet_t));
-
-        pkt->ack = 0;
-        // TODO: use minstrel->rates.X here
-        pkt->fallback_rate = minstrel->rates.fallback;
-
-        pkt->id = pkt_id;
-
-        pkt->next_symbol_rate = next_rate;
-
-        pkt->token_recv = 5; //TODO implement handshake
-        pkt->token_send = 6; //TODO implement handshake
-
-        pkt->type = packet_status_ok;
-
-        //set payload TODO überarbeiten
-        pkt->payload_len = 50;
-        pkt->p_payload = malloc(sizeof(uint8_t) * pkt->payload_len);
-        for (int i=0; i<pkt->payload_len; i++) {
-            pkt->p_payload[i] = i % 256;
-        }
-
-        packet_set_checksum(pkt);
-        //packet build done
-
-        //serialize
-        uint32_t len = packet_get_size(pkt);
-        uint8_t* send_buf = malloc(len * sizeof(uint8_t));
-        packet_serialize(pkt, send_buf);
-
-        //send
-        //cc1200_send_packet(pkt);
-        free(send_buf); //clean up
-
-        //receive
-        packet_status_t status;
-        packet_t* recv_pkt = cc1200_get_packet(0, clock(), &status);
-
-        //int res = waitForACK()
-        //if (res == CONNECTION_LOST) return 0;
-        //logPackageStatus(package->id, res)
-
-        // Update Minstrel state + statistics (incl. used rate)
-        Packet* pkt_minstrel; // TODO
-        minstrel_update(minstrel, pkt_minstrel);
-
-       //increment packet id for next send
-        if (pkt_id != UINT32_MAX) pkt_id++;
-        else pkt_id = 0;
-    }
+    free(buffer);
 }
 
 int main(int argc, char** argv)

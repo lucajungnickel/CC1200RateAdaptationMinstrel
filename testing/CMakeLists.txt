@@ -7,8 +7,11 @@ file (GLOB log_src "../src/log.c/src/log.c")
 
 #remove sender main
 list(REMOVE_ITEM controller_src "${CMAKE_CURRENT_SOURCE_DIR}/../src/controller/main_sender.c")
+#remove receiver main
+list(REMOVE_ITEM controller_src "${CMAKE_CURRENT_SOURCE_DIR}/../src/controller/main_receiver.c")
 
-message("${controller_src}")
+
+#message("${controller_src}")
 
 set (CMAKE_EXE_LINKER_FLAGS "-lpthread")
 set(CMAKE_C_FLAGS "-pthread -DLOG_USE_COLOR")

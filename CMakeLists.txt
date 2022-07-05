@@ -21,6 +21,11 @@ include_directories(src/log.c/src)
 
 
 file(GLOB SRC_CONTROLLER "src/controller/*.c")
+#remove sender main
+list(REMOVE_ITEM SRC_CONTROLLER "${CMAKE_CURRENT_SOURCE_DIR}/src/controller/main_sender.c")
+#remove receiver main
+list(REMOVE_ITEM SRC_CONTROLLER "${CMAKE_CURRENT_SOURCE_DIR}/src/controller/main_receiver.c")
+
 file(GLOB SRC_LOG_LIB "src/log.c/src/log.c")
 
 if (BUILD_LOCAL_ONLY)
@@ -42,7 +47,9 @@ endif (BUILD_REAL_MINSTREL)
 
 
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS} -lm")
-add_executable(MINSTREL ${SRC_LOG_LIB} ${SRC_CONTROLLER} ${SRC_MINSTREL} ${SRC_CC1200})
+add_executable(main_sender ${SRC_LOG_LIB} ${SRC_CONTROLLER} ${SRC_MINSTREL} ${SRC_CC1200} "${CMAKE_CURRENT_SOURCE_DIR}/src/controller/main_sender.c")
+add_executable(main_receiver ${SRC_LOG_LIB} ${SRC_CONTROLLER} ${SRC_MINSTREL} ${SRC_CC1200} "${CMAKE_CURRENT_SOURCE_DIR}/src/controller/main_receiver.c")
+
 
 if (BUILD_TESTS)
     enable_testing()

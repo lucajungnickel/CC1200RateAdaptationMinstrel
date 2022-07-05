@@ -6,7 +6,7 @@
 #include "../log.c/src/log.h"
 
 static void sender_interface_ping_thread(sender_interface_t* interface) {
-
+    //TODO implement
 }
 
 sender_interface_t* sender_interface_init(int socket_send, int socket_rcv) {
@@ -23,6 +23,8 @@ sender_interface_t* sender_interface_init(int socket_send, int socket_rcv) {
     back->isConnected = true;
     //now the sender is connected!
     //start thread for regular PINGs
+    //TODO implement
+    
     return back;
 }
 

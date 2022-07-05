@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "sender.h"
 
@@ -22,6 +23,7 @@
 typedef struct sender_interface_t {
     bool isConnected;
     sender_t *sender;
+    clock_t lastTimeSent;
 } sender_interface_t;
 
 /**

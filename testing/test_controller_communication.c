@@ -431,7 +431,7 @@ void test_communication_send_wrong_checksum_ack_error() {
 
 //-------------------------------------------------------------------------------------
 
-static uint32_t data_size = 1024 * 2;
+static uint32_t data_size = 1024 * 2 * 10;
 
 void *thread_send_big_data() {
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
@@ -445,13 +445,11 @@ void *thread_send_big_data() {
         receiver->lastPacketRcv->token_send);
 
     rcv = receiver;
+    
 
-    //it's important to receive the next packet, only at this point we can detect if 
-    //an ack failed
     uint32_t currentByte = 0;
-
+    int numPacket = receiver->last_ack_rcv;
     while (currentByte < data_size) {
-
         uint8_t* buffer;
         uint8_t len = receiver_receive_and_ack(rcv, &buffer);
 
@@ -461,13 +459,9 @@ void *thread_send_big_data() {
             currentByte++;
         }
 
-        //TODO assert here
-
+        numPacket++;
+        assert(rcv->last_ack_rcv == numPacket);
     }
-
-
-
-    //Check payload
     receive_done = true;
 }
 
@@ -496,12 +490,15 @@ void test_communication_send_big_data() {
     sender_interface_send_data(s_interface, buffer, data_size);
     log_info("All data sent!");
     free(buffer);
-    
+
     //Kill Thread
     while (!receive_done) {
         sleep(0.001);
     }
     pthread_join(thread_rcv_id, NULL);
+
+    //asserts
+    assert(s_interface->isConnected == true);
 
     sender_interface_destroy(s_interface);
     receiver_destroy(rcv);
