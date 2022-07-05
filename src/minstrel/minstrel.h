@@ -127,8 +127,8 @@ void minstrel_update(Minstrel* minstrel, Packet* pkt);
 
 /**
  * @brief Destroys the minstrel struct and all related data in it.
- * 
- * @param minstrel 
+ *
+ * @param minstrel
  */
 void minstrel_destroy(Minstrel* minstrel);
 
