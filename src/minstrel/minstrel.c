@@ -1,7 +1,9 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "minstrel.h"
+#include "../cc1200/cc1200_rate.h"
 
 
 uint32_t MINSTREL_RATES[] = {40, 250, 1200, 2400, 4800, 9600, 25000, 50000, 100000, 250000, 500000};
@@ -128,42 +130,33 @@ static void update_rates(Minstrel* minstrel) {
 static void set_probe_rate(Minstrel* minstrel) {
     uint8_t probe;
     // Pick a random rate not equal to the current one
-    while ((probe = rand() % MAX_RATE) == minstrel->rates.current);
+    while ((probe = rand() % MAX_RATES) == minstrel->rates.current);
     minstrel->rates.probe = probe;
 }
 
 uint8_t minstrel_get_next_rate(Minstrel* minstrel) {
-    return minstrel->rates[minstrel->rate_state];
+    return minstrel->rates.r[minstrel->rate_state];
 }
 
-static RateState minstrel_state_to_rate_state(MinstrelState state) {
-    switch(state) {
-      case PROBE:
-           set_probe_rate(minstrel);
-           return PROBE_RATE;
-       case PACKET_TIMEOUT:
-           // Use the next lower rate according to the specification
-           // i.e. best throughput -> second best throughput -> highest success probability -> fallback
-           if (minstrel->rate_state != FALLBACK_RATE)
-               return minstrel->rate_state - 1;
-           return FALLBACK_RATE;
-       case RESUME:
-           return CURRENT_RATE;
-       case RESET:
-           return FALLBACK_RATE;
-       case RUNNING:
-       default:
+static RateState minstrel_state_to_rate_state(Minstrel *minstrel) {
+    switch(minstrel->state) {
+        case PROBE:
+            set_probe_rate(minstrel);
+            return PROBE_RATE;
+         case PACKET_TIMEOUT:
+             // Use the next lower rate according to the specification
+             // i.e. best throughput -> second best throughput -> highest success probability -> fallback
+             if (minstrel->rate_state != FALLBACK_RATE)
+                 return minstrel->rate_state - 1;
+             return FALLBACK_RATE;
+         case RESUME:
+             return CURRENT_RATE;
+         case RESET:
+             return FALLBACK_RATE;
+         case RUNNING:
+         default:
            return BEST_RATE;
-}
-
-/**
- * @brief Set the next to-be-used rate (minstrel->rates.current) of the minstrel algorithm.
- *
- * @param minstrel
- * @param is_probe Whether the next rate is a probe or not.
- */
-static void set_next_rate(Minstrel* minstrel) {
-   minstrel->rate_state = minstrel_state_to_rate_state(minstrel->state);
+    }
 }
 
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
@@ -181,11 +174,12 @@ void minstrel_update(Minstrel* minstrel, Packet* pkt) {
         // Send probe every X packets TODO: Use time interval instead
         if ((pkt->id % 10) == 0)
             minstrel->state = PROBE;
-        else 
+        else
             minstrel->state = RUNNING;
+    }
 
     // Set next rate
-    minstrel->rate_state = minstrel_state_to_rate_state(minstrel->state);
+    minstrel->rate_state = minstrel_state_to_rate_state(minstrel);
 }
 
 void minstrel_destroy(Minstrel* minstrel) {
