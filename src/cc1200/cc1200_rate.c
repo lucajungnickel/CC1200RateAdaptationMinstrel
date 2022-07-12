@@ -150,7 +150,7 @@ static float log_2(float num) {
 }
 
 void cc1200_change_rate(int device_id, uint8_t rate) {
-    log_info("Change rate to %i, in detail: ", rate, MINSTREL_RATES[rate]);
+    log_info("Change rate to %i, in detail: %i", rate, MINSTREL_RATES[rate]);
     float rate_in_ksps = MINSTREL_RATES[rate] / 1000.;
     int32_t srate_e = log_2((rate_in_ksps * pow(2, 39)) / F_XOSC) - 20;
     int32_t srate_m = ((rate_in_ksps * pow(2, 39)) / (F_XOSC * (1 << srate_e))) - (1 << 20);
