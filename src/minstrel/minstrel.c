@@ -66,7 +66,7 @@ static void log_package_status(MinstrelStatistics* statistics, minstrel_packet_t
     float succ_prob;
 
     statistics->total_send++;
-    if (pkt->status == packet_status_ok_ack) {
+    if (pkt->status == packet_status_ok) {
         statistics->total_recv++;
         // Has to be called before pkt_count is increased
         calc_avg_duration(statistics, pkt->duration);
@@ -179,11 +179,11 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     // Update statistics for the current rate
     log_package_status(&minstrel->statistics[minstrel->rates.current], pkt);
 
+    summary(minstrel);
+
     // Only update rate every X packets TODO: Use time interval instead
-    if ((pkt->id % 5) == 0) {
+    if ((pkt->id % 5) == 0)
         update_rates(minstrel);
-        summary(minstrel);
-    }
 
     if (minstrel->state == PROBE)
         minstrel->state = RESUME;
