@@ -6,7 +6,7 @@
 #include "../cc1200/cc1200_rate.h"
 
 
-uint32_t MINSTREL_RATES[] = {40, 250, 1200, 2400, 4800, 9600, 25000, 50000, 100000, 250000, 500000};
+uint32_t MINSTREL_RATES[] = {1000, 1200, 2400, 4800, 9600, 12500, 25000, 37500, 50000};
 
 Minstrel* minstrel_init() {
     Minstrel* minstrel = malloc(sizeof(Minstrel));
