@@ -119,7 +119,8 @@ uint8_t minstrel_get_next_rate(Minstrel* minstrel);
 
 /**
  * @brief Prepares minstrel state for the next iteration. This includes the decision of whether we send a real packet or probe next (i.e. setting the symbol rate).
- *
+ *  The minstrel_packet_t pkt will be destroyed after this function is called.
+ * 
  * @param minstrel
 * @param pkt The packet for which new information should be incorporated into the algorithm.
  */

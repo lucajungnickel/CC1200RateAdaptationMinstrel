@@ -124,6 +124,8 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
     }
     receiver_ack(receiver);
     log_debug("receiver correct status: %i", status);
+    //change rate after ack is send
+    cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
     *buffer = pkt->p_payload;
     return pkt->payload_len;
 }

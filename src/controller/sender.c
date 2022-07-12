@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 
 #include "../minstrel/minstrel.h"
 #include "../cc1200/cc1200_rate.h"
@@ -121,7 +122,7 @@ static packet_t* sender_build_pkt(sender_t *sender, uint8_t* buffer, uint32_t le
     pkt->ack = 0;
     pkt->fallback_rate = sender->minstrel->rates.fallback;
     pkt->id = sender->next_ack;
-    pkt->next_symbol_rate = sender->minstrel->rates.current;
+    pkt->next_symbol_rate = minstrel_get_next_rate(sender->minstrel);
     pkt->token_recv = sender->token_receiver;
     pkt->token_send = sender->token_sender;
     pkt->payload_len = len;
@@ -137,17 +138,36 @@ static packet_t* sender_build_pkt(sender_t *sender, uint8_t* buffer, uint32_t le
 //Deep copies from buffer
 void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
     log_debug("Start send and ack");
+    int duration = 0;
     packet_t* pkt = sender_build_pkt(sender, buffer, len);
     sender_send(sender, pkt);
-    
+    //start timer
+    clock_t start = clock();
+
     bool should_send = true;
     while (should_send) {
         log_debug("Try to receive an ACK");
         packet_status_t status = sender_rcv_ack(sender);
+        //stop timer
+        clock_t duration_clock = clock() - start;
+        duration = duration_clock * 1000 / CLOCKS_PER_SEC;
+
         log_debug("Received at sender status: %i", status);
+
+        minstrel_packet_t* minstrel_status_pkt = calloc(1, sizeof(minstrel_packet_t));
+        minstrel_status_pkt->bytes_send = packet_get_size(pkt);
+        minstrel_status_pkt->duration = duration;
+        minstrel_status_pkt->id = pkt->id;
+        minstrel_status_pkt->status = status;
+        
+        minstrel_update(sender->minstrel, minstrel_status_pkt);
+        
+        free(minstrel_status_pkt);
+        
         if (status == packet_status_ok || status == packet_status_ok_ack) {
             should_send = false;
             log_info("Got good status, leave loop here");
+            log_info("Duration: %i ms", duration);
             break;
         } else if (status == packet_status_warn_wrong_ack) {
             //Sender shouldn't receive invalid ACK
@@ -164,5 +184,6 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
             log_debug("packet after timeout sent");
         }
     }
-    log_info("Sender done sending ack");
+    log_info("Sender done sending pkt, change rate now");
+    cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
 }
