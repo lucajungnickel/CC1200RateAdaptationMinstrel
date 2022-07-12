@@ -54,13 +54,13 @@ int sender_interface_send_data(sender_interface_t *interface, uint8_t *data, uin
     //send full packets
     for (int i=0; i<numFullPackets ; i++) {
         uint8_t *slice = data + i * PACKET_SIZE;
-        sender_send_and_ack(interface->sender, slice, PACKET_SIZE);
+        sender_send_and_ack(interface->sender, slice, PACKET_SIZE, false);
     }
 
     //send small last packet
     if (sizeLastPacket != 0) {
         uint8_t *slice = data + numFullPackets * PACKET_SIZE;
-        sender_send_and_ack(interface->sender, slice, sizeLastPacket);
+        sender_send_and_ack(interface->sender, slice, sizeLastPacket, false);
     }
 
     return 0;

@@ -35,7 +35,7 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     log_debug("Sender reference is built");
 
     //sends handshake packet, no payload
-    sender_send_and_ack(sender, NULL, 0);
+    sender_send_and_ack(sender, NULL, 0, true);
     
     return sender;
 }
@@ -136,7 +136,7 @@ static packet_t* sender_build_pkt(sender_t *sender, uint8_t* buffer, uint32_t le
 }
 
 //Deep copies from buffer
-void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
+void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool isHandshake) {
     log_debug("Start send and ack");
     int duration = 0;
     packet_t* pkt = sender_build_pkt(sender, buffer, len);
@@ -160,7 +160,7 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
         minstrel_status_pkt->id = pkt->id;
         minstrel_status_pkt->status = status;
         
-        minstrel_update(sender->minstrel, minstrel_status_pkt);
+        if (!isHandshake) minstrel_update(sender->minstrel, minstrel_status_pkt);
         
         free(minstrel_status_pkt);
         
@@ -185,5 +185,5 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len) {
         }
     }
     log_info("Sender done sending pkt, change rate now");
-    cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
+    if (!isHandshake) cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
 }

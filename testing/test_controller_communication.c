@@ -155,7 +155,7 @@ void test_communication_send_ok_rcv_ok() {
     for (int i=0; i<buffer_len;i++) {
         buffer[i] = i % UINT8_MAX;
     }
-    sender_send_and_ack(sender, buffer, buffer_len);
+    sender_send_and_ack(sender, buffer, buffer_len, false);
     free(buffer);
 
 

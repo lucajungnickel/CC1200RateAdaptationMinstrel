@@ -2,6 +2,7 @@
 #define SENDER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "packet.h"
 #include "../minstrel/minstrel.h"
@@ -63,7 +64,8 @@ packet_status_t sender_rcv_ack(sender_t *sender);
  * @param sender Sender
  * @param buffer Payload
  * @param len Payload len
+ * @param isHandshake if this packet is a handshake packet or not. Important for rate changing
  */
-void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len);
+void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool isHandshake);
 
 #endif //SENDER_H
