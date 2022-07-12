@@ -131,6 +131,7 @@ static void set_probe_rate(Minstrel* minstrel) {
     uint8_t probe;
     // Pick a random rate not equal to the current one
     while ((probe = rand() % MAX_RATES) == minstrel->rates.current);
+    printf("Probe rate: %d\n", probe);
     minstrel->rates.probe = probe;
 }
 
@@ -172,14 +173,17 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
         minstrel->state = RESUME;
     else {
         // Send probe every X packets TODO: Use time interval instead
-        if ((pkt->id % 10) == 0)
+        if ((pkt->id % 10) == 0) {
+            puts("IS PROBE");
             minstrel->state = PROBE;
+        }
         else
             minstrel->state = RUNNING;
     }
 
     // Set next rate
     minstrel->rate_state = minstrel_state_to_rate_state(minstrel);
+    printf("set rate to state: %d\n", minstrel->rate_state);
 }
 
 void minstrel_destroy(Minstrel* minstrel) {
