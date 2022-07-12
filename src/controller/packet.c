@@ -15,16 +15,16 @@
 
 packet_t* packet_create (
     uint32_t const id,
-    uint8_t  const next_symbol_rate,
-    uint16_t  const token_recv, //can't be 0 for valid token
-    uint16_t  const token_send, //can't be 0 for valid token
+    uint16_t  const token_recv,
+    uint16_t  const token_send,
     uint8_t  const type,
     uint32_t  const payload_len,
     uint8_t  const checksum,
     uint32_t const ack,
-    uint8_t  const fallback_rate,
+    uint8_t  const next_symbol_rate,
     uint8_t const next_second_best_rate,
-    uint8_t const next_highest_pro_rate) {
+    uint8_t const next_highest_pro_rate,
+    uint8_t  const fallback_rate) {
 
         packet_t* back = malloc(sizeof(packet_t));
         back->id = id;
@@ -60,9 +60,6 @@ uint8_t packet_calc_checksum(packet_t* const packet) {
 
     checksum += packet->id;
     checksum = checksum % 256;
-    
-    checksum += packet->next_symbol_rate;
-    checksum = checksum % 256;
 
     checksum += packet->token_recv;
     checksum = checksum % 256;
@@ -79,7 +76,7 @@ uint8_t packet_calc_checksum(packet_t* const packet) {
     checksum += packet->ack;
     checksum = checksum % 256;
 
-    checksum += packet->fallback_rate;
+    checksum += packet->next_symbol_rate;
     checksum = checksum % 256;
 
     checksum += packet->next_second_best_rate;
@@ -87,6 +84,11 @@ uint8_t packet_calc_checksum(packet_t* const packet) {
 
     checksum += packet->next_highest_pro_rate;
     checksum = checksum % 256;
+
+    checksum += packet->fallback_rate;
+    checksum = checksum % 256;
+
+
 
     if (packet->p_payload != NULL) {
         for (int i=0; i<packet->payload_len; i++) {

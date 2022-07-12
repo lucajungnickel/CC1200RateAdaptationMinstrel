@@ -43,16 +43,16 @@ typedef struct packet_t {
  */
 packet_t* packet_create (
     uint32_t const id,
-    uint8_t  const next_symbol_rate,
     uint16_t  const token_recv,
     uint16_t  const token_send,
     uint8_t  const type,
     uint32_t  const payload_len,
     uint8_t  const checksum,
     uint32_t const ack,
-    uint8_t  const fallback_rate,
+    uint8_t  const next_symbol_rate,
     uint8_t const next_second_best_rate,
-    uint8_t const next_highest_pro_rate);
+    uint8_t const next_highest_pro_rate,
+    uint8_t  const fallback_rate);
 
 /**
  * @brief Destroys the packet and also frees the allocated memory in payload data.

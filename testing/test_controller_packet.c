@@ -9,9 +9,9 @@
 void test_packet_build() {
     packet_t* pkt = packet_create(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
     assert(pkt->id == 1);
-    assert(pkt->next_symbol_rate == 2);
+    assert(pkt->next_symbol_rate == 8);
     assert(pkt->p_payload == 0x0);
-    assert(pkt->fallback_rate == 9);
+    assert(pkt->fallback_rate == 11);
 
     packet_destroy(pkt);
 }
