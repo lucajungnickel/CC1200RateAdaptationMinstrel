@@ -92,17 +92,17 @@ static void update_rates(Minstrel* minstrel) {
 
     for (int i=0; i<MAX_RATES; i++) {
         // Find highest success probability rate
-        if (minstrel->statistics[i].ewma > highest_prob) {
+        if (minstrel->statistics[i].ewma >= highest_prob) {
             highest_prob = minstrel->statistics[i].ewma;
             highest_prob_index = i;
         }
         // Find best throughput rate
-        if (minstrel->statistics[i].throughput > best_rate) {
+        if (minstrel->statistics[i].throughput >= best_rate) {
             best_rate = minstrel->statistics[i].throughput;
             best_rate_index = i;
         }
         // Find 2nd best throughput rate
-        if (minstrel->statistics[i].throughput > second_best_rate && minstrel->statistics[i].throughput < best_rate) {
+        if (minstrel->statistics[i].throughput >= second_best_rate && minstrel->statistics[i].throughput <= best_rate) {
             second_best_rate = minstrel->statistics[i].throughput;
             second_best_rate_index = i;
         }
@@ -176,8 +176,8 @@ static void summary(Minstrel* minstrel) {
 
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
-    // Update statistics for the current rate
-    log_package_status(&minstrel->statistics[minstrel->rates.current], pkt);
+    // TODO: Improve minstrel_get_next_rate() usage
+    log_package_status(&minstrel->statistics[minstrel_get_next_rate(minstrel)], pkt);
 
     summary(minstrel);
 
@@ -199,7 +199,7 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
 
     // Set next rate
     minstrel->rate_state = minstrel_state_to_rate_state(minstrel);
-    printf("set rate to state: %d\n", minstrel->rate_state);
+    printf("set rate to state: %d rate: %d\n", minstrel->rate_state, minstrel_get_next_rate(minstrel));
 }
 
 void minstrel_destroy(Minstrel* minstrel) {
