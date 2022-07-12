@@ -160,14 +160,30 @@ static RateState minstrel_state_to_rate_state(Minstrel *minstrel) {
     }
 }
 
+static void summary(Minstrel* minstrel) {
+    int rate_index = minstrel_get_next_rate(minstrel);
+    printf("** rate: %d index: %d\n", MINSTREL_RATES[rate_index], rate_index);
+    printf("** pkt_count: %d\n", minstrel->statistics[rate_index].pkt_count);
+    printf("last_pkt_id: %d\n", minstrel->statistics[rate_index].last_pkt_id);
+    printf("ewma: %f\n", minstrel->statistics[rate_index].ewma);
+    printf("throughput: %f\n", minstrel->statistics[rate_index].throughput);
+    printf("total_send: %d\n", minstrel->statistics[rate_index].total_send);
+    printf("total_recv: %d\n", minstrel->statistics[rate_index].total_recv);
+    printf("bytes_send: %d\n", minstrel->statistics[rate_index].bytes_send);
+    printf("avg_duration: %d\n", minstrel->statistics[rate_index].avg_duration);
+    puts("-------------------------------");
+}
+
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     // Update statistics for the current rate
     log_package_status(&minstrel->statistics[minstrel->rates.current], pkt);
 
     // Only update rate every X packets TODO: Use time interval instead
-    if ((pkt->id % 5) == 0)
+    if ((pkt->id % 5) == 0) {
         update_rates(minstrel);
+        summary(minstrel);
+    }
 
     if (minstrel->state == PROBE)
         minstrel->state = RESUME;
