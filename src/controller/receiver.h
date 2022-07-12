@@ -11,6 +11,8 @@
 #include "packet.h"
 #include "../minstrel/minstrel.h"
 
+#define RCV_MAX_TIMEOUTS 4
+
 typedef struct receiver_t {
     uint32_t last_ack_rcv;
     /**
@@ -21,6 +23,7 @@ typedef struct receiver_t {
      * (if there are 13 possible symbol rates)
      */
     uint8_t last_symbol_rate; 
+    uint8_t last_fallback_rate; //last fallback rate received
     uint16_t token_receiver;
     uint16_t token_sender; //receiver needs to know how the sender is
     packet_t* lastPacketSend; //for better debugging
@@ -28,7 +31,7 @@ typedef struct receiver_t {
     int debug_number_wrong_checksum; //for debugging, could be removed in future
     int socket_send;
     int socket_rcv;
-
+    int timeout_counter; //counter for number of timeouts. If it reaches RCV_MAX_TIMEOUTS, fallback rate will be set
 } receiver_t;
 
 

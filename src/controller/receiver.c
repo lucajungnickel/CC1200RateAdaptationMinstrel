@@ -23,6 +23,7 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     rcv->socket_rcv = socket_rcv;
     rcv->debug_number_wrong_checksum = 0;
     rcv->last_symbol_rate = 0; //symbol rate is set to lowest at beginning
+    rcv->timeout_counter = 0;
 
     packet_t* pkt = NULL;
     packet_status_t status = packet_status_none;
@@ -121,13 +122,24 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
             && status != packet_status_ok_ack) {
         pkt = receiver_receive(receiver, &status);
         log_debug("Receiver rcv status: %i", status);
+        if (status != packet_status_ok 
+            && status != packet_status_warn_wrong_ack 
+            && status != packet_status_ok_ack) {
+                receiver->timeout_counter++;
+                //change to fallback rate
+                if (receiver->timeout_counter == RCV_MAX_TIMEOUTS) {
+                    receiver->timeout_counter = 0;
+                    log_warn("max timeouts reached, changing to fallback rate");
+                    cc1200_change_rate(receiver->socket_rcv, receiver->last_fallback_rate);
+                }
+        }
     }
     receiver_ack(receiver);
     log_debug("receiver correct status: %i", status);
     //change rate after ack is send
     cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
     receiver->last_symbol_rate = pkt->next_symbol_rate;
-    
+    receiver->last_fallback_rate = pkt->fallback_rate;
     *buffer = pkt->p_payload;
     return pkt->payload_len;
 }
