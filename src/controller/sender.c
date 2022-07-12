@@ -175,12 +175,14 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
             log_debug("Wrong ACK, send again");
             pkt = sender_build_pkt(sender, buffer, len);
             sender_send(sender, pkt);
+            start = clock(); //start timer again
         } else if (status == packet_status_err_timeout) {
             //then send packet again
             log_debug("Timeout, send again");
             pkt = sender_build_pkt(sender, buffer, len);
             log_debug("PKT built again");
             sender_send(sender, pkt);
+            start = clock(); //start timer again
             log_debug("packet after timeout sent");
         }
     }

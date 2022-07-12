@@ -24,14 +24,16 @@ typedef enum packet_status_t {
 
 typedef struct packet_t {
     uint32_t id; //SEQuential number, incremeting with each correct packet
-    uint8_t next_symbol_rate; //next symbol rate the receiver will adapt after this packet is received
+    uint8_t next_symbol_rate; //for minstrel, next symbol rate the receiver will adapt after this packet is received
+    uint8_t next_second_best_rate; //for minstrel
+    uint8_t next_highest_pro_rate; //for minstrel
     uint16_t token_recv; //token of receiver unit
     uint16_t token_send; //token of sender unit
     uint8_t type; //packet status
     uint32_t payload_len; //len of payload, 0 if there is no payload
     uint8_t checksum; //checksum, see packet_set_checksum
     uint32_t ack; //acknowlegement number, only important when receiver ACKs a sender packet
-    uint8_t fallback_rate; //fallback rate, set by sender. On receiver->sender it's not important
+    uint8_t fallback_rate; //for minstrel, fallback rate, set by sender. On receiver->sender it's not important
     uint8_t *p_payload; //pointer to payload
 } packet_t;
 
@@ -48,7 +50,9 @@ packet_t* packet_create (
     uint32_t  const payload_len,
     uint8_t  const checksum,
     uint32_t const ack,
-    uint8_t  const fallback_rate);
+    uint8_t  const fallback_rate,
+    uint8_t const next_second_best_rate,
+    uint8_t const next_highest_pro_rate);
 
 /**
  * @brief Destroys the packet and also frees the allocated memory in payload data.

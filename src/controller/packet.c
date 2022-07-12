@@ -22,7 +22,9 @@ packet_t* packet_create (
     uint32_t  const payload_len,
     uint8_t  const checksum,
     uint32_t const ack,
-    uint8_t  const fallback_rate) {
+    uint8_t  const fallback_rate,
+    uint8_t const next_second_best_rate,
+    uint8_t const next_highest_pro_rate) {
 
         packet_t* back = malloc(sizeof(packet_t));
         back->id = id;
@@ -34,6 +36,8 @@ packet_t* packet_create (
         back->checksum = checksum;
         back->ack = ack;
         back->fallback_rate = fallback_rate;
+        back->next_second_best_rate = next_second_best_rate;
+        back->next_highest_pro_rate = next_highest_pro_rate;
         back->p_payload = 0x0;
         return back;
     }
@@ -78,6 +82,12 @@ uint8_t packet_calc_checksum(packet_t* const packet) {
     checksum += packet->fallback_rate;
     checksum = checksum % 256;
 
+    checksum += packet->next_second_best_rate;
+    checksum = checksum % 256;
+
+    checksum += packet->next_highest_pro_rate;
+    checksum = checksum % 256;
+
     if (packet->p_payload != NULL) {
         for (int i=0; i<packet->payload_len; i++) {
             checksum += packet->p_payload[i];
@@ -103,8 +113,6 @@ uint8_t packet_serialize(packet_t* const packet, uint8_t* p_buffer) {
     p_buffer[index + 2] = packet->id >> 16;
     p_buffer[index + 3] = packet->id >> 24;
     index += 4; //size in bytes
-    p_buffer[index] = packet->next_symbol_rate;
-    index += 1;
     p_buffer[index] = packet->token_recv;
     p_buffer[index + 1] = packet->token_recv >> 8;
     index += 2;
@@ -125,8 +133,14 @@ uint8_t packet_serialize(packet_t* const packet, uint8_t* p_buffer) {
     p_buffer[index + 2] = packet->ack >> 16;
     p_buffer[index + 3] = packet->ack >> 24;
     index += 4;
+    p_buffer[index] = packet->next_symbol_rate;
+    index += 1;
+    p_buffer[index] = packet->next_second_best_rate;
+    index += 1;
+    p_buffer[index] = packet->next_highest_pro_rate;
+    index += 1;
     p_buffer[index] = packet->fallback_rate;
-    index += 1;    
+    index += 1;
 
     //write payload
     memcpy(p_buffer + index, packet->p_payload, packet->payload_len);
@@ -144,10 +158,6 @@ packet_t* packet_deserialize(uint8_t* const p_buffer) {
     //id
     back->id = p_buffer[index] | p_buffer[index + 1] << 8 | p_buffer[index + 2] << 16 | p_buffer[index + 3] << 24;
     index += 4;
-
-    //next_symbol_rate
-    back->next_symbol_rate = p_buffer[index];
-    index += 1;
 
     //token_recv
     back->token_recv = p_buffer[index] | p_buffer[index + 1] << 8;
@@ -167,9 +177,20 @@ packet_t* packet_deserialize(uint8_t* const p_buffer) {
     //ack
     back->ack = p_buffer[index] | p_buffer[index + 1] << 8 | p_buffer[index + 2] << 16 | p_buffer[index + 3] << 24;
     index += 4;
+    
+    //next_symbol_rate
+    back->next_symbol_rate = p_buffer[index];
+    index += 1;
+    //second best rate
+    back->next_second_best_rate = p_buffer[index];
+    index += 1;
+    //highest probability rate
+    back->next_highest_pro_rate = p_buffer[index];
+    index += 1;
     //fallback_rate
     back->fallback_rate = p_buffer[index];
     index += 1;
+    
 
     //BODY
     //payload
@@ -185,15 +206,16 @@ uint32_t packet_get_size(packet_t* const packet) {
 
 void packet_print(packet_t* const packet) {
     log_debug("Pkt Id: %i", packet->id);
-    log_debug("Pkt Nxt Symbol Rate: %i", packet->next_symbol_rate);
     log_debug("Pkt Token rcv: %i", packet->token_recv);
     log_debug("Pkt Token send: %i", packet->token_send);
     log_debug("Pkt type: %i", packet->type);
     log_debug("Pkt Payload Len: %i", packet->payload_len);
     log_debug("Pkt Checksum: %i", packet->checksum);
     log_debug("Pkt Ack: %i ", packet->ack);
+    log_debug("Pkt Nxt Symbol Rate: %i", packet->next_symbol_rate);
     log_debug("Pkt Fallback Rate: %i", packet->fallback_rate);
-
+    log_debug("Pkt Second Best Rate: %i ", packet->next_second_best_rate);
+    log_debug("Pkt Best Prob Rate: %i", packet->next_highest_pro_rate);
     log_debug("        .         ");
 }
 
