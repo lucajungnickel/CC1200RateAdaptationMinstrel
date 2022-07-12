@@ -95,13 +95,13 @@ typedef struct Minstrel {
 /*
  * A packet for the minstrel algorithm.
  */
-typedef struct Packet {
+typedef struct minstrel_packet_t {
     uint32_t id;
     packet_status_t status;
     uint32_t bytes_send;
     uint32_t duration;
 
-} Packet;
+} minstrel_packet_t;
 
 /**
  * @brief Inits the algorithm
@@ -123,7 +123,7 @@ uint8_t minstrel_get_next_rate(Minstrel* minstrel);
  * @param minstrel
 * @param pkt The packet for which new information should be incorporated into the algorithm.
  */
-void minstrel_update(Minstrel* minstrel, Packet* pkt);
+void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt);
 
 /**
  * @brief Destroys the minstrel struct and all related data in it.

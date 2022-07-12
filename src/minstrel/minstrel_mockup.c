@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 
+#include "../log.c/src/log.h"
 #include "minstrel.h"
 
 
@@ -18,24 +19,66 @@ uint32_t MINSTREL_RATES[MAX_RATES];
 
 
 Minstrel* minstrel_init() {
-
+    Minstrel* back = calloc(1, sizeof(Minstrel));
+    if (back == NULL) return NULL;
+    back->statistics->pkt_count = 0;
+    back->statistics->avg_duration = 1; //last success pkt
+    return back;
 }
 
-void minstrel_log_package_status(uint8_t id, packet_status_t status) {
-
-}
-
-
-void minstrel_update(Minstrel* minstrel, Packet* pkt) {
-
-}
-
-
+/**
+ * @brief Returns the next rate, which will be written to the next packet
+ * of the sender.
+ *
+ * @param minstrel
+ * @return uint8_t Index of next rate, @see MINSTREL_RATES[]
+ */
 uint8_t minstrel_get_next_rate(Minstrel* minstrel) {
-    
+    if (minstrel->statistics->pkt_count % 8 == 0) { //mark packet as invalid, for testing
+        minstrel->statistics[0].avg_duration = 2;
+        log_info("Marked pkt as invalid in minstrel");
+    }
+
+    if (minstrel->statistics[0].avg_duration == 1) { //last pkt success
+        //get next higher rate if possible, all 5 packets
+        if (minstrel->statistics[0].pkt_count % 5 == 0) {
+            if (minstrel->rates.current != (MAX_RATES-1) ) {
+                minstrel->rates.current++;
+            }
+        }
+    } else if (minstrel->statistics[0].avg_duration == 2) { //last pkt error
+        //get lower rate
+        if (minstrel->rates.current != 0) {
+            minstrel->rates.current--;
+        }
+    } else {
+        log_warn("Wrong average duration: %i", minstrel->statistics[0].avg_duration);
+    }
+
+    return minstrel->rates.current;
 }
 
+/**
+ * @brief Prepares minstrel state for the next iteration. This includes the decision of whether we send a real packet or probe next (i.e. setting the symbol rate).
+ *
+ * @param minstrel
+* @param pkt The packet for which new information should be incorporated into the algorithm.
+ */
+void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
+    if (pkt->status == packet_status_ok || pkt->status == packet_status_ok_ack) {
+        //avg_duration will be used for a flag, if the last packet is correct sent
+        minstrel->statistics[0].avg_duration = 1;
+    } else { //error
+        minstrel->statistics[0].avg_duration = 2;
+    }
+    minstrel->statistics->pkt_count++;
+}
+
+/**
+ * @brief Destroys the minstrel struct and all related data in it.
+ *
+ * @param minstrel
+ */
 void minstrel_destroy(Minstrel* minstrel) {
-    if (minstrel == NULL) return;
-    free(minstrel); //ATTENTION, ONLY FREE MINSTREL, NOT THE CONTENT
+    free(minstrel);
 }

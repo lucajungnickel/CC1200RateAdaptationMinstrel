@@ -62,7 +62,7 @@ static void calc_avg_duration(MinstrelStatistics* statistics, uint32_t duration)
  * @param pkt The packet for which new information should be incorporated into the algorithm.
  */
 // TODO: Reset packet count every X
-static void log_package_status(MinstrelStatistics* statistics, Packet* pkt) {
+static void log_package_status(MinstrelStatistics* statistics, minstrel_packet_t* pkt) {
     float succ_prob;
 
     statistics->total_send++;
@@ -160,7 +160,7 @@ static RateState minstrel_state_to_rate_state(Minstrel *minstrel) {
 }
 
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
-void minstrel_update(Minstrel* minstrel, Packet* pkt) {
+void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     // Update statistics for the current rate
     log_package_status(&minstrel->statistics[minstrel->rates.current], pkt);
 
