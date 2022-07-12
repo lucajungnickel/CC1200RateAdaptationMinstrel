@@ -42,7 +42,6 @@ static void start() {
     while (true) { //for testing purpose there is a while loop here
         log_debug("Try to send a lot of data");
         sender_interface_send_data(s_interface, buffer, data_size);
-        sleep(1);
         log_info("All data sent!");
     }
     free(buffer);
