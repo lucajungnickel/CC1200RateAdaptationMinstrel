@@ -152,8 +152,12 @@ static float log_2(float num) {
 void cc1200_change_rate(int device_id, uint8_t rate) {
     log_info("Change rate to %i, in detail: %i", rate, MINSTREL_RATES[rate]);
     float rate_in_ksps = MINSTREL_RATES[rate] / 1000.;
+    printf("Rate in ksps %f\n", rate_in_ksps);
+
     int32_t srate_e = log_2((rate_in_ksps * pow(2, 39)) / F_XOSC) - 20;
+    printf("Srate_e %i\n", srate_e);
     int32_t srate_m = ((rate_in_ksps * pow(2, 39)) / (F_XOSC * (1 << srate_e))) - (1 << 20);
+    printf("srate_m %i\n", srate_m);
 
     uint8_t symbol_rate_2 = ((srate_e & 0xF) << 4) | (0xF & (srate_m >> 16));
     uint8_t symbol_rate_1 = 0xFF & (srate_m >> 8);
