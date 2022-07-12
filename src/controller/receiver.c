@@ -101,7 +101,7 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
         
         //change rate if there is another symbol rate
         if (pkt->next_symbol_rate != receiver->last_symbol_rate) {
-            cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
+            //cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
             receiver->last_symbol_rate = pkt->next_symbol_rate;
         }
 
@@ -126,6 +126,8 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
     log_debug("receiver correct status: %i", status);
     //change rate after ack is send
     cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
+    receiver->last_symbol_rate = pkt->next_symbol_rate;
+    
     *buffer = pkt->p_payload;
     return pkt->payload_len;
 }
