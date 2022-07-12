@@ -13,8 +13,7 @@
 #include "minstrel.h"
 
 
-uint32_t MINSTREL_RATES[MAX_RATES];
-
+uint32_t MINSTREL_RATES[] = {40, 250, 1200, 2400, 4800, 9600, 25000, 50000, 100000, 250000, 500000};
 
 
 
