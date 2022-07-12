@@ -26,7 +26,8 @@
 #define PKT_OVERHEAD 2 // 2 bytes packet overhead
 
 // Crystal frequency of the TI boards (40MHz)
-#define F_XOSC 40000
+//#define F_XOSC 40000
+#define F_XOSC 40000000
 
 
 typedef enum cc1200_status_send {
