@@ -125,6 +125,8 @@ static packet_t* sender_build_pkt(sender_t *sender, uint8_t* buffer, uint32_t le
     pkt->next_symbol_rate = minstrel_get_next_rate(sender->minstrel);
     pkt->token_recv = sender->token_receiver;
     pkt->token_send = sender->token_sender;
+    pkt->next_second_best_rate = sender->minstrel->rates.second_best;
+    pkt->next_highest_pro_rate = sender->minstrel->rates.highest_prob;
     pkt->payload_len = len;
     pkt->p_payload = malloc(len * sizeof(uint8_t));
     memcpy(pkt->p_payload, buffer, len);
@@ -188,4 +190,5 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
     }
     log_info("Sender done sending pkt, change rate now");
     if (!isHandshake) cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
+    if (isHandshake) sender->token_receiver = pkt->token_recv;
 }
