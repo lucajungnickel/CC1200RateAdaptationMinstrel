@@ -26,6 +26,7 @@ static int id_rcv = 20;
 static void start() {
     cc1200_init(id_sender);
     cc1200_init(id_rcv);
+    cc1200_change_rate(id_sender, 0); //TODO remove, for debugging only
 
     //sender_interface
     log_debug("Start init sender_interface in test function");
