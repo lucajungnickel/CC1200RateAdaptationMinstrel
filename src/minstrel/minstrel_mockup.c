@@ -34,7 +34,7 @@ Minstrel* minstrel_init() {
  * @return uint8_t Index of next rate, @see MINSTREL_RATES[]
  */
 uint8_t minstrel_get_next_rate(Minstrel* minstrel) {
-    if (minstrel->statistics->pkt_count % 8 == 0) { //mark packet as invalid, for testing
+    if (minstrel->statistics->pkt_count % 18 == 0) { //mark packet as invalid, for testing
         minstrel->statistics[0].avg_duration = 2;
         log_info("Marked pkt as invalid in minstrel");
     }
