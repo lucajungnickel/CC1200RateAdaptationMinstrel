@@ -16,7 +16,7 @@
 #include "../controller/packet.h"
 
 
-#define MAX_RATES 11
+#define MAX_RATES 9
 // EWMA alpha value
 #define WEIGHT 0.75
 
