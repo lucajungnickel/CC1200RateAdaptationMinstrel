@@ -66,7 +66,7 @@ static void log_package_status(MinstrelStatistics* statistics, minstrel_packet_t
     float succ_prob;
 
     statistics->total_send++;
-    if (pkt->status == packet_status_ok_ack) {
+    if (pkt->status == packet_status_ok) {
         statistics->total_recv++;
         // Has to be called before pkt_count is increased
         calc_avg_duration(statistics, pkt->duration);
@@ -92,17 +92,17 @@ static void update_rates(Minstrel* minstrel) {
 
     for (int i=0; i<MAX_RATES; i++) {
         // Find highest success probability rate
-        if (minstrel->statistics[i].ewma > highest_prob) {
+        if (minstrel->statistics[i].ewma >= highest_prob) {
             highest_prob = minstrel->statistics[i].ewma;
             highest_prob_index = i;
         }
         // Find best throughput rate
-        if (minstrel->statistics[i].throughput > best_rate) {
+        if (minstrel->statistics[i].throughput >= best_rate) {
             best_rate = minstrel->statistics[i].throughput;
             best_rate_index = i;
         }
         // Find 2nd best throughput rate
-        if (minstrel->statistics[i].throughput > second_best_rate && minstrel->statistics[i].throughput < best_rate) {
+        if (minstrel->statistics[i].throughput >= second_best_rate && minstrel->statistics[i].throughput <= best_rate) {
             second_best_rate = minstrel->statistics[i].throughput;
             second_best_rate_index = i;
         }
@@ -131,6 +131,7 @@ static void set_probe_rate(Minstrel* minstrel) {
     uint8_t probe;
     // Pick a random rate not equal to the current one
     while ((probe = rand() % MAX_RATES) == minstrel->rates.current);
+    printf("Probe rate: %d\n", probe);
     minstrel->rates.probe = probe;
 }
 
@@ -159,10 +160,26 @@ static RateState minstrel_state_to_rate_state(Minstrel *minstrel) {
     }
 }
 
+static void summary(Minstrel* minstrel) {
+    int rate_index = minstrel_get_next_rate(minstrel);
+    printf("** rate: %d index: %d\n", MINSTREL_RATES[rate_index], rate_index);
+    printf("** pkt_count: %d\n", minstrel->statistics[rate_index].pkt_count);
+    printf("last_pkt_id: %d\n", minstrel->statistics[rate_index].last_pkt_id);
+    printf("ewma: %f\n", minstrel->statistics[rate_index].ewma);
+    printf("throughput: %f\n", minstrel->statistics[rate_index].throughput);
+    printf("total_send: %d\n", minstrel->statistics[rate_index].total_send);
+    printf("total_recv: %d\n", minstrel->statistics[rate_index].total_recv);
+    printf("bytes_send: %d\n", minstrel->statistics[rate_index].bytes_send);
+    printf("avg_duration: %d\n", minstrel->statistics[rate_index].avg_duration);
+    puts("-------------------------------");
+}
+
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
-    // Update statistics for the current rate
-    log_package_status(&minstrel->statistics[minstrel->rates.current], pkt);
+    // TODO: Improve minstrel_get_next_rate() usage
+    log_package_status(&minstrel->statistics[minstrel_get_next_rate(minstrel)], pkt);
+
+    summary(minstrel);
 
     // Only update rate every X packets TODO: Use time interval instead
     if ((pkt->id % 5) == 0)
@@ -172,14 +189,17 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
         minstrel->state = RESUME;
     else {
         // Send probe every X packets TODO: Use time interval instead
-        if ((pkt->id % 10) == 0)
+        if ((pkt->id % 10) == 0) {
+            puts("IS PROBE");
             minstrel->state = PROBE;
+        }
         else
             minstrel->state = RUNNING;
     }
 
     // Set next rate
     minstrel->rate_state = minstrel_state_to_rate_state(minstrel);
+    printf("set rate to state: %d rate: %d\n", minstrel->rate_state, minstrel_get_next_rate(minstrel));
 }
 
 void minstrel_destroy(Minstrel* minstrel) {
