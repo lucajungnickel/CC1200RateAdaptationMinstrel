@@ -221,5 +221,5 @@ void packet_print(packet_t* const packet) {
 
 
 uint32_t getHeaderSize() {
-    return 21;
+    return 23;
 }
