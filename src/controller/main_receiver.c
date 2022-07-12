@@ -20,7 +20,7 @@ static void start() {
     
     cc1200_init(id_sender);
 
-    log_set_level(LOG_WARN);
+    //log_set_level(LOG_WARN);
     
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
 
