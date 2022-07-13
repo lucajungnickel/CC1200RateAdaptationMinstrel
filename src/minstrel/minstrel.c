@@ -174,10 +174,18 @@ static void summary(Minstrel* minstrel) {
     puts("-------------------------------");
 }
 
+
+int is_prob_ack = 0;
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
+    if (is_prob_ack) {
+        is_prob_ack = 0;
+        return;
+    }
     // TODO: Improve minstrel_get_next_rate() usage
     log_package_status(&minstrel->statistics[minstrel_get_next_rate(minstrel)], pkt);
+
+    printf("** DURATION: %d\n", pkt->duration);
 
     summary(minstrel);
 
@@ -192,10 +200,14 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
         if ((pkt->id % 10) == 0) {
             puts("IS PROBE");
             minstrel->state = PROBE;
+            is_prob_ack = 1;
         }
         else
             minstrel->state = RUNNING;
     }
+
+    if (pkt->status != packet_status_ok)
+        minstrel->state = PACKET_TIMEOUT;
 
     // Set next rate
     minstrel->rate_state = minstrel_state_to_rate_state(minstrel);

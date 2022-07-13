@@ -9,20 +9,35 @@
 uint32_t MINSTREL_RATES[MAX_RATES];
 
 typedef enum MinstrelState {
-    READY,
+    PROBE,
+    //RESUME, // After probe
+    RUNNING,
+    PACKET_TIMEOUT,
     RESET,
-    RUNNNING,
-    STOPPED,
-    DONE,
+    UPDATE,
 } MinstrelState;
 
-typedef struct AvailableRates {
-    uint8_t current;
-    uint8_t best;
-    uint8_t second_best;
-    uint8_t highest_prob;
-    uint8_t fallback;
+typedef enum RateState {
+    FALLBACK_RATE,
+    HIGHEST_PROB_RATE,
+    SECOND_BEST_RATE,
+    BEST_RATE,
+    CURRENT_RATE,
+    PROBE_RATE,
+} RateState;
+
+typedef union AvailableRates {
+    struct {
+        uint8_t fallback;
+        uint8_t highest_prob;
+        uint8_t second_best;
+        uint8_t best;
+        uint8_t current;
+        uint8_t probe;
+    };
+    uint8_t r[6];
 } AvailableRates;
+
 
 typedef struct MinstrelStatistics {
     uint32_t last_pkt_id;
@@ -36,7 +51,9 @@ typedef struct MinstrelStatistics {
 } MinstrelStatistics;
 
 typedef struct Minstrel {
+    //ATTENTION, no pointers here, because the contents are only integers.
     AvailableRates rates;
+    RateState rate_state;
     MinstrelState state;
     MinstrelStatistics statistics[MAX_RATES];
 } Minstrel;
