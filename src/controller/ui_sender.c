@@ -131,14 +131,14 @@ bool ui_update(Minstrel* minstrel) {
         current = minstrel->rates.current;
         probe = minstrel->rates.probe;
 
-        last_pkt_id = minstrel->statistics->last_pkt_id;
-        pkt_count = minstrel->statistics->pkt_count;
-        ewma = minstrel->statistics->ewma;
-        throughput = minstrel->statistics->throughput;
-        total_send = minstrel->statistics->total_send;
-        total_recv = minstrel->statistics->total_recv;
-        bytes_send = minstrel->statistics->bytes_send;
-        avg_duration = minstrel->statistics->avg_duration;
+        last_pkt_id = minstrel->statistics[current].last_pkt_id;
+        pkt_count = minstrel->statistics[current].pkt_count;
+        ewma = minstrel->statistics[current].ewma;
+        throughput = minstrel->statistics[current].throughput;
+        total_send = minstrel->statistics[current].total_send;
+        total_recv = minstrel->statistics[current].total_recv;
+        bytes_send = minstrel->statistics[current].bytes_send;
+        avg_duration = minstrel->statistics[current].avg_duration;
     } else {
         fallback = 0;
         highest_prob = 0;
