@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <curses.h>
+#include <pthread.h>
 
 #include "packet.h"
 #include "ui_sender.h"
@@ -25,13 +26,13 @@
 static int id_sender = 10;
 static int id_rcv = 20;
 
-const bool IS_IN_GRAPHIC_MODE = false;
+
 
 static void start() {
     cc1200_init(id_sender);
     cc1200_init(id_rcv);
     cc1200_change_rate(id_sender, 0); //TODO remove, for debugging only
-
+    
     //sender_interface
     log_debug("Start init sender_interface in test function");
     sender_interface_t* s_interface = sender_interface_init(id_sender, id_rcv);
@@ -51,6 +52,13 @@ static void start() {
     free(buffer);
 }
 
+void *thread_stop() {
+    getch();
+    ui_cleanup();
+    cc1200_reset(0);
+    exit(0);
+}
+
 int main(int argc, char** argv)
 {
     if (argc == 2) {
@@ -58,14 +66,16 @@ int main(int argc, char** argv)
         IS_DEBUG = 1;
     }
     if (IS_IN_GRAPHIC_MODE) {
+        log_set_level(LOG_FATAL);
         ui_init();
-        ui_show();
-        int res = getch();			/* Wait for user input */
-        mvaddch(1, 0, res);
-        getch();
         
-	    ui_cleanup();
-    } else {
-        start();
+        ui_show();
+        pthread_t thread_rcv_id;
+        pthread_create(&thread_rcv_id, NULL, thread_stop, NULL);
+        /*int res = getch();
+        mvaddch(1, 0, res);
+        getch();*/
     }
+    start();
+    ui_cleanup();
 }

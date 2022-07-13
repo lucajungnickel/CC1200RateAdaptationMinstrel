@@ -8,6 +8,7 @@
 #include "../minstrel/minstrel.h"
 #include "../cc1200/cc1200_rate.h"
 #include "../log.c/src/log.h"
+#include "../controller/ui_sender.h"
 
 static clock_t timer_started = 0x0;
 
@@ -163,6 +164,7 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
         minstrel_status_pkt->status = status;
         
         if (!isHandshake) minstrel_update(sender->minstrel, minstrel_status_pkt);
+        if (!isHandshake) ui_update(sender->minstrel);
         
         free(minstrel_status_pkt);
         
@@ -189,6 +191,9 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
         }
     }
     log_info("Sender done sending pkt, change rate now");
+    
+    ui_add_rate_change(pkt->id, MINSTREL_RATES[pkt->next_symbol_rate]);
+
     if (!isHandshake) cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
     if (isHandshake) sender->token_receiver = pkt->token_recv;
 }
