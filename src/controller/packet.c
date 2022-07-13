@@ -176,6 +176,14 @@ packet_t* packet_deserialize(uint8_t* const p_buffer, int payload_len) {
 
     //error handling, -1 is ignore
     if (payload_len != back->payload_len && payload_len != -1) {
+        log_warn("Invalid payload len: Should %i Is %i", payload_len, back->payload_len);
+        log_warn("Here is the header:");
+        log_warn("Id: %i", back->id);
+        log_warn("Token recv: %i", back->token_recv);
+        log_warn("Token send: %i", back->token_send);
+        log_warn("Type: %i", back->type);
+        log_warn("Payload len: %i", back->payload_len);
+        free(back);
         return NULL;
     }
 
@@ -214,18 +222,20 @@ uint32_t packet_get_size(packet_t* const packet) {
 }
 
 void packet_print(packet_t* const packet) {
-    log_debug("Pkt Id: %i", packet->id);
-    log_debug("Pkt Token rcv: %i", packet->token_recv);
-    log_debug("Pkt Token send: %i", packet->token_send);
-    log_debug("Pkt type: %i", packet->type);
-    log_debug("Pkt Payload Len: %i", packet->payload_len);
-    log_debug("Pkt Checksum: %i", packet->checksum);
-    log_debug("Pkt Ack: %i ", packet->ack);
-    log_debug("Pkt Nxt Symbol Rate: %i", packet->next_symbol_rate);
-    log_debug("Pkt Fallback Rate: %i", packet->fallback_rate);
-    log_debug("Pkt Second Best Rate: %i ", packet->next_second_best_rate);
-    log_debug("Pkt Best Prob Rate: %i", packet->next_highest_pro_rate);
-    log_debug("        .         ");
+    if (packet != NULL) {
+        log_debug("Pkt Id: %i", packet->id);
+        log_debug("Pkt Token rcv: %i", packet->token_recv);
+        log_debug("Pkt Token send: %i", packet->token_send);
+        log_debug("Pkt type: %i", packet->type);
+        log_debug("Pkt Payload Len: %i", packet->payload_len);
+        log_debug("Pkt Checksum: %i", packet->checksum);
+        log_debug("Pkt Ack: %i ", packet->ack);
+        log_debug("Pkt Nxt Symbol Rate: %i", packet->next_symbol_rate);
+        log_debug("Pkt Fallback Rate: %i", packet->fallback_rate);
+        log_debug("Pkt Second Best Rate: %i ", packet->next_second_best_rate);
+        log_debug("Pkt Best Prob Rate: %i", packet->next_highest_pro_rate);
+        log_debug("        .         ");
+    }
 }
 
 

@@ -230,13 +230,17 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
 // TODO: Error handling
 packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_status_t *status_back) {
     // Switch to RX mode
+    cc1200_cmd(SFRX);
+    char* status = get_status_cc1200_str();
+    log_debug("Current mode: %s", status);
     log_debug("Try to switch to SRX mode");
     cc1200_cmd(SRX);
-    log_debug("Switched successfully");
     
     while (get_status_cc1200() != RX)
         cc1200_cmd(SNOP);
 
+    log_debug("Switched successfully");
+    
     unsigned int num_rx_bytes, pkt_len;
     uint8_t* buffer;
     clock_t time_d = clock() - timeout_started;
@@ -275,7 +279,10 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
                         printf("\n");
                     }
                     *status_back = packet_status_ok;
-                    packet_t* pkt = packet_deserialize(buffer, pkt_len - getHeaderSize() - 2);
+                    packet_t* pkt = packet_deserialize(buffer, pkt_len - getHeaderSize());
+                    if (pkt == NULL) {
+                        *status_back = packet_status_err_checksum;
+                    }
                     packet_print(pkt);
                     return pkt;
                 }
