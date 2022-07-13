@@ -90,7 +90,7 @@ uint8_t packet_serialize(packet_t* const packet, uint8_t* p_buffer);
  * @param p_buffer pointer to buffer which will be converted to packet
  * @return packet_t* packet or NULL IF an error occured
  */
-packet_t* packet_deserialize(uint8_t* const p_buffer);
+packet_t* packet_deserialize(uint8_t* const p_buffer, int payload_len);
 
 /**
  * @brief Get the complete size of the packet in bytes, header + payload included.

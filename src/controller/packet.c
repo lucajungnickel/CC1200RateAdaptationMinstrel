@@ -150,7 +150,7 @@ uint8_t packet_serialize(packet_t* const packet, uint8_t* p_buffer) {
     return 0;
 }
 
-packet_t* packet_deserialize(uint8_t* const p_buffer) {
+packet_t* packet_deserialize(uint8_t* const p_buffer, int payload_len) {
     packet_t* back = calloc(1, sizeof(packet_t));
     if (back == NULL) return NULL;
 
@@ -173,6 +173,12 @@ packet_t* packet_deserialize(uint8_t* const p_buffer) {
     //payload_len
     back->payload_len = p_buffer[index] | p_buffer[index + 1] << 8 | p_buffer[index + 2] << 16 | p_buffer[index + 3] << 24;
     index += 4;
+
+    //error handling, -1 is ignore
+    if (payload_len != back->payload_len && payload_len != -1) {
+        return NULL;
+    }
+
     //checksum
     back->checksum = p_buffer[index];
     index += 1;
@@ -192,6 +198,7 @@ packet_t* packet_deserialize(uint8_t* const p_buffer) {
     //fallback_rate
     back->fallback_rate = p_buffer[index];
     index += 1;
+    
     
 
     //BODY

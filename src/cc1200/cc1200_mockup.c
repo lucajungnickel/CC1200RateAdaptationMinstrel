@@ -186,7 +186,7 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
     log_debug("CC1200 Mockup: read data, device id %i, size %i", device_id, data_len);
     //now we got data
     *status_back = packet_status_ok;
-    packet_t *back = packet_deserialize(data);
+    packet_t *back = packet_deserialize(data, -1);
     //FREE and set pointer to NULL
     free(data);
     if (device_id == id0) {

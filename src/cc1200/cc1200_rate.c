@@ -275,7 +275,7 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
                         printf("\n");
                     }
                     *status_back = packet_status_ok;
-                    packet_t* pkt = packet_deserialize(buffer);
+                    packet_t* pkt = packet_deserialize(buffer, pkt_len - getHeaderSize() - 2);
                     packet_print(pkt);
                     return pkt;
                 }
