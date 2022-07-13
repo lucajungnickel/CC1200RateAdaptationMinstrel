@@ -32,10 +32,10 @@ uint32_t MINSTREL_RATES[MAX_RATES];
  */
 typedef enum MinstrelState {
     PROBE,
-    RESUME, // After probe
     RUNNING,
     PACKET_TIMEOUT,
     RESET,
+    UPDATE,
 } MinstrelState;
 
 /*
