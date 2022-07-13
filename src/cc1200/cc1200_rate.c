@@ -172,6 +172,8 @@ void cc1200_change_rate(int device_id, uint8_t rate) {
     cc1200_reg_write(SYMBOL_RATE1, symbol_rate_1);
     // Write mantissa [7:0]
     cc1200_reg_write(SYMBOL_RATE0, symbol_rate_0);
+
+    
 }
 
 // TODO: Error handling

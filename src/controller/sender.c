@@ -165,6 +165,11 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
         
         if (!isHandshake) minstrel_update(sender->minstrel, minstrel_status_pkt);
         if (!isHandshake) ui_update(sender->minstrel);
+        if (!isHandshake) {
+            //change rate if wished by minstrel
+            //TODO implement rate change here
+            //cc1200_change_rate(sender->socket_send, minstrel_get_next_rate(sender->minstrel));
+        }
         
         free(minstrel_status_pkt);
         
