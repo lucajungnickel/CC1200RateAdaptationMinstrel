@@ -66,19 +66,19 @@ static void update_rates(Minstrel* minstrel) {
 
     for (int i=0; i<MAX_RATES; i++) {
         // Find highest success probability rate
-        if (minstrel->statistics[i].ewma >= highest_prob) {
+        if (minstrel->statistics[i].ewma >= highest_prob && minstrel->statistics[i].ewma != 0) {
             highest_prob = minstrel->statistics[i].ewma;
             highest_prob_index = i;
         }
         // Find best throughput rate
-        if (minstrel->statistics[i].throughput >= best_rate) {
+        if (minstrel->statistics[i].throughput >= best_rate && minstrel->statistics[i].throughput != 0) {
             best_rate = minstrel->statistics[i].throughput;
             best_rate_index = i;
         }
     }
     // Find 2nd best throughput rate
     for (int i=0; i<MAX_RATES; i++) {
-        if (minstrel->statistics[i].throughput >= second_best_rate && minstrel->statistics[i].throughput < best_rate && i < best_rate_index) {
+        if (minstrel->statistics[i].throughput >= second_best_rate && minstrel->statistics[i].throughput < best_rate && i < best_rate_index && minstrel->statistics[i].throughput != 0) {
             second_best_rate = minstrel->statistics[i].throughput;
             second_best_rate_index = i;
         }
@@ -159,6 +159,7 @@ static void summary(Minstrel* minstrel) {
 int is_prob_ack = 0;
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, Packet* pkt) {
+        update_rates(minstrel);
     if (is_prob_ack) {
         is_prob_ack = 0;
         puts("**************** SKIP ******************");
