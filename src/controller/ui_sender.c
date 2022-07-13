@@ -156,6 +156,7 @@ bool ui_update(Minstrel* minstrel) {
         bytes_send = 0;
         avg_duration = 0;   
     }
+    ui_show();
 }
 
 bool ui_add_rate_change(int pkt_id, int new_rate) {
@@ -167,6 +168,6 @@ bool ui_add_rate_change(int pkt_id, int new_rate) {
         if (last_change == MAX_CHANGES_PRINT) last_change = 0;
         changes[last_change].rate = new_rate;
         changes[last_change].pkt = pkt_id;
-
+        ui_show();
     } //else ignore
 }
