@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 
-#define MAX_RATES 11
+#define MAX_RATES 9
 // EWMA alpha value
 #define WEIGHT 0.75
 
@@ -10,7 +10,6 @@ uint32_t MINSTREL_RATES[MAX_RATES];
 
 typedef enum MinstrelState {
     PROBE,
-    //RESUME, // After probe
     RUNNING,
     PACKET_TIMEOUT,
     RESET,

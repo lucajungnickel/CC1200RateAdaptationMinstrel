@@ -103,14 +103,15 @@ static void get_new_packet(Packet* packet) {
         status = packet_status_err_timeout;
 
     packet->status = status;
-    packet->duration = 100 - cur_rate_index * 10;
+    packet->duration = 100 - cur_rate_index * 10 + 1;
     packet->id++;
 }
 
 static void set_probe_rate(Minstrel* minstrel) {
+    puts("setting probe rate");
     uint8_t probe;
     // Pick a random rate not equal to the current one
-    while ((probe = rand() % MAX_RATES) == minstrel->rates.current);
+    while ((probe = (rand() % MAX_RATES)) == minstrel->rates.current);
     printf("Probe rate: %d\n", probe);
     minstrel->rates.probe = probe;
 }
@@ -158,33 +159,34 @@ static void summary(Minstrel* minstrel) {
 int is_prob_ack = 0;
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, Packet* pkt) {
-    // Reset state
-    minstrel->state = RUNNING;
     if (is_prob_ack) {
         is_prob_ack = 0;
         puts("**************** SKIP ******************");
         return;
     }
+    // Only update if last rate was a probe
+    if (minstrel->state == PROBE) {
+        update_rates(minstrel);
+        minstrel->state = UPDATE;
+    }
+    // Reset state
+    minstrel->state = RUNNING;
     // TODO: Improve minstrel_get_next_rate() usage
     log_package_status(&minstrel->statistics[minstrel_get_next_rate(minstrel)], pkt);
 
     printf("** DURATION: %d\n", pkt->duration);
 
-    // Only update rate every X packets TODO: Use time interval instead
-    if ((pkt->id % 5) == 0) {
-        update_rates(minstrel);
-        minstrel->state = UPDATE;
-    }
 
-    // Send probe every X packets TODO: Use time interval instead
-    if ((pkt->id % 10) == 0) {
+    if (pkt->status != packet_status_ok)
+        minstrel->state = PACKET_TIMEOUT;
+    // Send probe every X packets
+    // TODO: Use time interval instead
+    // Note: If we got a packet timeout, we won't send a probe
+    else if ((pkt->id % 10) == 0) {
         puts("!!!!!!!!! NEXT IS PROBE");
         minstrel->state = PROBE;
         is_prob_ack = 1;
     }
-
-    if (pkt->status != packet_status_ok)
-        minstrel->state = PACKET_TIMEOUT;
 
     // Set next rate
     minstrel->rate_state = minstrel_state_to_rate_state(minstrel);
