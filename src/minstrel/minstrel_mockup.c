@@ -43,9 +43,9 @@ uint8_t minstrel_get_next_rate(Minstrel* minstrel) {
             }
         }
     } else if (minstrel->statistics[0].avg_duration == 2) { //last pkt error
-        //get lower rate
+        //get lowest rate
         if (minstrel->rates.current != 0) {
-            minstrel->rates.current--;
+            minstrel->rates.current = 0;
         }
     } else {
         log_warn("Wrong average duration: %i", minstrel->statistics[0].avg_duration);
