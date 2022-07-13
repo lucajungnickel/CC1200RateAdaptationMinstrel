@@ -227,7 +227,7 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
 // TODO: Error handling
 packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_status_t *status_back) {
     // Switch to RX mode
-    cc1200_cmd(SFRX);
+    cc1200_cmd(SFRX); //TODO maybe remove
     char* status = get_status_cc1200_str();
     log_debug("Current mode: %s", status);
     log_debug("Try to switch to SRX mode");
@@ -252,7 +252,10 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
         if (num_rx_bytes > 0) {
             // Read packet len
             pkt_len = cc1200_reg_read(REG_FIFO, NULL);
-            while(1) {
+            while(msec < TIMEOUT) {
+                time_d = clock() - timeout_started;
+                msec = time_d * 1000 / CLOCKS_PER_SEC;
+
                 cc1200_reg_read(NUM_RXBYTES, &num_rx_bytes);
 
                 // Only read if whole packet is received
@@ -286,6 +289,7 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
             }
         }
     }
+    cc1200_cmd(SFRX);
     *status_back = packet_status_err_timeout;
     return NULL;
 }
