@@ -14,7 +14,7 @@ list(REMOVE_ITEM controller_src "${CMAKE_CURRENT_SOURCE_DIR}/../src/controller/m
 #message("${controller_src}")
 
 set (CMAKE_EXE_LINKER_FLAGS "-lpthread")
-set(CMAKE_C_FLAGS "-pthread -DLOG_USE_COLOR")
+set(CMAKE_C_FLAGS "-pthread -lncurses -DLOG_USE_COLOR")
 add_executable(unit_test ${test_src} ${controller_src} ${log_src} "../src/minstrel/minstrel_mockup.c" "../src/cc1200/cc1200_mockup.c")
 
 add_test(NAME packet.minstrel.build COMMAND unit_test packet.minstrel.build)

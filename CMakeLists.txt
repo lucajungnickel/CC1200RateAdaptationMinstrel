@@ -28,8 +28,6 @@ list(REMOVE_ITEM SRC_CONTROLLER "${CMAKE_CURRENT_SOURCE_DIR}/src/controller/main
 
 file(GLOB SRC_CC1200 "src/cc1200/*.c")
 
-
-
 file(GLOB SRC_LOG_LIB "src/log.c/src/log.c")
 
 if (BUILD_LOCAL_ONLY)
@@ -49,11 +47,9 @@ else ()
     file(GLOB SRC_MINSTREL "src/minstrel/minstrel_mockup.c")
 endif (BUILD_REAL_MINSTREL)
 
-
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS} -lm")
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS} -lm -lncurses")
 add_executable(main_sender ${SRC_LOG_LIB} ${SRC_CONTROLLER} ${SRC_MINSTREL} ${SRC_CC1200} "${CMAKE_CURRENT_SOURCE_DIR}/src/controller/main_sender.c")
 add_executable(main_receiver ${SRC_LOG_LIB} ${SRC_CONTROLLER} ${SRC_MINSTREL} ${SRC_CC1200} "${CMAKE_CURRENT_SOURCE_DIR}/src/controller/main_receiver.c")
-
 
 if (BUILD_TESTS)
     enable_testing()

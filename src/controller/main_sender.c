@@ -13,8 +13,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <curses.h>
 
 #include "packet.h"
+#include "ui_sender.h"
 #include "sender_interface.h"
 #include "../minstrel/minstrel.h"
 #include "../cc1200/cc1200_rate.h"
@@ -22,6 +24,8 @@
 
 static int id_sender = 10;
 static int id_rcv = 20;
+
+const bool IS_IN_GRAPHIC_MODE = false;
 
 static void start() {
     cc1200_init(id_sender);
@@ -53,5 +57,15 @@ int main(int argc, char** argv)
         puts("Using DEBUG mode\n");
         IS_DEBUG = 1;
     }
-    start();
+    if (IS_IN_GRAPHIC_MODE) {
+        ui_init();
+        ui_show();
+        int res = getch();			/* Wait for user input */
+        mvaddch(1, 0, res);
+        getch();
+        
+	    ui_cleanup();
+    } else {
+        start();
+    }
 }
