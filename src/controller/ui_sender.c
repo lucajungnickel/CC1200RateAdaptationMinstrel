@@ -57,7 +57,7 @@ static void set_colors() {
 }
 
 bool ui_init() {
-    if (!IS_IN_GRAPHIC_MODE) return false;
+    //if (!IS_IN_GRAPHIC_MODE) return false;
 
     uiwindow = initscr();
     if (uiwindow == NULL) return false;
@@ -85,7 +85,7 @@ bool ui_init() {
     return true;
 }
 bool ui_cleanup() {
-    if (!IS_IN_GRAPHIC_MODE) return false;
+   // if (!IS_IN_GRAPHIC_MODE) return false;
 
     delwin(uiwindow);
     endwin();
@@ -93,7 +93,7 @@ bool ui_cleanup() {
     return true;
 }
 bool ui_show() {
-    if (!IS_IN_GRAPHIC_MODE) return false;
+    //if (!IS_IN_GRAPHIC_MODE) return false;
 
     clock_t start = clock();
 
@@ -137,7 +137,7 @@ bool ui_show() {
     mvprintw(19, 0, "diff: %i", diff);
 }
 bool ui_update(Minstrel* minstrel) {
-    if (!IS_IN_GRAPHIC_MODE) return false;
+    //if (!IS_IN_GRAPHIC_MODE) return false;
 
     if (minstrel != NULL) {
         fallback = minstrel->rates.fallback;
@@ -175,7 +175,7 @@ bool ui_update(Minstrel* minstrel) {
 }
 
 bool ui_add_rate_change(int pkt_id, int new_rate) {
-    if (!IS_IN_GRAPHIC_MODE) return false;
+    //if (!IS_IN_GRAPHIC_MODE) return false;
 
     //check if last change is another rate
     if (changes[last_change].rate != new_rate) {
