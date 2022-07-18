@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "../log.c/src/log.h"
 #include "packet.h"
 
 #define MAX_CHANGES_PRINT 15
