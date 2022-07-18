@@ -73,10 +73,10 @@ int main(int argc, char** argv)
     log_info("Starting");
     if (argc == 2) {
         //puts("Using DEBUG mode\n");
-        IS_DEBUG = 1;
-        IS_IN_GRAPHIC_MODE = false;
+        //IS_DEBUG = 1;
+        //IS_IN_GRAPHIC_MODE = false;
     }
-    if (!IS_IN_GRAPHIC_MODE) {
+    //if (!IS_IN_GRAPHIC_MODE) {
         //log_set_level(LOG_FATAL);
         //log_set_quiet(true);
         //ui_init();
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
         //pthread_t thread_stop_id, thread_refresh_id;
         //pthread_create(&thread_stop_id, NULL, thread_stop, NULL);
         //pthread_create(&thread_refresh_id, NULL, thread_refresh, NULL);
-    }
+    //}
     start();
     ui_cleanup();
 }
