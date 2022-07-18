@@ -68,7 +68,7 @@ void *thread_refresh() {
 
 int main(int argc, char** argv)
 {
-    IS_IN_GRAPHIC_MODE = false;
+    IS_IN_GRAPHIC_MODE = true;
     IS_DEBUG = 0;
     if (argc == 2) {
         //puts("Using DEBUG mode\n");
