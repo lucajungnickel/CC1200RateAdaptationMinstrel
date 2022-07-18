@@ -157,7 +157,7 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
         log_info("Duration between send - rcv: %i", duration);
         log_debug("Received at sender status: %i", status);
         
-        ui_add_last_status(status); //log status on console
+        //ui_add_last_status(status); //log status on console
 
         minstrel_packet_t* minstrel_status_pkt = calloc(1, sizeof(minstrel_packet_t));
         minstrel_status_pkt->bytes_send = packet_get_size(pkt);
@@ -166,7 +166,7 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
         minstrel_status_pkt->status = status;
         
         if (!isHandshake) minstrel_update(sender->minstrel, minstrel_status_pkt);
-        if (!isHandshake) ui_update(sender->minstrel);
+        //if (!isHandshake) ui_update(sender->minstrel);
         
         free(minstrel_status_pkt);
         
@@ -200,7 +200,7 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
     }
     log_info("Sender done sending pkt and ack, change rate now");
     
-    ui_add_rate_change(pkt->id, MINSTREL_RATES[pkt->next_symbol_rate]);
+    //ui_add_rate_change(pkt->id, MINSTREL_RATES[pkt->next_symbol_rate]);
 
     if (!isHandshake) cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
     if (isHandshake) sender->token_receiver = pkt->token_recv;
