@@ -35,21 +35,21 @@ void sender_interface_destroy(sender_interface_t* interface) {
 
 int sender_interface_send_data(sender_interface_t *interface, uint8_t *data, uint32_t len) {
     if (interface == NULL || data == NULL || len == 0) {
-        log_warn("Invalid vars for sender_interface_send_data, Interface: %p Data: %p Len: %i", interface, data, len);
+        if (!IS_IN_GRAPHIC_MODE) log_warn("Invalid vars for sender_interface_send_data, Interface: %p Data: %p Len: %i", interface, data, len);
         return 0;
     }
 
     if (!interface->isConnected) {
-        log_warn("Sender interface is not connected, ignoring send data");
+        if (!IS_IN_GRAPHIC_MODE) log_warn("Sender interface is not connected, ignoring send data");
         return 1;
     }
 
     //split up data
     int numFullPackets = len / PACKET_SIZE;
     int sizeLastPacket = len % PACKET_SIZE;
-    log_debug("Len sending data: %i, max packet size: %i", len, PACKET_SIZE);
-    log_debug("Number full packets for interface sending: %i", numFullPackets);
-    log_debug("Size last packet for interface sending: %i", sizeLastPacket);
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Len sending data: %i, max packet size: %i", len, PACKET_SIZE);
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Number full packets for interface sending: %i", numFullPackets);
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Size last packet for interface sending: %i", sizeLastPacket);
 
     //send full packets
     for (int i=0; i<numFullPackets ; i++) {

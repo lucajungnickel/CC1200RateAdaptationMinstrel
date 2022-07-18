@@ -48,7 +48,7 @@ uint8_t minstrel_get_next_rate(Minstrel* minstrel) {
             minstrel->rates.current = 0;
         }
     } else {
-        log_warn("Wrong average duration: %i", minstrel->statistics[0].avg_duration);
+        if (!IS_IN_GRAPHIC_MODE) log_warn("Wrong average duration: %i", minstrel->statistics[0].avg_duration);
     }
 
     return minstrel->rates.current;

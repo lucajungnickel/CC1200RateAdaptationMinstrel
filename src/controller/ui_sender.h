@@ -6,8 +6,6 @@
 #include "../controller/packet.h"
 #include "../minstrel/minstrel.h"
 
-bool IS_IN_GRAPHIC_MODE;
-
 bool ui_init();
 bool ui_cleanup();
 bool ui_show();

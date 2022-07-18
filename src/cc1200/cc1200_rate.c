@@ -117,18 +117,18 @@ void cc1200_init(int device_id) {
         addr = RegSettings[i].adr;
         val = RegSettings[i].val;
         cc1200_reg_write(addr, val);
-        log_debug("Write reg adr 0%x, val 0%x", addr, val);
+        if (!IS_IN_GRAPHIC_MODE) log_debug("Write reg adr 0%x, val 0%x", addr, val);
     }
     // Set extended register
     for (i=0; i<MAX_EXT_REG; i++) {
         addr = ExtRegSettings[i].adr;
         val = ExtRegSettings[i].val;
         cc1200_reg_write(addr, val);
-        log_debug("Write reg adr 0%x, val 0%x", addr, val);
+        if (!IS_IN_GRAPHIC_MODE) log_debug("Write reg adr 0%x, val 0%x", addr, val);
     }
 
     uint32_t len = 50;
-    log_debug("Packet len to be send: %i", len);
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Packet len to be send: %i", len);
 
     // Configure variable packet mode
     cc1200_reg_write(PKT_CFG0, build_pkg_cfg0_std(PKT_MODE));
@@ -136,7 +136,7 @@ void cc1200_init(int device_id) {
     cc1200_reg_write(PKT_LEN, len);
     
     int control_len = cc1200_reg_read(PKT_LEN, NULL);
-    log_info("Control: len is set to %i", control_len);
+    if (!IS_IN_GRAPHIC_MODE) log_info("Control: len is set to %i", control_len);
 
     if (IS_DEBUG) {
         puts("DEBUG: Initialized CC1200 registers.");
@@ -150,7 +150,7 @@ static float log_2(float num) {
 }
 
 void cc1200_change_rate(int device_id, uint8_t rate) {
-    log_info("Change rate to %i, in detail: %i", rate, MINSTREL_RATES[rate]);
+    if (!IS_IN_GRAPHIC_MODE) log_info("Change rate to %i, in detail: %i", rate, MINSTREL_RATES[rate]);
     float rate_in_ksps = MINSTREL_RATES[rate] / 1000.;
 
     int32_t srate_e = log_2((rate_in_ksps * pow(2, 39)) / F_XOSC) - 20;
@@ -180,7 +180,7 @@ void cc1200_change_rate(int device_id, uint8_t rate) {
 cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     //To be tested:
     uint32_t len = packet_get_size(packet);
-    log_debug("Packet len to be send: %i", len);
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Packet len to be send: %i", len);
     uint8_t* buffer = malloc(len * sizeof(uint8_t));
     packet_serialize(packet, buffer);
 
@@ -222,7 +222,7 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
         puts("DEBUG: Sent packet!");
         printf("DEBUG: Status: %s\n", get_status_cc1200_str());
     }
-    log_debug("CC1200 module sent");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("CC1200 module sent");
     return cc1200_status_send_ok; //TODO better error handling
 }
 
@@ -231,14 +231,14 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
     // Switch to RX mode
     cc1200_cmd(SFRX); //TODO maybe remove
     const char* status = get_status_cc1200_str();
-    log_debug("Current mode: %s", status);
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Current mode: %s", status);
     //log_debug("Try to switch to SRX mode");
     cc1200_cmd(SRX);
     
     while (get_status_cc1200() != RX)
         cc1200_cmd(SNOP);
 
-    log_debug("Switched successfully");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Switched successfully");
     
     unsigned int num_rx_bytes, pkt_len;
     uint8_t* buffer;
@@ -262,13 +262,13 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
 
                 // Only read if whole packet is received
                 if (num_rx_bytes >= pkt_len + PKT_OVERHEAD) {
-                    log_info("Now all data is there");
+                    if (!IS_IN_GRAPHIC_MODE) log_info("Now all data is there");
                     buffer = calloc(pkt_len, sizeof(uint8_t));
 
                     // Read whole packet
                     for (int i=0; i < pkt_len; i++)
                         buffer[i] = cc1200_reg_read(REG_FIFO, NULL);
-                    log_debug("Read num rx bytes %i", num_rx_bytes); 
+                    if (!IS_IN_GRAPHIC_MODE) log_debug("Read num rx bytes %i", num_rx_bytes); 
                     
                     //read 2 overhead bytes
                     int byte1 = cc1200_reg_read(REG_FIFO, NULL);

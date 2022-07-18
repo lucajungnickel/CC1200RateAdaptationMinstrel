@@ -33,7 +33,7 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     sender->token_sender = token_sender;
     if (token_sender == 0) token_sender = 1;
     
-    log_debug("Sender reference is built");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Sender reference is built");
 
     //sends handshake packet, no payload
     sender_send_and_ack(sender, NULL, 0, true);
@@ -50,7 +50,7 @@ static void sender_send(sender_t *sender, packet_t *packet) {
 
     bool should_send = true;
     while (should_send) {
-        log_debug("Send the packet to cc1200 module");
+        if (!IS_IN_GRAPHIC_MODE) log_debug("Send the packet to cc1200 module");
         cc1200_status_send status = cc1200_send_packet(sender->socket_send, packet);
         //log_debug("Send to module done");
         switch (status) {
@@ -58,7 +58,7 @@ static void sender_send(sender_t *sender, packet_t *packet) {
                 should_send = false;
             break;
             case cc1200_status_send_error:
-                log_warn("Warning: CC1200 sending failed");
+                if (!IS_IN_GRAPHIC_MODE) log_warn("Warning: CC1200 sending failed");
                 should_send = true;
             break;
         }
@@ -140,7 +140,7 @@ static packet_t* sender_build_pkt(sender_t *sender, uint8_t* buffer, uint32_t le
 
 //Deep copies from buffer
 void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool isHandshake) {
-    log_debug("Start send and ack");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Start send and ack");
     int duration = 0;
     packet_t* pkt = sender_build_pkt(sender, buffer, len);
     sender_send(sender, pkt);
@@ -149,13 +149,13 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
 
     bool should_send = true;
     while (should_send) {
-        log_debug("Try to receive an ACK");
+        if (!IS_IN_GRAPHIC_MODE) log_debug("Try to receive an ACK");
         packet_status_t status = sender_rcv_ack(sender);
         //stop timer
         clock_t duration_clock = clock() - start;
         duration = duration_clock * 1000 / CLOCKS_PER_SEC;
-        log_info("Duration between send - rcv: %i", duration);
-        log_debug("Received at sender status: %i", status);
+        if (!IS_IN_GRAPHIC_MODE) log_info("Duration between send - rcv: %i", duration);
+        if (!IS_IN_GRAPHIC_MODE) log_debug("Received at sender status: %i", status);
         
         //ui_add_last_status(status); //log status on console
 
@@ -174,31 +174,31 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
 
         if (status == packet_status_ok || status == packet_status_ok_ack) {
             should_send = false;
-            log_info("Got good status, leave loop here");
-            log_info("Duration: %i ms", duration);
+            if (!IS_IN_GRAPHIC_MODE) log_info("Got good status, leave loop here");
+            if (!IS_IN_GRAPHIC_MODE) log_info("Duration: %i ms", duration);
             break;
         } else if (status == packet_status_warn_wrong_ack) {
             //Sender shouldn't receive invalid ACK
             //,then send packet again
-            log_debug("Wrong ACK, send again");
+            if (!IS_IN_GRAPHIC_MODE) log_debug("Wrong ACK, send again");
             pkt = sender_build_pkt(sender, buffer, len);
             sender_send(sender, pkt);
             start = clock(); //start timer again
         } else if (status == packet_status_err_timeout) {
             //then send packet again
-            log_warn("Timeout, send again");
+            if (!IS_IN_GRAPHIC_MODE) log_warn("Timeout, send again");
             if (sender->minstrel->is_new_rate && !isHandshake) {
-                log_warn("Send on another rate");
+                if (!IS_IN_GRAPHIC_MODE) log_warn("Send on another rate");
                 cc1200_change_rate(sender->socket_send, minstrel_get_next_rate(sender->minstrel));
             }
             pkt = sender_build_pkt(sender, buffer, len);
-            log_debug("PKT built again");
+            if (!IS_IN_GRAPHIC_MODE) log_debug("PKT built again");
             sender_send(sender, pkt);
             start = clock(); //start timer again
-            log_debug("packet after timeout sent");
+            if (!IS_IN_GRAPHIC_MODE) log_debug("packet after timeout sent");
         }
     }
-    log_info("Sender done sending pkt and ack, change rate now");
+    if (!IS_IN_GRAPHIC_MODE) log_info("Sender done sending pkt and ack, change rate now");
     
     //ui_add_rate_change(pkt->id, MINSTREL_RATES[pkt->next_symbol_rate]);
 

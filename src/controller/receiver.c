@@ -32,12 +32,12 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
             && status != packet_status_warn_wrong_ack) { //TODO better error handling
         pkt = receiver_receive(rcv, &status);
     }
-    log_debug("receiver init worked fine, here is the output of the payload");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("receiver init worked fine, here is the output of the payload");
 
     for (int i=0;i<pkt->payload_len;i++) {
-        log_debug("%i ", pkt->p_payload[i]);
+        if (!IS_IN_GRAPHIC_MODE) log_debug("%i ", pkt->p_payload[i]);
     }
-    log_debug("");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("");
 
     //assume everything went perfect
 
@@ -74,17 +74,17 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
 
     packet_t* pkt = cc1200_get_packet(receiver->socket_send, timer_started, &status);
 
-    log_debug("receiver rcv status of packet: %i", status);
+    if (!IS_IN_GRAPHIC_MODE) log_debug("receiver rcv status of packet: %i", status);
     if (pkt != NULL) {
         //TODO check for correct recv token
 
         //TODO check for correct checksum
-        log_debug("Checksum rcv %i, calced %i", pkt->checksum, packet_calc_checksum(pkt));
+        if (!IS_IN_GRAPHIC_MODE) log_debug("Checksum rcv %i, calced %i", pkt->checksum, packet_calc_checksum(pkt));
         if (pkt->checksum != packet_calc_checksum(pkt)) {
             status = packet_status_err_checksum;
             
             receiver->debug_number_wrong_checksum++;
-            log_warn("Got wrong checksum %i", receiver->debug_number_wrong_checksum);
+            if (!IS_IN_GRAPHIC_MODE) log_warn("Got wrong checksum %i", receiver->debug_number_wrong_checksum);
             packet_destroy(pkt);
             return NULL;
         }
@@ -121,28 +121,28 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
             && status != packet_status_warn_wrong_ack 
             && status != packet_status_ok_ack) {
         pkt = receiver_receive(receiver, &status);
-        log_debug("Receiver rcv status: %i", status);
+        if (!IS_IN_GRAPHIC_MODE) log_debug("Receiver rcv status: %i", status);
         if (status != packet_status_ok 
             && status != packet_status_warn_wrong_ack 
             && status != packet_status_ok_ack) {
                 receiver->timeout_counter++;
-                log_warn("timeout or wrong status");
+                if (!IS_IN_GRAPHIC_MODE) log_warn("timeout or wrong status");
                 //change to fallback rate
                 if (receiver->timeout_counter == RCV_MAX_TIMEOUTS) {
-                    log_error("max timeouts reached, changing to second best rate");
+                    if (!IS_IN_GRAPHIC_MODE) log_error("max timeouts reached, changing to second best rate");
                     cc1200_change_rate(receiver->socket_rcv, receiver->last_second_best_rate);
                 } else if (receiver->timeout_counter == RCV_MAX_TIMEOUTS*2) {
-                    log_error("max timeouts reached, changing to highest prob rate");
+                    if (!IS_IN_GRAPHIC_MODE) log_error("max timeouts reached, changing to highest prob rate");
                     cc1200_change_rate(receiver->socket_rcv, receiver->last_highest_prob_rate);
                 } else if (receiver->timeout_counter == RCV_MAX_TIMEOUTS*3) {
-                    log_error("max timeouts reached, changing to fallback rate");
+                    if (!IS_IN_GRAPHIC_MODE) log_error("max timeouts reached, changing to fallback rate");
                     cc1200_change_rate(receiver->socket_rcv, receiver->last_fallback_rate);
                 }
         }
     }
     receiver->timeout_counter = 0; //reset timeout counter and start at 0 again
     receiver_ack(receiver);
-    log_debug("receiver correct status: %i", status);
+    if (!IS_IN_GRAPHIC_MODE) log_debug("receiver correct status: %i", status);
     //change rate after ack is send
     cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
     receiver->last_symbol_rate = pkt->next_symbol_rate;

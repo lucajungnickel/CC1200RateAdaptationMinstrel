@@ -34,9 +34,9 @@ static void start() {
     cc1200_change_rate(id_sender, 0); //TODO remove, for debugging only
     
     //sender_interface
-    log_debug("Start init sender_interface in test function");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Start init sender_interface in test function");
     sender_interface_t* s_interface = sender_interface_init(id_sender, id_rcv);
-    log_debug("Handshake succeeded in sender interface");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Handshake succeeded in sender interface");
 
     uint32_t data_size = 1024 * 2;
     uint8_t *buffer = calloc(data_size, sizeof(uint8_t));
@@ -45,9 +45,9 @@ static void start() {
     }    
     
     while (true) { //for testing purpose there is a while loop here
-        log_debug("Try to send a lot of data");
+        if (!IS_IN_GRAPHIC_MODE) log_debug("Try to send a lot of data");
         sender_interface_send_data(s_interface, buffer, data_size);
-        log_info("All data sent!");
+        if (!IS_IN_GRAPHIC_MODE) log_info("All data sent!");
     }
     free(buffer);
 }
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
         IS_DEBUG = 1;
         IS_IN_GRAPHIC_MODE = false;
     }
-    if (IS_IN_GRAPHIC_MODE) {
+    if (!IS_IN_GRAPHIC_MODE) {
         //log_set_level(LOG_FATAL);
         //log_set_quiet(true);
         //ui_init();

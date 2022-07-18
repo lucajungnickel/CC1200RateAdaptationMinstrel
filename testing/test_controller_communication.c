@@ -27,9 +27,9 @@ static void resetTests() {
 }
 
 static void *thread_receive_init() {
-    log_debug("rcv thread started");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("rcv thread started");
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
-    log_debug("rcv thread finished");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("rcv thread finished");
 
     assert(receiver->token_receiver != 0);
     assert(receiver->token_sender != 0);
@@ -87,7 +87,7 @@ void test_communication_initialization() {
 
 
 static void *thread_receive_send_ok_rcv_ok() {
-    log_debug("started rcv");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("started rcv");
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
 
     assert(receiver->token_receiver != 0);
@@ -99,17 +99,17 @@ static void *thread_receive_send_ok_rcv_ok() {
         receiver->lastPacketRcv->token_send);
 
     rcv = receiver;
-    log_debug("Start to receive payload");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Start to receive payload");
     uint8_t* buffer;
     uint8_t len = receiver_receive_and_ack(rcv, &buffer);
 
     //Check payload
-    log_debug("Received payload after handshake");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Received payload after handshake");
     for (int i=0;i<len;i++) {
         assert(buffer[i] == i);
-        log_debug("0x%x ", i);
+        if (!IS_IN_GRAPHIC_MODE) log_debug("0x%x ", i);
     }
-    log_debug("");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("");
 
     //free(buffer);
     
@@ -124,7 +124,7 @@ static void *thread_receive_send_ok_rcv_ok() {
  * with correct data. There will be a handshake before.
  */
 void test_communication_send_ok_rcv_ok() {
-    log_debug("Starts send ok rcv ok test");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Starts send ok rcv ok test");
     //Setup a sender and receiver
     resetTests();  
     cc1200_init(id_sender);
@@ -148,7 +148,7 @@ void test_communication_send_ok_rcv_ok() {
     assert(rcv->lastPacketRcv->payload_len == 0);
     assert(sender->next_ack == 2);
 
-    log_debug("Handshake ok");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Handshake ok");
 
     uint32_t buffer_len = 20;
     uint8_t* buffer = calloc(buffer_len, sizeof(uint8_t));
@@ -181,7 +181,7 @@ void test_communication_send_ok_rcv_ok() {
 //---------------------------------------------------------------
 
 static void *thread_send_error_handshake() {
-    log_debug("rcv thread started");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("rcv thread started");
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
 
     assert(receiver->token_receiver != 0);
@@ -194,9 +194,9 @@ static void *thread_send_error_handshake() {
     assert(receiver->lastPacketRcv->ack == 0);
 
     rcv = receiver;
-    log_debug("rcv thread init ok");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("rcv thread init ok");
 
-    log_debug("rcv thread finished");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("rcv thread finished");
     receive_done = true;
 }
 
@@ -305,7 +305,7 @@ void test_communication_handshake_ack_error() {
 //-------------------------------------------------------------------------------
 
 static void *thread_communication_send_wrong_checksum_error() {
-    log_debug("rcv thread started");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("rcv thread started");
     receiver_t* receiver = receiver_init(id_sender, id_rcv);
 
     assert(receiver->debug_number_wrong_checksum == 1);
@@ -319,9 +319,9 @@ static void *thread_communication_send_wrong_checksum_error() {
     assert(receiver->lastPacketRcv->ack == 0);
 
     rcv = receiver;
-    log_debug("rcv thread init ok");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("rcv thread init ok");
 
-    log_debug("rcv thread finished");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("rcv thread finished");
     receive_done = true;
 }
 
@@ -454,7 +454,7 @@ void *thread_send_big_data() {
         uint8_t len = receiver_receive_and_ack(rcv, &buffer);
 
         for (int i=0;i<len;i++) {
-            log_debug("RCV: [%i] %i", currentByte, buffer[i]);
+            if (!IS_IN_GRAPHIC_MODE) log_debug("RCV: [%i] %i", currentByte, buffer[i]);
             assert(buffer[i] == currentByte % 256);
             currentByte++;
         }
@@ -478,17 +478,17 @@ void test_communication_send_big_data() {
     sleep(0.001);
 
     //Test sender_interface
-    log_debug("Start init sender_interface in test function");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Start init sender_interface in test function");
     sender_interface_t* s_interface = sender_interface_init(id_sender, id_rcv);
-    log_debug("Handshake succeeded in sender interface");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Handshake succeeded in sender interface");
 
-    log_debug("Try to send a lot of data");
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Try to send a lot of data");
     uint8_t *buffer = calloc(data_size, sizeof(uint8_t));
     for (int i=0;i < data_size;i++) {
         buffer[i] = i % 256;
     }
     sender_interface_send_data(s_interface, buffer, data_size);
-    log_info("All data sent!");
+    if (!IS_IN_GRAPHIC_MODE) log_info("All data sent!");
     free(buffer);
 
     //Kill Thread
