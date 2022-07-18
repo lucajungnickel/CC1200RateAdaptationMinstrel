@@ -146,7 +146,7 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
     .level = level,
   };
 
-  if (IS_IN_GRAPHIC_MODE) return;
+  //if (IS_IN_GRAPHIC_MODE) return;
 
   lock();
 
