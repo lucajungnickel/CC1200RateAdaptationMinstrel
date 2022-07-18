@@ -79,7 +79,6 @@ int main(int argc, char** argv)
         //log_set_level(LOG_FATAL);
         //log_set_quiet(true);
         //ui_init();
-        exit(0);
         //ui_show();
         //pthread_t thread_stop_id, thread_refresh_id;
         //pthread_create(&thread_stop_id, NULL, thread_stop, NULL);
