@@ -21,6 +21,7 @@
  */
 
 #include "log.h"
+#include "../../controller/ui_sender.h"
 
 #define MAX_CALLBACKS 32
 
@@ -144,6 +145,8 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
     .line  = line,
     .level = level,
   };
+
+  if (IS_IN_GRAPHIC_MODE) return;
 
   lock();
 
