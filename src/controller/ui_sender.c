@@ -137,7 +137,6 @@ bool ui_show() {
     int msec = diff * 1000 / CLOCKS_PER_SEC;
     mvprintw(18, 0, "Time rendering: %i", msec);
     mvprintw(19, 0, "diff: %i", diff);
-    refresh();
 }
 bool ui_update(Minstrel* minstrel) {
     if (!IS_IN_GRAPHIC_MODE) return false;
@@ -186,7 +185,6 @@ bool ui_add_rate_change(int pkt_id, int new_rate) {
         if (last_change == MAX_CHANGES_PRINT) last_change = 0;
         changes[last_change].rate = new_rate;
         changes[last_change].pkt = pkt_id;
-        ui_show();
     } //else ignore
 }
 
