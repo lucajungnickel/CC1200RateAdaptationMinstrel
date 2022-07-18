@@ -73,8 +73,8 @@ int main(int argc, char** argv)
     log_info("Starting");
     if (argc == 2) {
         //puts("Using DEBUG mode\n");
-        //IS_DEBUG = 1;
-        //IS_IN_GRAPHIC_MODE = false;
+        IS_DEBUG = 1;
+        IS_IN_GRAPHIC_MODE = false;
     }
     //if (!IS_IN_GRAPHIC_MODE) {
         //log_set_level(LOG_FATAL);
