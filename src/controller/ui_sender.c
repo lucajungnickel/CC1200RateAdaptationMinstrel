@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "packet.h"
 
@@ -96,6 +97,8 @@ bool ui_cleanup() {
 bool ui_show() {
     if (!IS_IN_GRAPHIC_MODE) return false;
 
+    clock_t start = clock();
+
     mvaddnstr(0, 0, "Minstrel stats:", 15);
     attron(COLOR_PAIR(1));
     mvaddstr(1, 0, "\tRates: \t\t\t");
@@ -129,6 +132,11 @@ bool ui_show() {
         if (i == last_change) attroff(COLOR_PAIR(3));
     }
     refresh();
+
+    clock_t diff = clock() - start;
+    int msec = diff * 1000 / CLOCKS_PER_SEC;
+    mvprintw(18, 0, "Time rendering: %i", msec);
+    mvprintw(19, 0, "diff: %i", diff);
 }
 bool ui_update(Minstrel* minstrel) {
     if (!IS_IN_GRAPHIC_MODE) return false;
@@ -177,7 +185,6 @@ bool ui_add_rate_change(int pkt_id, int new_rate) {
         if (last_change == MAX_CHANGES_PRINT) last_change = 0;
         changes[last_change].rate = new_rate;
         changes[last_change].pkt = pkt_id;
-        ui_show();
     } //else ignore
 }
 
