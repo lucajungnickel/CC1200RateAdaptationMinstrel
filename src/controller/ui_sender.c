@@ -120,7 +120,8 @@ bool ui_show() {
     mvprintw(13, 0, "Total Rcv: \t\t%i\t", total_recv);
     mvprintw(14, 0, "Bytes Sent: \t\t%i\t", bytes_send);
     mvprintw(15, 0, "Avg Duration: \t\t%i\t", avg_duration);
-    mvprintw(17, 0, "Last packet send status: %s", status_str);
+    mvprintw(16, 0, "\t\t\t\t");
+    mvprintw(17, 0, "Last packet send status: %s\t", status_str);
     attroff(COLOR_PAIR(2));
 
     //print last changes:

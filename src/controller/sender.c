@@ -156,6 +156,8 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
         duration = duration_clock * 1000 / CLOCKS_PER_SEC;
         log_info("Duration between send - rcv: %i", duration);
         log_debug("Received at sender status: %i", status);
+        
+        ui_add_last_status(status); //log status on console
 
         minstrel_packet_t* minstrel_status_pkt = calloc(1, sizeof(minstrel_packet_t));
         minstrel_status_pkt->bytes_send = packet_get_size(pkt);
