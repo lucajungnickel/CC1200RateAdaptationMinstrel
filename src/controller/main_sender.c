@@ -61,6 +61,7 @@ void *thread_stop() {
 
 void *thread_refresh() {
     while (true) {
+        usleep(100 * 1000);
         ui_show();
     }
 }
@@ -79,7 +80,7 @@ int main(int argc, char** argv)
         ui_show();
         pthread_t thread_stop_id, thread_refresh_id;
         pthread_create(&thread_stop_id, NULL, thread_stop, NULL);
-        pthread_create(&thread_refresh_id, NULL, thread_refresh, NULL);        
+        pthread_create(&thread_refresh_id, NULL, thread_refresh, NULL);
     }
     start();
     ui_cleanup();
