@@ -97,9 +97,6 @@ bool ui_show() {
     if (!IS_IN_GRAPHIC_MODE) return false;
 
     mvaddnstr(0, 0, "Minstrel stats:", 15);
-    //char snum[5];
-    //itoa(best, snum, 10);
-    //mvaddnstr(2, 0, "Best: %i", 5, 5);
     attron(COLOR_PAIR(1));
     mvaddstr(1, 0, "\tRates: \t\t\t");
     mvprintw(2, 0, "Best: \t\t%i\t\t", best);
@@ -108,7 +105,6 @@ bool ui_show() {
     mvprintw(5, 0, "Fallback: \t%i\t\t", fallback);
     mvprintw(6, 0, "Current: \t%i\t\t", current);
     mvprintw(7, 0, "Probe: \t\t%i\t\t", probe);
-    //mvaddnstr(2, 5, snum, 5);
     attroff(COLOR_PAIR(1));
 
     attron(COLOR_PAIR(2));    
@@ -170,7 +166,6 @@ bool ui_update(Minstrel* minstrel) {
         bytes_send = 0;
         avg_duration = 0;   
     }
-    ui_show();
 }
 
 bool ui_add_rate_change(int pkt_id, int new_rate) {

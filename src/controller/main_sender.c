@@ -59,6 +59,12 @@ void *thread_stop() {
     exit(0);
 }
 
+void *thread_refresh() {
+    while (true) {
+        ui_show();
+    }
+}
+
 int main(int argc, char** argv)
 {
     if (argc == 2) {
@@ -71,11 +77,9 @@ int main(int argc, char** argv)
         ui_init();
         
         ui_show();
-        pthread_t thread_rcv_id;
-        pthread_create(&thread_rcv_id, NULL, thread_stop, NULL);
-        /*int res = getch();
-        mvaddch(1, 0, res);
-        getch();*/
+        pthread_t thread_stop_id, thread_refresh_id;
+        pthread_create(&thread_stop_id, NULL, thread_stop, NULL);
+        pthread_create(&thread_refresh_id, NULL, thread_refresh, NULL);        
     }
     start();
     ui_cleanup();

@@ -129,16 +129,15 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
                 log_warn("timeout or wrong status");
                 //change to fallback rate
                 if (receiver->timeout_counter == RCV_MAX_TIMEOUTS) {
-                    log_warn("max timeouts reached, changing to second best rate");
+                    log_error("max timeouts reached, changing to second best rate");
                     cc1200_change_rate(receiver->socket_rcv, receiver->last_second_best_rate);
                 } else if (receiver->timeout_counter == RCV_MAX_TIMEOUTS*2) {
-                    log_warn("max timeouts reached, changing to highest prob rate");
+                    log_error("max timeouts reached, changing to highest prob rate");
                     cc1200_change_rate(receiver->socket_rcv, receiver->last_highest_prob_rate);
                 } else if (receiver->timeout_counter == RCV_MAX_TIMEOUTS*3) {
-                    log_warn("max timeouts reached, changing to fallback rate");
+                    log_error("max timeouts reached, changing to fallback rate");
                     cc1200_change_rate(receiver->socket_rcv, receiver->last_fallback_rate);
                 }
-
         }
     }
     receiver->timeout_counter = 0; //reset timeout counter and start at 0 again
