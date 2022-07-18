@@ -52,7 +52,7 @@ static void sender_send(sender_t *sender, packet_t *packet) {
     while (should_send) {
         log_debug("Send the packet to cc1200 module");
         cc1200_status_send status = cc1200_send_packet(sender->socket_send, packet);
-        log_debug("Send to module done");
+        //log_debug("Send to module done");
         switch (status) {
             case cc1200_status_send_ok:
                 should_send = false;
@@ -63,7 +63,7 @@ static void sender_send(sender_t *sender, packet_t *packet) {
             break;
         }
     }
-    log_debug("Sender packet sent");
+    //log_debug("Sender packet sent");
     
     //start timer
     timer_started = clock(); //start timer for read timeout
@@ -167,11 +167,6 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
         
         if (!isHandshake) minstrel_update(sender->minstrel, minstrel_status_pkt);
         if (!isHandshake) ui_update(sender->minstrel);
-        if (!isHandshake) {
-            //change rate if wished by minstrel
-            //TODO implement rate change here
-            //cc1200_change_rate(sender->socket_send, minstrel_get_next_rate(sender->minstrel));
-        }
         
         free(minstrel_status_pkt);
         
@@ -191,7 +186,11 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
             start = clock(); //start timer again
         } else if (status == packet_status_err_timeout) {
             //then send packet again
-            log_debug("Timeout, send again");
+            log_warn("Timeout, send again");
+            if (sender->minstrel->is_new_rate && !isHandshake) {
+                log_warn("Send on another rate");
+                cc1200_change_rate(sender->socket_send, minstrel_get_next_rate(sender->minstrel));
+            }
             pkt = sender_build_pkt(sender, buffer, len);
             log_debug("PKT built again");
             sender_send(sender, pkt);
@@ -199,7 +198,7 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
             log_debug("packet after timeout sent");
         }
     }
-    log_info("Sender done sending pkt, change rate now");
+    log_info("Sender done sending pkt and ack, change rate now");
     
     ui_add_rate_change(pkt->id, MINSTREL_RATES[pkt->next_symbol_rate]);
 

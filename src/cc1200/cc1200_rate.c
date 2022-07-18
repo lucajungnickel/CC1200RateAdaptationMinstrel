@@ -185,12 +185,12 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     packet_serialize(packet, buffer);
 
     int num_bytes_fifo = cc1200_reg_read(NUM_TXBYTES, NULL);
-    log_debug("NUM_TXBYTES REG before writing: %i", num_bytes_fifo);
+    //log_debug("NUM_TXBYTES REG before writing: %i", num_bytes_fifo);
     
     cc1200_cmd(SIDLE);
     while (get_status_cc1200() != IDLE)
         cc1200_cmd(SNOP);
-    log_debug("Send is in IDLE mode");
+    //log_debug("Send is in IDLE mode");
 
     //Write len of packet, because it is a variable len
     cc1200_reg_write(REG_FIFO, len);
@@ -199,30 +199,30 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
         cc1200_reg_write(REG_FIFO, buffer[i]);
     
     num_bytes_fifo = cc1200_reg_read(NUM_TXBYTES, NULL);
-    log_debug("NUM_TXBYTES REG after writing: %i", num_bytes_fifo);
+    //log_debug("NUM_TXBYTES REG after writing: %i", num_bytes_fifo);
     
     // Switch to TX mode
     cc1200_cmd(STX);
 
-    log_debug("CC1200 Module send, before WHILE");
+    //log_debug("CC1200 Module send, before WHILE");
     // Wait till TX mode entered
     while (get_status_cc1200() != TX)
         cc1200_cmd(SNOP);
 
-    log_debug("CC1200 Status: %i", get_status_cc1200());
-    log_debug("CC1200 Module send, between WHILE");
+    //log_debug("CC1200 Status: %i", get_status_cc1200());
+    //log_debug("CC1200 Module send, between WHILE");
 
     // Wait till TX mode left
     while (get_status_cc1200() == TX)
         cc1200_cmd(SNOP);
 
-    log_debug("CC1200 Module send, after WHILE");
+    //log_debug("CC1200 Module send, after WHILE");
 
     if (IS_DEBUG) {
         puts("DEBUG: Sent packet!");
         printf("DEBUG: Status: %s\n", get_status_cc1200_str());
     }
-
+    log_debug("CC1200 module sent");
     return cc1200_status_send_ok; //TODO better error handling
 }
 
@@ -232,7 +232,7 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
     cc1200_cmd(SFRX); //TODO maybe remove
     char* status = get_status_cc1200_str();
     log_debug("Current mode: %s", status);
-    log_debug("Try to switch to SRX mode");
+    //log_debug("Try to switch to SRX mode");
     cc1200_cmd(SRX);
     
     while (get_status_cc1200() != RX)
