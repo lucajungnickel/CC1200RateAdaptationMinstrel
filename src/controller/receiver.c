@@ -126,6 +126,7 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
             && status != packet_status_warn_wrong_ack 
             && status != packet_status_ok_ack) {
                 receiver->timeout_counter++;
+                log_warn("timeout or wrong status");
                 //change to fallback rate
                 if (receiver->timeout_counter == RCV_MAX_TIMEOUTS) {
                     log_warn("max timeouts reached, changing to second best rate");
