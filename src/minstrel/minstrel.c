@@ -105,16 +105,16 @@ static void update_rates(Minstrel* minstrel) {
         }
     }
     // Find 2nd best throughput rate
-    for (int i=0; i<MAX_RATES; i++) {
-        if (minstrel->statistics[i].throughput >= second_best_rate && minstrel->statistics[i].throughput < best_rate && i < best_rate_index && minstrel->statistics[i].throughput != 0) {
-            second_best_rate = minstrel->statistics[i].throughput;
-            second_best_rate_index = i;
-        }
-    }
+    //for (int i=0; i<MAX_RATES; i++) {
+      //  if (minstrel->statistics[i].throughput >= second_best_rate && minstrel->statistics[i].throughput < best_rate && i < best_rate_index && minstrel->statistics[i].throughput != 0) {
+        //    second_best_rate = minstrel->statistics[i].throughput;
+          //  second_best_rate_index = i;
+        //}
+    //}
     // Update rates indices
     minstrel->rates.best = best_rate_index;
     minstrel->rates.current = best_rate_index;
-    minstrel->rates.second_best = second_best_rate_index;
+    minstrel->rates.second_best = best_rate_index == 0 ? 0 : (best_rate_index - 1);
     minstrel->rates.highest_prob = highest_prob_index;
 
         puts("DEBUG: Updated rates.");
@@ -226,6 +226,10 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
 
     summary(minstrel);
     printf("--- set rate to state: %d rate: %d\n", minstrel->rate_state, minstrel_get_next_rate(minstrel));
+        puts("DEBUG: Updated rates.");
+        printf("DEBUG: best: %d\n", minstrel->rates.best);
+        printf("DEBUG: second_best: %d\n", minstrel->rates.second_best);
+        printf("DEBUG: highest prob: %d\n", minstrel->rates.highest_prob);
 }
 
 void minstrel_destroy(Minstrel* minstrel) {
