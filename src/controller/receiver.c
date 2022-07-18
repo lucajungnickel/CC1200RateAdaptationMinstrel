@@ -128,18 +128,28 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
                 receiver->timeout_counter++;
                 //change to fallback rate
                 if (receiver->timeout_counter == RCV_MAX_TIMEOUTS) {
-                    receiver->timeout_counter = 0;
+                    log_warn("max timeouts reached, changing to second best rate");
+                    cc1200_change_rate(receiver->socket_rcv, receiver->last_second_best_rate);
+                } else if (receiver->timeout_counter == RCV_MAX_TIMEOUTS*2) {
+                    log_warn("max timeouts reached, changing to highest prob rate");
+                    cc1200_change_rate(receiver->socket_rcv, receiver->last_highest_prob_rate);
+                } else if (receiver->timeout_counter == RCV_MAX_TIMEOUTS*3) {
                     log_warn("max timeouts reached, changing to fallback rate");
                     cc1200_change_rate(receiver->socket_rcv, receiver->last_fallback_rate);
                 }
+
         }
     }
+    receiver->timeout_counter = 0; //reset timeout counter and start at 0 again
     receiver_ack(receiver);
     log_debug("receiver correct status: %i", status);
     //change rate after ack is send
     cc1200_change_rate(receiver->socket_rcv, pkt->next_symbol_rate);
     receiver->last_symbol_rate = pkt->next_symbol_rate;
     receiver->last_fallback_rate = pkt->fallback_rate;
+    receiver->last_highest_prob_rate = pkt->next_highest_pro_rate;
+    receiver->last_second_best_rate = pkt->next_second_best_rate;
+
     *buffer = pkt->p_payload;
     return pkt->payload_len;
 }

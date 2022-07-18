@@ -24,6 +24,8 @@ typedef struct receiver_t {
      */
     uint8_t last_symbol_rate; 
     uint8_t last_fallback_rate; //last fallback rate received
+    uint8_t last_second_best_rate;
+    uint8_t last_highest_prob_rate;
     uint16_t token_receiver;
     uint16_t token_sender; //receiver needs to know how the sender is
     packet_t* lastPacketSend; //for better debugging
