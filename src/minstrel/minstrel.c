@@ -116,11 +116,12 @@ static void update_rates(Minstrel* minstrel) {
     minstrel->rates.current = best_rate_index;
     minstrel->rates.second_best = best_rate_index == 0 ? 0 : (best_rate_index - 1);
     minstrel->rates.highest_prob = highest_prob_index;
-
+        if (IS_DEBUG) {
         puts("DEBUG: Updated rates.");
         printf("DEBUG: best: %d\n", minstrel->rates.best);
         printf("DEBUG: second_best: %d\n", minstrel->rates.second_best);
         printf("DEBUG: highest prob: %d\n", minstrel->rates.highest_prob);
+}
 }
 
 /**
@@ -133,7 +134,8 @@ static void set_probe_rate(Minstrel* minstrel) {
     uint8_t probe;
     // Pick a random rate not equal to the current one
     while ((probe = rand() % MAX_RATES) <= minstrel->rates.current);
-    printf("Probe rate: %d\n", probe);
+    if (IS_DEBUG)
+        printf("Probe rate: %d\n", probe);
     minstrel->rates.probe = probe;
 }
 
@@ -184,7 +186,8 @@ int timeout_count;
 void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     if (is_prob_ack) {
         is_prob_ack = 0;
-        puts("**************** SKIP ******************");
+        if (IS_DEBUG)
+            puts("**************** SKIP ******************");
         return;
     }
     // Only update if last rate was a probe
@@ -224,12 +227,14 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     else
         minstrel->is_new_rate = 0;
 
+        if (IS_DEBUG) {
     summary(minstrel);
     printf("--- set rate to state: %d rate: %d\n", minstrel->rate_state, minstrel_get_next_rate(minstrel));
         puts("DEBUG: Updated rates.");
         printf("DEBUG: best: %d\n", minstrel->rates.best);
         printf("DEBUG: second_best: %d\n", minstrel->rates.second_best);
         printf("DEBUG: highest prob: %d\n", minstrel->rates.highest_prob);
+}
 }
 
 void minstrel_destroy(Minstrel* minstrel) {
