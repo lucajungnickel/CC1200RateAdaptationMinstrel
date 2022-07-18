@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "packet.h"
+
 #define MAX_CHANGES_PRINT 15
 
 WINDOW *uiwindow = NULL;
@@ -26,6 +28,18 @@ uint32_t total_send = 0;
 uint32_t total_recv = 0;
 uint32_t bytes_send = 0;
 uint32_t avg_duration = 0;
+
+packet_status_t last_status = 0;
+char status_strs[8][20] = {
+    "NONE",
+    "OK",
+    "OK - ACK",
+    "WARN - WRONG ACK",
+    "ERR - TIMEOUT",
+    "ERR - CHECKSUM",
+    "ERR - TOKEN RCV",
+    "ERR - TOKEN SEND"};
+char* status_str = status_strs[0];
 
 bool IS_IN_GRAPHIC_MODE = true;
 
@@ -82,8 +96,6 @@ bool ui_cleanup() {
 bool ui_show() {
     if (!IS_IN_GRAPHIC_MODE) return false;
 
-    //mvaddnstr(0, 0, "Hello world", 11);
-
     mvaddnstr(0, 0, "Minstrel stats:", 15);
     //char snum[5];
     //itoa(best, snum, 10);
@@ -108,6 +120,7 @@ bool ui_show() {
     mvprintw(13, 0, "Total Rcv: \t\t%i\t", total_recv);
     mvprintw(14, 0, "Bytes Sent: \t\t%i\t", bytes_send);
     mvprintw(15, 0, "Avg Duration: \t\t%i\t", avg_duration);
+    mvprintw(17, 0, "Last packet send status: %s", status_str);
     attroff(COLOR_PAIR(2));
 
     //print last changes:
@@ -170,4 +183,9 @@ bool ui_add_rate_change(int pkt_id, int new_rate) {
         changes[last_change].pkt = pkt_id;
         ui_show();
     } //else ignore
+}
+
+bool ui_add_last_status(packet_status_t status) {
+    last_status = status;
+    status_str = status_strs[status];
 }

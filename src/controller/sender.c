@@ -173,6 +173,8 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
         
         free(minstrel_status_pkt);
         
+        
+
         if (status == packet_status_ok || status == packet_status_ok_ack) {
             should_send = false;
             log_info("Got good status, leave loop here");
