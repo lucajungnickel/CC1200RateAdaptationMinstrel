@@ -10,6 +10,7 @@ uint32_t MINSTREL_RATES[] = {1000, 1200, 2400, 4800, 9600, 12500, 25000, 37500, 
 
 Minstrel* minstrel_init() {
     Minstrel* minstrel = malloc(sizeof(Minstrel));
+    minstrel->is_new_rate = 0;
     // Init all rates with lowest possible rate
     minstrel->rates.fallback = 0;
     minstrel->rates.highest_prob = 0;
@@ -216,7 +217,12 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     }
 
     // Set next rate
+    uint8_t last_rate =  minstrel_get_next_rate(minstrel);
     minstrel->rate_state = minstrel_state_to_rate_state(minstrel);
+    if (last_rate != minstrel_get_next_rate(minstrel))
+        minstrel->is_new_rate = 1;
+    else
+        minstrel->is_new_rate = 0;
 
     summary(minstrel);
     printf("--- set rate to state: %d rate: %d\n", minstrel->rate_state, minstrel_get_next_rate(minstrel));
