@@ -230,7 +230,7 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
 packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_status_t *status_back) {
     // Switch to RX mode
     cc1200_cmd(SFRX); //TODO maybe remove
-    char* status = get_status_cc1200_str();
+    const char* status = get_status_cc1200_str();
     log_debug("Current mode: %s", status);
     //log_debug("Try to switch to SRX mode");
     cc1200_cmd(SRX);
