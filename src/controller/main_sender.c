@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     }
     if (IS_IN_GRAPHIC_MODE) {
         //log_set_level(LOG_FATAL);
-        log_set_quiet(true);
+        //log_set_quiet(true);
         //ui_init();
         
         //ui_show();
