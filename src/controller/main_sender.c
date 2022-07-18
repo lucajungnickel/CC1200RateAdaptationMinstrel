@@ -69,6 +69,7 @@ void *thread_refresh() {
 int main(int argc, char** argv)
 {
     IS_IN_GRAPHIC_MODE = true;
+    IS_DEBUG = 0;
     if (argc == 2) {
         puts("Using DEBUG mode\n");
         IS_DEBUG = 1;
@@ -78,7 +79,7 @@ int main(int argc, char** argv)
         //log_set_level(LOG_FATAL);
         //log_set_quiet(true);
         //ui_init();
-        
+        exit(0);
         //ui_show();
         //pthread_t thread_stop_id, thread_refresh_id;
         //pthread_create(&thread_stop_id, NULL, thread_stop, NULL);
