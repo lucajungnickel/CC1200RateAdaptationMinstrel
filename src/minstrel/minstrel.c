@@ -178,6 +178,7 @@ static void summary(Minstrel* minstrel) {
 
 
 int is_prob_ack = 0;
+int timeout_count = 0;
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     if (is_prob_ack) {
@@ -195,8 +196,17 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     // TODO: Improve minstrel_get_next_rate() usage here
     log_package_status(&minstrel->statistics[minstrel_get_next_rate(minstrel)], pkt);
 
-    if (pkt->status != packet_status_ok)
-        minstrel->state = PACKET_TIMEOUT;
+    if (pkt->status != packet_status_ok) {
+        if (timeout_count == 5) {
+            minstrel->state = PACKET_TIMEOUT;
+            timeout_count = 0;
+        }
+        else {
+            timeout_count++;
+            return;
+        }
+    }
+
     // Send probe every X packets
     // TODO: Use time interval instead
     // Note: If we got a packet timeout, we won't send a probe
@@ -207,7 +217,7 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
 
     // Set next rate
     minstrel->rate_state = minstrel_state_to_rate_state(minstrel);
-    
+
     summary(minstrel);
     printf("--- set rate to state: %d rate: %d\n", minstrel->rate_state, minstrel_get_next_rate(minstrel));
 }
