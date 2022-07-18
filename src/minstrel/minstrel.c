@@ -178,8 +178,8 @@ static void summary(Minstrel* minstrel) {
 }
 
 
-int is_prob_ack = 0;
-int timeout_count = 0;
+int is_prob_ack;
+int timeout_count;
 // TODO: Reset minstrel->statistics's total_{send, recv} to avoid overflow
 void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     if (is_prob_ack) {
