@@ -42,7 +42,7 @@ char status_strs[8][20] = {
     "ERR - TOKEN SEND"};
 char* status_str = status_strs[0];
 
-bool IS_IN_GRAPHIC_MODE = true;
+bool IS_IN_GRAPHIC_MODE = false;
 
 
 //array with 15 last rate changes
