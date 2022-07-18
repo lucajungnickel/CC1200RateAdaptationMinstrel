@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "../minstrel/minstrel.h"
 #include "../cc1200/cc1200_rate.h"
@@ -200,6 +201,8 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
     }
     if (!IS_IN_GRAPHIC_MODE) log_info("Sender done sending pkt and ack, change rate now");
     
+    usleep(10 * 1000); //TODO maybe remove
+
     //ui_add_rate_change(pkt->id, MINSTREL_RATES[pkt->next_symbol_rate]);
 
     if (!isHandshake) cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
