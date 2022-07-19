@@ -20,8 +20,6 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     uint16_t token_recv = rand() % UINT16_MAX;
     if (token_recv == 0) token_recv = 1;
     rcv->token_receiver = token_recv;
-    
-    log_fatal("Generated token recv: %i", rcv->token_receiver);
 
     rcv->socket_send = socket_send;
     rcv->socket_rcv = socket_rcv;
@@ -48,7 +46,6 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     //now set ACK, TOKEN_SEND
     rcv->last_ack_rcv = pkt->id;
     rcv->token_sender = pkt->token_send;
-    log_fatal("Set token sender: %i", pkt->token_send);
     //send ACK packet
     receiver_ack(rcv);
 
@@ -200,7 +197,6 @@ void receiver_ack(receiver_t* receiver) {
         pkt_send->token_send = receiver->token_sender;
         pkt_send->type = packet_status_ok_ack;
         packet_set_checksum(pkt_send);
-        log_fatal("Send handshake token recv: %i", pkt_send->token_recv);
         cc1200_status_send status = cc1200_send_packet(receiver->socket_rcv, pkt_send);
         
         switch (status) {

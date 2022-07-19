@@ -108,7 +108,6 @@ void packet_set_checksum(packet_t* const packet) {
 uint8_t packet_serialize(packet_t* const packet, uint8_t* p_buffer) {
     uint32_t index = 0;
     if (packet == NULL || p_buffer == NULL) return 1;
-    log_fatal("Serialize packet, token send: %i, token recv: %i", packet->token_send, packet->token_recv);
 
     //write content:
     p_buffer[index] = packet->id;
@@ -207,8 +206,6 @@ packet_t* packet_deserialize(uint8_t* const p_buffer, int payload_len) {
     //fallback_rate
     back->fallback_rate = p_buffer[index];
     index += 1;
-    
-    log_fatal("Deserialize packet, token send: %i, token recv: %i", back->token_send, back->token_recv);
 
 
     //BODY
