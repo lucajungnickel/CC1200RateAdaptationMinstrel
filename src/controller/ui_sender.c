@@ -108,7 +108,7 @@ bool ui_show() {
     mvprintw(7, 0, "Probe: \t\t%i\t\t", probe);
     attroff(COLOR_PAIR(1));
 
-    attron(COLOR_PAIR(2));    
+    attron(COLOR_PAIR(2));
     mvaddstr(8, 0, "\tStatistics: \t\t");
     mvprintw(9, 0, "Last Pkt ID: \t\t%i\t", last_pkt_id);
     mvprintw(10, 0, "EWMA: \t\t\t%f", ewma);
@@ -138,7 +138,23 @@ bool ui_show() {
 }
 bool ui_update(Minstrel* minstrel) {
     //if (!IS_IN_GRAPHIC_MODE) return false;
-
+    puts("****************** MINSTREL STATISTICS *************************");
+    printf("* fallback:      %d\n", minstrel->rates.fallback);
+    printf("* highest_prob:  %d\n", minstrel->rates.highest_prob);
+    printf("* second_best:   %d\n", minstrel->rates.second_best);
+    printf("* best:          %d\n", minstrel->rates.best);
+    printf("* current:       %d\n", minstrel->rates.current);
+    printf("* probe:         %d\n", minstrel->rates.probe);
+    printf("* last_pkt_id:   %d\n", minstrel->statistics[current].last_pkt_id);
+    printf("* pkt_count:     %d\n", minstrel->statistics[current].pkt_count);
+    printf("* ewma:          %f\n", minstrel->statistics[current].ewma);
+    printf("* throughput:    %f\n", minstrel->statistics[current].throughput);
+    printf("* total_send:    %d\n", minstrel->statistics[current].total_send);
+    printf("* total_recv:    %d\n", minstrel->statistics[current].total_recv);
+    printf("* bytes_send:    %d\n", minstrel->statistics[current].bytes_send);
+    printf("* avg_duration:  %d\n", minstrel->statistics[current].avg_duration);
+    puts("****************************************************************\n\n\n");
+    /*
     if (minstrel != NULL) {
         fallback = minstrel->rates.fallback;
         highest_prob = minstrel->rates.highest_prob;
@@ -170,8 +186,8 @@ bool ui_update(Minstrel* minstrel) {
         total_send = 0;
         total_recv = 0;
         bytes_send = 0;
-        avg_duration = 0;   
-    }
+        avg_duration = 0;
+    }*/
 }
 
 bool ui_add_rate_change(int pkt_id, int new_rate) {
