@@ -128,7 +128,7 @@ void cc1200_init(int device_id) {
     }
 
     uint32_t len = 50;
-    if (!IS_IN_GRAPHIC_MODE) log_debug("Packet len to be send: %i", len);
+    if (!IS_IN_GRAPHIC_MODE) log_debug("Max packet len to be send: %i", len);
 
     // Configure variable packet mode
     cc1200_reg_write(PKT_CFG0, build_pkg_cfg0_std(PKT_MODE));
@@ -136,12 +136,6 @@ void cc1200_init(int device_id) {
     cc1200_reg_write(PKT_LEN, len);
     
     int control_len = cc1200_reg_read(PKT_LEN, NULL);
-    if (!IS_IN_GRAPHIC_MODE) log_info("Control: len is set to %i", control_len);
-
-    if (IS_DEBUG) {
-        puts("DEBUG: Initialized CC1200 registers.");
-        printf("INFO: Status:%s\n", get_status_cc1200_str());
-    }
 
 }
 
@@ -160,12 +154,6 @@ void cc1200_change_rate(int device_id, uint8_t rate) {
     uint8_t symbol_rate_1 = 0xFF & (srate_m >> 8);
     uint8_t symbol_rate_0 = 0xFF & srate_m;
 
-    if (IS_DEBUG) {
-        printf("DEBUG: symbol_rate_2: 0x%x\n", symbol_rate_2);
-        printf("DEBUG: symbol_rate_1: 0x%x\n", symbol_rate_1);
-        printf("DEBUG: symbol_rate_0: 0x%x\n", symbol_rate_0);
-    }
-
     // Write exponent and mantissa [19:16]
     cc1200_reg_write(SYMBOL_RATE2, symbol_rate_2);
     // Write mantissa [15:8]
@@ -180,7 +168,6 @@ void cc1200_change_rate(int device_id, uint8_t rate) {
 cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     //To be tested:
     uint32_t len = packet_get_size(packet);
-    if (!IS_IN_GRAPHIC_MODE) log_debug("Packet len to be send: %i", len);
     uint8_t* buffer = malloc(len * sizeof(uint8_t));
     packet_serialize(packet, buffer);
 
@@ -209,20 +196,10 @@ cc1200_status_send cc1200_send_packet(int device_id, packet_t* packet) {
     while (get_status_cc1200() != TX)
         cc1200_cmd(SNOP);
 
-    //log_debug("CC1200 Status: %i", get_status_cc1200());
-    //log_debug("CC1200 Module send, between WHILE");
-
     // Wait till TX mode left
     while (get_status_cc1200() == TX)
         cc1200_cmd(SNOP);
 
-    //log_debug("CC1200 Module send, after WHILE");
-
-    if (IS_DEBUG) {
-        puts("DEBUG: Sent packet!");
-        printf("DEBUG: Status: %s\n", get_status_cc1200_str());
-    }
-    if (!IS_IN_GRAPHIC_MODE) log_debug("CC1200 module sent");
     return cc1200_status_send_ok; //TODO better error handling
 }
 
@@ -231,15 +208,11 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
     // Switch to RX mode
     cc1200_cmd(SFRX); //TODO maybe remove
     const char* status = get_status_cc1200_str();
-    if (!IS_IN_GRAPHIC_MODE) log_debug("Current mode: %s", status);
-    //log_debug("Try to switch to SRX mode");
     cc1200_cmd(SRX);
     
     while (get_status_cc1200() != RX)
         cc1200_cmd(SNOP);
 
-    if (!IS_IN_GRAPHIC_MODE) log_debug("Switched successfully");
-    
     unsigned int num_rx_bytes, pkt_len;
     uint8_t* buffer;
     clock_t time_d = clock() - timeout_started;
@@ -262,24 +235,16 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
 
                 // Only read if whole packet is received
                 if (num_rx_bytes >= pkt_len + PKT_OVERHEAD) {
-                    if (!IS_IN_GRAPHIC_MODE) log_info("Now all data is there");
                     buffer = calloc(pkt_len, sizeof(uint8_t));
 
                     // Read whole packet
                     for (int i=0; i < pkt_len; i++)
                         buffer[i] = cc1200_reg_read(REG_FIFO, NULL);
-                    if (!IS_IN_GRAPHIC_MODE) log_debug("Read num rx bytes %i", num_rx_bytes); 
                     
                     //read 2 overhead bytes
                     int byte1 = cc1200_reg_read(REG_FIFO, NULL);
                     int byte2 = cc1200_reg_read(REG_FIFO, NULL);
 
-                    if (IS_DEBUG) {
-                        printf("DEBUG: Packet received: \n\t");
-                        for (int i=0; i < pkt_len + PKT_OVERHEAD; i++)
-                            printf("0x%x ",buffer[i]);
-                        printf("\n");
-                    }
                     *status_back = packet_status_ok;
                     packet_t* pkt = packet_deserialize(buffer, pkt_len - getHeaderSize());
                     if (pkt == NULL) {
