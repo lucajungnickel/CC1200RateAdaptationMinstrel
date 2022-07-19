@@ -232,7 +232,6 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
                 msec = time_d * 1000 / CLOCKS_PER_SEC;
 
                 cc1200_reg_read(NUM_RXBYTES, &num_rx_bytes);
-                if (num_rx_bytes != 0) log_debug("Num RX Bytes in FIFO: %i", num_rx_bytes);
                 // Only read if whole packet is received
                 if (num_rx_bytes >= pkt_len + PKT_OVERHEAD) {
                     buffer = calloc(pkt_len, sizeof(uint8_t));
