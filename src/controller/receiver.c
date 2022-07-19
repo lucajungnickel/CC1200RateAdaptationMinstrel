@@ -12,6 +12,8 @@
 static clock_t timer_started = 0x0;
 
 receiver_t* receiver_init(int socket_send, int socket_rcv) {
+    srand(time(0));
+    
     receiver_t* rcv = calloc(1, sizeof(receiver_t));
     if (rcv == NULL) return NULL;
 

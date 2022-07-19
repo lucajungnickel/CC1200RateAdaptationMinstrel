@@ -21,6 +21,8 @@ sender_t* sender_init(Minstrel* minstrel, int socket_send, int socket_rcv) {
     sender_t *sender = calloc(1, sizeof(sender_t));
     if (sender == NULL) return NULL;
     
+    srand(time(0));
+
     //builds sender
     sender->minstrel = minstrel;
     sender->debug_number_wrong_checksum = 0;
