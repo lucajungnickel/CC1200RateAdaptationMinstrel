@@ -147,16 +147,16 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
     .line  = line,
     .level = level,
   };
-  if (IS_LOG_DEACTIVATED) {
+  /*if (IS_LOG_DEACTIVATED) {
     usleep(10);
     return;
-  }
+  }*/
   lock();
 
   if (!L.quiet && level >= L.level) {
     init_event(&ev, stderr);
     va_start(ev.ap, fmt);
-    stdout_callback(&ev);
+    if (!IS_LOG_DEACTIVATED) stdout_callback(&ev);
     va_end(ev.ap);
   }
 
