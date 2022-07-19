@@ -16,8 +16,9 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     if (rcv == NULL) return NULL;
 
     uint16_t token_recv = rand() % UINT16_MAX;
-    rcv->token_receiver = token_recv;
     if (token_recv == 0) token_recv = 1;
+    rcv->token_receiver = token_recv;
+    
     log_fatal("Generated token recv: %i", token_recv);
 
     rcv->socket_send = socket_send;
