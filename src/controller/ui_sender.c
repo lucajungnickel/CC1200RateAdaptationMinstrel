@@ -143,16 +143,16 @@ bool ui_update(Minstrel* minstrel) {
     printf("* highest_prob:  %d\n", minstrel->rates.highest_prob);
     printf("* second_best:   %d\n", minstrel->rates.second_best);
     printf("* best:          %d\n", minstrel->rates.best);
-    printf("* current:       %d\n", minstrel->rates.current);
+    printf("* current:       %d\n", minstrel_get_next_rate(minstrel));
     printf("* probe:         %d\n", minstrel->rates.probe);
-    printf("* last_pkt_id:   %d\n", minstrel->statistics[current].last_pkt_id);
-    printf("* pkt_count:     %d\n", minstrel->statistics[current].pkt_count);
-    printf("* ewma:          %f\n", minstrel->statistics[current].ewma);
-    printf("* throughput:    %f\n", minstrel->statistics[current].throughput);
-    printf("* total_send:    %d\n", minstrel->statistics[current].total_send);
-    printf("* total_recv:    %d\n", minstrel->statistics[current].total_recv);
-    printf("* bytes_send:    %d\n", minstrel->statistics[current].bytes_send);
-    printf("* avg_duration:  %d\n", minstrel->statistics[current].avg_duration);
+    printf("* last_pkt_id:   %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].last_pkt_id);
+    printf("* pkt_count:     %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].pkt_count);
+    printf("* ewma:          %f\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].ewma);
+    printf("* throughput:    %f\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].throughput);
+    printf("* total_send:    %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].total_send);
+    printf("* total_recv:    %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].total_recv);
+    printf("* bytes_send:    %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].bytes_send);
+    printf("* avg_duration:  %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].avg_duration);
     puts("****************************************************************\n\n\n");
     /*
     if (minstrel != NULL) {
