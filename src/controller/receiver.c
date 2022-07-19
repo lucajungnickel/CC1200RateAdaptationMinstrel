@@ -45,7 +45,7 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     //now set ACK, TOKEN_SEND
     rcv->last_ack_rcv = pkt->id;
     rcv->token_sender = pkt->token_send;
-    
+    log_fatal("Set token sender: %i", pkt->token_send);
     //send ACK packet
     receiver_ack(rcv);
 
