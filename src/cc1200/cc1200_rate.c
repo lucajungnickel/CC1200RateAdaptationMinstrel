@@ -92,7 +92,7 @@ static uint8_t build_pkg_cfg2_std(uint8_t pkt_format) {
     return build_pkg_cfg2(byte_swap_en, fg_mode_en, cca_mode, pkt_format);
 }
 
-const int TIMEOUT = 500;
+const int TIMEOUT = 600;
 
 void cc1200_reset(int device_id) {
 

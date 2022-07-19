@@ -18,7 +18,7 @@
 #include "sender.h"
 
 //Maximum size of payload data
-#define PACKET_SIZE 20
+#define PACKET_SIZE 10
 
 typedef struct sender_interface_t {
     bool isConnected;
