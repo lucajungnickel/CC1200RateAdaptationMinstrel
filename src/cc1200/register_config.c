@@ -66,8 +66,8 @@ REG_TYPE ExtRegSettings[MAX_EXT_REG] =
     {FREQOFF1        , 0x00 },  // Frequency Offset MSB
     {FREQOFF0        , 0x00 },  // Frequency Offset LSB
     {FREQ2           , 0x56 },  // Frequency Configuration [23:16]
-    {FREQ1           , 0xcc },  // Frequency Configuration [15:8]
-    {FREQ0           , 0xcc },  // Frequency Configuration [7:0]
+    {FREQ1           , 0xaa /*0xcc*/ },  // Frequency Configuration [15:8]
+    {FREQ0           , 0xaa /*0xcc*/ },  // Frequency Configuration [7:0]
     {IF_ADC2         , 0x02 },  // Analog to Digital Converter Configuration Reg. 2
     {IF_ADC1         , 0xee },  // Analog to Digital Converter Configuration Reg. 1
     {IF_ADC0         , 0x10 },  // Analog to Digital Converter Configuration Reg. 0
