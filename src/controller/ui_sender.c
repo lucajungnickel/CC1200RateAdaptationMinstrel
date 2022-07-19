@@ -141,7 +141,7 @@ bool ui_update(Minstrel* minstrel) {
     #define ANSI_COLOR_GREEN   "\x1b[32m"
     #define ANSI_COLOR_RESET   "\x1b[0m"
 
-    puts("****************** MINSTREL STATISTICS *************************");
+    puts("\n****************** MINSTREL STATISTICS *************************");
     printf("* fallback:      %d -> %d SPS\n", minstrel->rates.fallback, MINSTREL_RATES[minstrel->rates.fallback]);
     printf("* highest_prob:  %d -> %d SPS\n", minstrel->rates.highest_prob, MINSTREL_RATES[minstrel->rates.highest_prob]);
     printf("* second_best:   %d -> %d SPS\n", minstrel->rates.second_best, MINSTREL_RATES[minstrel->rates.second_best]);
@@ -153,50 +153,14 @@ bool ui_update(Minstrel* minstrel) {
     printf("* pkt_count:     %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].pkt_count);
     printf("* ewma:          %f\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].ewma);
     printf("* throughput:    %f\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].throughput);
-    printf("* total_send:    %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].total_send);
-    printf("* total_recv:    %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].total_recv);
+    printf("* total_send:    %d PKTs\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].total_send);
+    printf("* total_recv:    %d PKTs\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].total_recv);
     printf("* bytes_send:    %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].bytes_send);
-    printf("* avg_duration:  %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].avg_duration);
+    printf("* avg_duration:  %d ms\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].avg_duration);
     puts("****************************************************************\n\n\n");
-    /*
-    if (minstrel != NULL) {
-        fallback = minstrel->rates.fallback;
-        highest_prob = minstrel->rates.highest_prob;
-        second_best = minstrel->rates.second_best;
-        best = minstrel->rates.best;
-        current = minstrel->rates.current;
-        probe = minstrel->rates.probe;
-
-        last_pkt_id = minstrel->statistics[current].last_pkt_id;
-        pkt_count = minstrel->statistics[current].pkt_count;
-        ewma = minstrel->statistics[current].ewma;
-        throughput = minstrel->statistics[current].throughput;
-        total_send = minstrel->statistics[current].total_send;
-        total_recv = minstrel->statistics[current].total_recv;
-        bytes_send = minstrel->statistics[current].bytes_send;
-        avg_duration = minstrel->statistics[current].avg_duration;
-    } else {
-        fallback = 0;
-        highest_prob = 0;
-        second_best = 0;
-        best = 0;
-        current = 0;
-        probe = 0;
-
-        last_pkt_id = 0;
-        pkt_count = 0;
-        ewma = 0;
-        throughput = 0;
-        total_send = 0;
-        total_recv = 0;
-        bytes_send = 0;
-        avg_duration = 0;
-    }*/
 }
 
 bool ui_add_rate_change(int pkt_id, int new_rate) {
-    //if (!IS_IN_GRAPHIC_MODE) return false;
-
     //check if last change is another rate
     if (changes[last_change].rate != new_rate) {
         last_change++;
