@@ -208,7 +208,8 @@ packet_t* packet_deserialize(uint8_t* const p_buffer, int payload_len) {
     back->fallback_rate = p_buffer[index];
     index += 1;
     
-    
+    log_fatal("Deserialize packet, token send: %i, token recv: %i", back->token_send, back->token_recv);
+
 
     //BODY
     //payload
