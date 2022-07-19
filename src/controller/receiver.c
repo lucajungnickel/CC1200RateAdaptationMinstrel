@@ -18,7 +18,8 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     uint16_t token_recv = rand() % UINT16_MAX;
     rcv->token_receiver = token_recv;
     if (token_recv == 0) token_recv = 1;
-    
+    log_fatal("Generated token recv: %i", token_recv);
+
     rcv->socket_send = socket_send;
     rcv->socket_rcv = socket_rcv;
     rcv->debug_number_wrong_checksum = 0;
@@ -74,7 +75,34 @@ packet_t* receiver_receive(receiver_t* receiver, packet_status_t *status_back) {
 
     packet_t* pkt = cc1200_get_packet(receiver->socket_send, timer_started, &status);
 
-    if (!IS_IN_GRAPHIC_MODE) log_debug("receiver rcv status of packet: %i", status);
+    if (!IS_IN_GRAPHIC_MODE) {
+        switch (status) {
+            case 0:
+            log_debug("receiver status: no status");
+            break;
+            case 1:
+            log_debug("receiver status: OK");
+            break;
+            case 2:
+            log_debug("receiver status: OK ack");
+            break;
+            case 3:
+            log_debug("receiver status: WARN wrong ack");
+            break;
+            case 4:
+            log_debug("receiver status: TIMEOUT");
+            break;
+            case 5:
+            log_debug("receiver status: ERR CHECKSUM");
+            break;
+            case 6:
+            log_debug("receiver status: ERR TOKEN RCV");
+            break;
+            case 7:
+            log_debug("receiver status: ERR TOKEN SEND");
+            break;
+        }
+    }
     if (pkt != NULL) {
         //TODO check for correct recv token
 
@@ -121,7 +149,6 @@ uint8_t receiver_receive_and_ack(receiver_t* receiver, uint8_t** buffer) {
             && status != packet_status_warn_wrong_ack 
             && status != packet_status_ok_ack) {
         pkt = receiver_receive(receiver, &status);
-        if (!IS_IN_GRAPHIC_MODE) log_debug("Receiver rcv status: %i", status);
         if (status != packet_status_ok 
             && status != packet_status_warn_wrong_ack 
             && status != packet_status_ok_ack) {
@@ -170,7 +197,7 @@ void receiver_ack(receiver_t* receiver) {
         pkt_send->token_send = receiver->token_sender;
         pkt_send->type = packet_status_ok_ack;
         packet_set_checksum(pkt_send);
-
+        log_fatal("Send handshake token recv: %i", pkt_send->token_recv);
         cc1200_status_send status = cc1200_send_packet(receiver->socket_rcv, pkt_send);
         
         switch (status) {
