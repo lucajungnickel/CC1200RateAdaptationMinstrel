@@ -111,6 +111,7 @@ packet_status_t sender_rcv_ack(sender_t *sender) {
         //check for correct ACK
         if (pkt->ack == sender->next_ack) {
             sender->next_ack++;
+            sender->token_receiver = pkt->token_recv;
             return packet_status_ok;
         } else return packet_status_warn_wrong_ack;
     }
@@ -175,8 +176,6 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
 
         free(minstrel_status_pkt);
         
-        
-
         if (status == packet_status_ok || status == packet_status_ok_ack) {
             should_send = false;
             if (!IS_IN_GRAPHIC_MODE) log_info("Got good status, leave loop here");
@@ -208,6 +207,5 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
     //ui_add_rate_change(pkt->id, MINSTREL_RATES[pkt->next_symbol_rate]);
 
     if (!isHandshake) cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
-    sender->token_receiver = pkt->token_recv;
-    log_fatal("TOKEN RECV: %i", pkt->token_recv);
+    log_fatal("TOKEN RECV: %i", sender->token_receiver);
 }
