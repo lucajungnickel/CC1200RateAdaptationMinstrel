@@ -201,7 +201,7 @@ void minstrel_update(Minstrel* minstrel, minstrel_packet_t* pkt) {
     log_package_status(&minstrel->statistics[minstrel_get_next_rate(minstrel)], pkt);
 
     if (pkt->status != packet_status_ok) {
-        if (timeout_count == 5) {
+        if (timeout_count == 2) {
             minstrel->state = PACKET_TIMEOUT;
             timeout_count = 0;
         }

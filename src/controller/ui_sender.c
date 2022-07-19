@@ -139,12 +139,13 @@ bool ui_show() {
 bool ui_update(Minstrel* minstrel) {
     //if (!IS_IN_GRAPHIC_MODE) return false;
     puts("****************** MINSTREL STATISTICS *************************");
-    printf("* fallback:      %d\n", minstrel->rates.fallback);
-    printf("* highest_prob:  %d\n", minstrel->rates.highest_prob);
-    printf("* second_best:   %d\n", minstrel->rates.second_best);
-    printf("* best:          %d\n", minstrel->rates.best);
-    printf("* current:       %d\n", minstrel_get_next_rate(minstrel));
-    printf("* probe:         %d\n", minstrel->rates.probe);
+    printf("* fallback:      %d -> %d SPS\n", minstrel->rates.fallback, MINSTREL_RATES[minstrel->rates.fallback]);
+    printf("* highest_prob:  %d -> %d SPS\n", minstrel->rates.highest_prob, MINSTREL_RATES[minstrel->rates.highest_prob]);
+    printf("* second_best:   %d -> %d SPS\n", minstrel->rates.second_best, MINSTREL_RATES[minstrel->rates.second_best]);
+    printf("* best:          %d -> %d SPS\n", minstrel->rates.best, MINSTREL_RATES[minstrel->rates.best]);
+    printf("* current:       %d -> %d SPS\n", minstrel_get_next_rate(minstrel), MINSTREL_RATES[minstrel_get_next_rate(minstrel)]);
+    printf("* probe:         %d -> %d SPS\n", minstrel->rates.probe, MINSTREL_RATES[minstrel->rates.probe]);
+    printf("* is_probe:      %d\n", minstrel->rate_state == PROBE_RATE ? 1 : 0);
     printf("* last_pkt_id:   %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].last_pkt_id);
     printf("* pkt_count:     %d\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].pkt_count);
     printf("* ewma:          %f\n", minstrel->statistics[minstrel_get_next_rate(minstrel)].ewma);
