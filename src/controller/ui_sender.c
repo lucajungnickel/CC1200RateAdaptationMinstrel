@@ -161,8 +161,6 @@ bool ui_update(Minstrel* minstrel) {
 }
 
 bool ui_add_rate_change(int pkt_id, int new_rate) {
-    //if (!IS_IN_GRAPHIC_MODE) return false;
-
     //check if last change is another rate
     if (changes[last_change].rate != new_rate) {
         last_change++;
