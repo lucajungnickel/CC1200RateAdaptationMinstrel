@@ -33,7 +33,7 @@ Minstrel* minstrel_init() {
  * @param minstrel
  * @param succ_prob The newly calculated success probability which should receive the highest weight (#send/#acks).
  */
-static void calc_ewma(MinstrelStatistics* statistics, uint32_t succ_prob) {
+static void calc_ewma(MinstrelStatistics* statistics, float succ_prob) {
     statistics->ewma = (WEIGHT * succ_prob) + ((1 - WEIGHT) * statistics->ewma);
 }
 
