@@ -13,7 +13,7 @@ static clock_t timer_started = 0x0;
 
 receiver_t* receiver_init(int socket_send, int socket_rcv) {
     srand(time(0));
-    
+
     receiver_t* rcv = calloc(1, sizeof(receiver_t));
     if (rcv == NULL) return NULL;
 
@@ -21,7 +21,7 @@ receiver_t* receiver_init(int socket_send, int socket_rcv) {
     if (token_recv == 0) token_recv = 1;
     rcv->token_receiver = token_recv;
     
-    log_fatal("Generated token recv: %i", token_recv);
+    log_fatal("Generated token recv: %i", rcv->token_receiver);
 
     rcv->socket_send = socket_send;
     rcv->socket_rcv = socket_rcv;
