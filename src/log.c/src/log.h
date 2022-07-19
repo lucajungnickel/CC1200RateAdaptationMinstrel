@@ -16,6 +16,7 @@
 #define LOG_VERSION "0.1.0"
 
 bool IS_IN_GRAPHIC_MODE;
+bool IS_LOG_DEACTIVATED;
 
 typedef struct {
   va_list ap;

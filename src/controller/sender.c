@@ -146,8 +146,6 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
     packet_t* pkt = sender_build_pkt(sender, buffer, len);
     sender_send(sender, pkt);
     
-    if (IS_IN_GRAPHIC_MODE) usleep(1 * 1000); //TODO maybe remove
-
     //start timer
     clock_t start = clock();
 

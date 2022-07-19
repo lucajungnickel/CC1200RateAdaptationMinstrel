@@ -20,6 +20,8 @@
  * IN THE SOFTWARE.
  */
 
+#include <unistd.h>
+
 #include "log.h"
 #include "../../controller/ui_sender.h"
 
@@ -145,7 +147,10 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
     .line  = line,
     .level = level,
   };
-
+  if (IS_LOG_DEACTIVATED) {
+    usleep(10);
+    return;
+  }
   lock();
 
   if (!L.quiet && level >= L.level) {

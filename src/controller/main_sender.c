@@ -69,12 +69,14 @@ void *thread_refresh() {
 int main(int argc, char** argv)
 {
     IS_IN_GRAPHIC_MODE = true;
-    IS_DEBUG = 1;
+    IS_LOG_DEACTIVATED = true;
+    IS_DEBUG = 0;
     log_info("Starting");
     if (argc == 2) {
         //puts("Using DEBUG mode\n");
         IS_DEBUG = 1;
         IS_IN_GRAPHIC_MODE = false;
+        IS_LOG_DEACTIVATED = false;
     }
     //if (!IS_IN_GRAPHIC_MODE) {
         //log_set_level(LOG_FATAL);
