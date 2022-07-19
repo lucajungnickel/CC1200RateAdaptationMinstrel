@@ -142,7 +142,6 @@ packet_t* cc1200_get_packet(int device_id, clock_t timeout_started, packet_statu
     uint32_t data_len = 0;
 
     while (1) {
-        //sleep(0.001);
         //check for timeout
         clock_t time_d = clock() - timeout_started;
         int msec = time_d * 1000 / CLOCKS_PER_SEC;
