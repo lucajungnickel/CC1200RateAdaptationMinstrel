@@ -207,5 +207,4 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
     //ui_add_rate_change(pkt->id, MINSTREL_RATES[pkt->next_symbol_rate]);
 
     if (!isHandshake) cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
-    log_fatal("TOKEN RECV: %i", sender->token_receiver);
 }
