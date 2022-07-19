@@ -188,15 +188,10 @@ void sender_send_and_ack(sender_t *sender, uint8_t* buffer, uint32_t len, bool i
                 cc1200_change_rate(sender->socket_send, minstrel_get_next_rate(sender->minstrel));
             }
             pkt = sender_build_pkt(sender, buffer, len);
-            if (!IS_IN_GRAPHIC_MODE) log_debug("PKT built again");
             sender_send(sender, pkt);
             start = clock(); //start timer again
             if (!IS_IN_GRAPHIC_MODE) log_debug("packet after timeout sent");
         }
     }
-    if (!IS_IN_GRAPHIC_MODE) log_info("Sender done sending pkt and ack, change rate now");
-    
-    //ui_add_rate_change(pkt->id, MINSTREL_RATES[pkt->next_symbol_rate]);
-
     if (!isHandshake) cc1200_change_rate(sender->socket_send, pkt->next_symbol_rate);
 }
